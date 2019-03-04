@@ -9,8 +9,9 @@ statement: return_statement;
 return_statement: RETURN INT_LITTERAL ';' ;
 
 INT: 'int' ;
-INT_LITTERAL: [0-9]+ ;
 MAIN: 'main' ;
 RETURN: 'return' ;
 SPACE: (' ' | '\t') -> skip ;
+INT_LITTERAL: [0-9]+ ;
+IDENTIFIER: [a-zA-Z][0-9a-zA-Z]* ;
 
