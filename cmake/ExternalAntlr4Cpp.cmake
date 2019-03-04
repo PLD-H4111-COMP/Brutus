@@ -89,7 +89,8 @@ if(ANTLR4_ZIP_REPOSITORY)
           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
           -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
       INSTALL_COMMAND ""
-      EXCLUDE_FROM_ALL 1)
+      EXCLUDE_FROM_ALL 1
+      UPDATE_DISCONNECTED 1)
 else()
   ExternalProject_Add(
       antlr4_runtime
@@ -105,7 +106,8 @@ else()
           -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
           -DWITH_STATIC_CRT:BOOL=${ANTLR4_WITH_STATIC_CRT}
       INSTALL_COMMAND ""
-      EXCLUDE_FROM_ALL 1)
+      EXCLUDE_FROM_ALL 1
+      UPDATE_DISCONNECTED 1)
 endif()
 
 # Seperate build step as rarely people want both
