@@ -1,0 +1,3 @@
+intmain() {
+    return8;
+}
