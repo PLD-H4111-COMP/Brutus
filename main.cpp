@@ -28,8 +28,6 @@ int main(int argc, char **argv)
     CProgParser parser(&tokens);
     tree::ParseTree *tree = parser.prog();
     
-    cout << ".text" << endl;
-    cout << ".global main" << endl;
     CProgASVisitor visitor;
     visitor.visit(tree);
     return 0;
