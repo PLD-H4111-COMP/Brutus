@@ -14,15 +14,11 @@ int main(int argc, char **argv)
     if(argc != 2)
     {
         cout << "Usage: ./BRUTUS <filename.c>" << endl;
+        return 1;
     }
-    
+
     ifstream file(argv[1]);
-    string line, prog;
-    while(getline(file, line))
-    {
-        prog += line;
-    }
-    ANTLRInputStream input(prog);
+    ANTLRInputStream input(file);
     CProgLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CProgParser parser(&tokens);
