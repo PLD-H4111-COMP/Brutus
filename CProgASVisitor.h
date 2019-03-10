@@ -8,6 +8,11 @@
 class CProgASVisitor : public CProgBaseVisitor {
 public:
 
+    virtual antlrcpp::Any visitPreproc(CProgParser::PreprocContext *ctx) override {
+        std::cerr << "Ignoring " << ctx->getText() << std::endl;
+        return visitChildren(ctx);
+    }
+    
     virtual antlrcpp::Any visitProg(CProgParser::ProgContext *ctx) override {
         std::cout << ".text" << std::endl;
         return visitChildren(ctx);
