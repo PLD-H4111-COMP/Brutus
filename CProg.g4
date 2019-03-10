@@ -10,6 +10,8 @@ statement: return_statement;
 return_statement: RETURN INT_LITTERAL ';' ;
 
 PREPROC_DIR: '#' ~[\r\n]* '\r'? '\n' ;
+ONELINE_COMMENT: '//' ~[\r\n]* -> skip ;
+MULTILINE_COMMENT: '/*' .*? '*/' -> skip ;
 INT: 'int' ;
 RETURN: 'return' ;
 SPACE: [ \t\r\n]+ -> skip ;
