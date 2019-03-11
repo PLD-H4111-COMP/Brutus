@@ -5,9 +5,14 @@ preproc: PREPROC_DIR+ ;
 funcdef: type identifier '(' ')' block ;
 type: INT ;
 identifier: IDENTIFIER ;
-block: '{' statement '}' ;
-statement: return_statement;
-return_statement: RETURN INT_LITTERAL ';' ;
+block: '{' statement* '}' ;
+statement: return_statement ';'
+         | declaration ';'
+         | assignment ';'
+         | ';' ;
+return_statement: RETURN (identifier | INT_LITTERAL);
+declaration: type (identifier | assignment) (',' (identifier | assignment))* ;
+assignment: identifier '=' (identifier | INT_LITTERAL) ;
 
 PREPROC_DIR: '#' ~[\r\n]* '\r'? '\n' ;
 ONELINE_COMMENT: '//' ~[\r\n]* -> skip ;
