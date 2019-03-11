@@ -35,3 +35,5 @@ add_executable(Brutus main.cpp CProgASVisitor.cpp
                ${ANTLR_CProg_CXX_OUTPUTS})
 target_link_libraries(Brutus antlr4_static)
 
+configure_file(compile.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
