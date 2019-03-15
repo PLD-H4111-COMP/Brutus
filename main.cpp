@@ -16,9 +16,10 @@ int main(int argc, char **argv)
     if (!options.parseOptions(argc, argv))
     {
         cout << "usage : " << argv[0] << " [options] <input_file>" << endl
-                << "[options] : -o <output_file> | -O | -a | --help" << endl;
+             << "[options] : -o <output_file> | -O | -a | --help" << endl;
         return 1;
     }
+    
     if (options.help)
     {
         cout << argv[0] << " [options] <input_file>" << endl
@@ -38,7 +39,7 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    ifstream file(argv[1]);
+    ifstream file(options.input_file);
     ANTLRInputStream input(file);
     CProgLexer lexer(&input);
     CommonTokenStream tokens(&lexer);

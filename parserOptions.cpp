@@ -1,7 +1,6 @@
 #include "parserOptions.h"
 
 #include <iostream>
-#include <fstream> 
 
 Options::Options() : input_file(""), output_file("brutus.s"), optimisation(false), generate_assembly(true), help(false)
 {
@@ -10,10 +9,6 @@ Options::Options() : input_file(""), output_file("brutus.s"), optimisation(false
 
 bool Options::parseOptions(int nb_options, char **option_inputs)
 {
-    if (nb_options == 1)
-    {
-        return false;
-    }
     for (int i = 1; i < nb_options; ++i)
     {
         std::string input(option_inputs[i]);
@@ -23,36 +18,48 @@ bool Options::parseOptions(int nb_options, char **option_inputs)
             return true;
         }
     }
-    for (int i = 1; i < nb_options-1; ++i)
+    
+    for (int i = 1; i < nb_options; ++i)
     {
         std::string input(option_inputs[i]);
-        if (input == "-o")
+        
+        if (input.empty())
+            continue;
+        
+        if (input[0] == '-')
         {
-            ++i;
-            if (i < nb_options-1)
+            if (input == "-o")
             {
-                output_file = option_inputs[i];
+                ++i;
+                if (i < nb_options)
+                {
+                    output_file = option_inputs[i];
+                }
+                else
+                {
+                    std::cerr << "You must specify the output file after -o." << std::endl;
+                    return false;
+                }
+            }
+            else if (input == "-O")
+            {
+                optimisation = true;
+            }
+            else if (input == "-a")
+            {
+                generate_assembly = false;
             }
             else
             {
+                std::cerr << "Unknown option : " << input << std::endl;
                 return false;
             }
         }
-        else if (input == "-O")
-        {
-            optimisation = true;
-        }
-        else if (input == "-a")
-        {
-            generate_assembly = false;
-        }
         else
         {
-            std::cout << "Unknown argument : " << input << std::endl;
-            return false;
+            input_file = input;
         }
     }
-    std::string input(option_inputs[nb_options-1]);
-    input_file = input;
-    return true;
+    
+    return input_file.size();
 }
