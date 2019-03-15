@@ -103,5 +103,6 @@ antlrcpp::Any CProgASVisitor::visitAssignment(CProgParser::AssignmentContext *ct
         std::cout << "    movl " << "%eax, " << tos[lhs_name].index << "(%rbp)" << std::endl;
     }
     
+    return visitChildren(ctx);
 }
 
