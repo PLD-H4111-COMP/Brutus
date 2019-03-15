@@ -46,7 +46,6 @@ antlrcpp::Any CProgASVisitor::visitReturn_statement(CProgParser::Return_statemen
     else
     {
         ret = std::to_string(tos[ctx->identifier()->IDENTIFIER()->getText()].index) + "(%rbp)";
-        
     }
     std::cout << "    movl " << ret << ", %eax" << std::endl;
     std::cout << "    popq %rbp" << std::endl;
@@ -60,7 +59,8 @@ antlrcpp::Any CProgASVisitor::visitDeclaration(CProgParser::DeclarationContext *
         if(tos.find(id->IDENTIFIER()->getText()) == tos.end())
         {
             tos_index -= 4;
-            tos[id->IDENTIFIER()->getText()] = {SymbolType::INTEGER, tos_index, false, false};
+            if (ctx->type()->INT() != nullptr)
+                tos[id->IDENTIFIER()->getText()] = {SymbolType::INTEGER, tos_index, false, false};
         }
     }
     for(CProgParser::AssignmentContext *as : ctx->assignment())
@@ -69,7 +69,8 @@ antlrcpp::Any CProgASVisitor::visitDeclaration(CProgParser::DeclarationContext *
         if(tos.find(lhs_name) == tos.end())
         {
             tos_index -= 4;
-            tos[lhs_name] = {SymbolType::INTEGER, tos_index, false, false};
+            if (ctx->type()->INT() != nullptr)
+                tos[lhs_name] = {SymbolType::INTEGER, tos_index, false, false};
         }
     }
     return visitChildren(ctx);
