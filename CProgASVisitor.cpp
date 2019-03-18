@@ -6,7 +6,7 @@ antlrcpp::Any CProgASVisitor::visitPreproc(CProgParser::PreprocContext *ctx) {
     // std::cerr << "Ignoring " << ctx->getText() << std::endl;
     return visitChildren(ctx);
 }
-    
+
 antlrcpp::Any CProgASVisitor::visitProg(CProgParser::ProgContext *ctx) {
     std::cout << ".text" << std::endl;
     return visitChildren(ctx);
@@ -59,8 +59,7 @@ antlrcpp::Any CProgASVisitor::visitDeclaration(CProgParser::DeclarationContext *
         if(tos.find(id->IDENTIFIER()->getText()) == tos.end())
         {
             tos_index -= 4;
-            if (ctx->type()->INT() != nullptr)
-                tos[id->IDENTIFIER()->getText()] = {SymbolType::INTEGER, tos_index, false, false};
+            tos[id->IDENTIFIER()->getText()] = {SymbolType::INTEGER, tos_index, false, false};
         }
     }
     for(CProgParser::AssignmentContext *as : ctx->assignment())
@@ -69,8 +68,7 @@ antlrcpp::Any CProgASVisitor::visitDeclaration(CProgParser::DeclarationContext *
         if(tos.find(lhs_name) == tos.end())
         {
             tos_index -= 4;
-            if (ctx->type()->INT() != nullptr)
-                tos[lhs_name] = {SymbolType::INTEGER, tos_index, false, false};
+            tos[lhs_name] = {SymbolType::INTEGER, tos_index, false, false};
         }
     }
     return visitChildren(ctx);
@@ -104,6 +102,4 @@ antlrcpp::Any CProgASVisitor::visitAssignment(CProgParser::AssignmentContext *ct
         std::cout << "    movl " << "%eax, " << tos[lhs_name].index << "(%rbp)" << std::endl;
     }
     
-    return visitChildren(ctx);
 }
-
