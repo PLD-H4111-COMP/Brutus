@@ -1,16 +1,19 @@
-#ifndef WRITER_H
-#define WRITER_H
+#pragma once
 
 #include <fstream>
+
+struct Options;
 
 class Writer
 {
 private:
-    std::ostream m_stream;
+    std::ofstream m_output_file_stream;
 
 public:
-    Writer(string options);
-    std::ostream& stream();
+    Writer(const Options &options);
+    std::ostream& assembly(unsigned int indent);
+    std::ostream& info();
+    std::ostream& warning();
+    std::ostream& error();
 };
 
-#endif // WRITER_H
