@@ -19,7 +19,7 @@ int main(int argc, char **argv)
              << "[options] : -o <output_file> | -O | -a | --help" << endl;
         return 1;
     }
-    
+
     if (options.help)
     {
         cout << argv[0] << " [options] <input_file>" << endl
@@ -44,8 +44,8 @@ int main(int argc, char **argv)
     CProgLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CProgParser parser(&tokens);
-    tree::ParseTree *tree = parser.prog();
-    
+    tree::ParseTree *tree = parser.program();
+
     CProgASVisitor visitor;
     visitor.visit(tree);
     return 0;
