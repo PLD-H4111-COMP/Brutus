@@ -1,5 +1,5 @@
 #include "antlr4-runtime.h"
-#include "CProgASVisitor.h"
+#include "CProgCSTVisitor.h"
 #include "CProgLexer.h"
 #include "CProgParser.h"
 #include "parserOptions.h"
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     CProgParser parser(&tokens);
     tree::ParseTree *tree = parser.program();
 
-    CProgASVisitor visitor;
+    CProgCSTVisitor visitor;
     visitor.visit(tree);
     return 0;
 }

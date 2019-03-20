@@ -11,21 +11,22 @@ type_name: INT_TYPE_NAME ;
 block: '{' statement* '}' ;
 statement: return_statement ';'
          | declaration ';'
-         | expression ';'
+         | int_expr ';'
          | ';' ;
-return_statement: RETURN expression ;
+return_statement: RETURN int_expr ;
 declaration: type_name (IDENTIFIER | assignment) (',' (IDENTIFIER | assignment))* ;
-assignment: IDENTIFIER '=' expression ;
-expression: expression '*' expression # expr_mul
-          | expression '/' expression # expr_div
-          | expression '%' expression # expr_mod
-          | expression '+' expression # expr_add
-          | expression '-' expression # expr_sub
-          | '(' expression ')'        # expr_brk
-          | assignment                # expr_ass
-          | IDENTIFIER                # expr_id
-          | INT_LITTERAL              # expr_lit
-          ;
+assignment: IDENTIFIER '=' int_expr ;
+int_expr: int_terms | assignment ;
+int_terms: int_factors rhs_int_terms* ;
+rhs_int_terms: OP_ADD int_factors
+             | OP_SUB int_factors ;
+int_factors: int_atom rhs_int_factors* ;
+rhs_int_factors: OP_MUL int_atom
+               | OP_DIV int_atom
+               | OP_MOD int_atom ;
+int_atom: INT_LITTERAL
+        | IDENTIFIER
+        | '(' int_expr ')' ;
 
 // -------------------------------------------------------------- skipped tokens
 
@@ -38,5 +39,10 @@ WHITESPACE: [ \t\r\n]+ -> skip ;
 
 INT_TYPE_NAME: 'int' ;
 RETURN: 'return' ;
+OP_ADD: '+' ;
+OP_SUB: '-' ;
+OP_MUL: '*' ;
+OP_DIV: '/' ;
+OP_MOD: '%' ;
 INT_LITTERAL: [0-9]+ ;
 IDENTIFIER: [a-zA-Z_][0-9a-zA-Z_]* ;
