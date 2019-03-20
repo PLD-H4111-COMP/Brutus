@@ -1,5 +1,5 @@
 #include "antlr4-runtime.h"
-#include "CProgASVisitor.h"
+#include "CProgCSTVisitor.h"
 #include "CProgLexer.h"
 #include "CProgParser.h"
 #include "parserOptions.h"
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
              << "[options] : -o <output_file> | -O | -a | --help" << endl;
         return 1;
     }
-    
+
     if (options.help)
     {
         cout << argv[0] << " [options] <input_file>" << endl
@@ -44,9 +44,9 @@ int main(int argc, char **argv)
     CProgLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     CProgParser parser(&tokens);
-    tree::ParseTree *tree = parser.prog();
-    
-    CProgASVisitor visitor;
+    tree::ParseTree *tree = parser.program();
+
+    CProgCSTVisitor visitor;
     visitor.visit(tree);
     return 0;
 }
