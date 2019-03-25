@@ -20,10 +20,13 @@ int_expr: int_terms | assignment ;
 int_terms: int_factors rhs_int_terms* ;
 rhs_int_terms: OP_ADD int_factors
              | OP_SUB int_factors ;
-int_factors: int_atom rhs_int_factors* ;
-rhs_int_factors: OP_MUL int_atom
-               | OP_DIV int_atom
-               | OP_MOD int_atom ;
+int_factors: int_signed_atom rhs_int_factors* ;
+rhs_int_factors: OP_MUL int_signed_atom
+               | OP_DIV int_signed_atom
+               | OP_MOD int_signed_atom ;
+int_signed_atom: OP_SUB int_signed_atom
+               | OP_ADD int_signed_atom
+               | int_atom ;
 int_atom: INT_LITTERAL
         | IDENTIFIER
         | '(' int_expr ')' ;
