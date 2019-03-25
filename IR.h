@@ -54,7 +54,7 @@ class IRInstr {
 
 
 	/**  constructor */
-	IRInstr(BasicBlock* bb_, Operation op, VarType t, std::vector<std::string> params);
+	IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params);
 	
 	/** Actual code generation */
 	void gen_asm(std::ostream &o); /**< x86 assembly code generation for this IR instruction */
@@ -90,6 +90,7 @@ class IRInstr {
 class BasicBlock {
  public:
 	BasicBlock(CFG* cfg, std::string entry_label);
+    virtual ~BasicBlock();
 	void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
 	void add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params);
@@ -122,8 +123,6 @@ class CFG {
  public:
 	CFG(DefFonction* funcAst);
 
-
-	
 	void add_bb(BasicBlock* bb);
 
 	// x86 code generation: could be encapsulated in a processor class in a retargetable compiler
@@ -136,7 +135,7 @@ class CFG {
 	void add_to_symbol_table(std::string name, VarType t);
 	std::string create_new_tempvar(VarType t);
 	int get_var_index(std::string name);
-//	VarType get_var_type(std::string name);
+	VarType get_var_type(std::string name);
 
 
 	DefFonction* ast; /**< The AST this CFG comes from */
@@ -154,15 +153,9 @@ class CFG {
 	std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
 
-
-
-
 // ****************************************************************************
 
 
-/*
-
- */
 class IRStore {
 public :
 	IRStore();

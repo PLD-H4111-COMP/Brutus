@@ -4,23 +4,38 @@
 // ****************************************************************************
 
 
-IRInstr::IRInstr(BasicBlock* bb_, Operation op, VarType t, std::vector<std::string> params){
+IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params){
+    this->bb = bb;
+    this->op = op;
+    this->t = t;
+    this->params = params;
 }
 
 void IRInstr::gen_asm(std::ostream &o){
+    
 }
 
 
 // ****************************************************************************
 
 
-BasicBlock::BasicBlock(CFG* cfg, std::string entry_label){
+BasicBlock::BasicBlock(CFG* cfg, std::string entry_label) : exit_true(nullptr), exit_false(nullptr), label(entry_label) {
+    // jump to the next block default ?
+    this->cfg = cfg;
+}
+
+BasicBlock::~BasicBlock(){
+    for (IRInstr* instr : instrs){
+        delete instr;
+    }
 }
 
 void BasicBlock::gen_asm(std::ostream &o){
+
 }
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params){
+    instrs.push_back(new IRInstr(this, op, t, params));
 }
 
 
@@ -29,6 +44,7 @@ void BasicBlock::add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::
 
 void CFG::gen_asm(std::ostream& o){
 }
+
 std::string CFG::IR_reg_to_asm(std::string reg){
     return "";
 }
@@ -41,12 +57,12 @@ void CFG::gen_asm_epilogue(std::ostream& o){
 
 
 int CFG::get_var_index(std::string name){
-    return 0;
+    return SymbolIndex[name];
 }
 
-/*VarType CFG::get_var_type(std::string name){
-
-}*/
+VarType CFG::get_var_type(std::string name){
+    return SymbolType[name];
+}
 
 CFG::CFG(DefFonction* funcAst) : ast(funcAst), nextFreeSymbolIndex(0), nextBBnumber(0) {
     bbs.push_back(new BasicBlock(this, "input"));
