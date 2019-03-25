@@ -4,26 +4,38 @@
 
 antlrcpp::Any CProgCSTVisitor::visitProgram(CProgParser::ProgramContext *ctx)
 {
-    std::cout << ".text" << std::endl;
-    return visitChildren(ctx);
+    IRStore *ir = new IRStore();
+    for(auto funcdef : ctx->funcdef())
+    {
+        CFG *cfg = (CFG*) visit(funcdef);
+        ir->add_cfg(cfg);
+    }
+    return ir;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
 {
-    std::cout << ".global " << ctx->IDENTIFIER()->getText() << std::endl;
-    std::cout << ctx->IDENTIFIER()->getText() << ":" << std::endl;
-    std::cout << "    pushq %rbp" << std::endl;
-    std::cout << "    movq %rsp, %rbp" << std::endl;
-    return visitChildren(ctx);
+    CFG *cfg = new CFG(ctx);
+    BasicBlock *bb = new BasicBlock(cfg, cfg->new_BB_name());
+    for(auto statement : ctx->block()->statement())
+    {
+        for(IRInstr *instr : visit(statement))
+        {
+            bb->add_instr(instr);
+        }
+    }
+    cfg->add_bb(bb);
+    return cfg;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitReturn_statement(CProgParser::Return_statementContext *ctx)
 {
-    std::string tmp_res = visit(ctx->int_expr());
-    std::cout << "    movl " << tos[tmp_res].index << "(%rbp) , %eax" << std::endl;
+    vector<IRInstr*> instr_vec = visit(ctx->int_expr());
+    instr_vec.push_back(new IRInstr(IRInstr::ret, INT_64, std::vector<std::string>{tmp_res}););
+    /*std::cout << "    movl " << tos[tmp_res].index << "(%rbp) , %eax" << std::endl;
     std::cout << "    popq %rbp" << std::endl;
-    std::cout << "    ret" << std::endl;
-    return 0; // nothing to return, children were already visited
+    std::cout << "    ret" << std::endl;*/
+    return instr_vec;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitDeclaration(CProgParser::DeclarationContext *ctx)

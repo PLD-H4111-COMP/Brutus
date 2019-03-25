@@ -3,6 +3,7 @@
 #include "CProgLexer.h"
 #include "CProgParser.h"
 #include "parserOptions.h"
+#include "IR.h"
 #include <istream>
 #include <iostream>
 #include <string>
@@ -47,6 +48,6 @@ int main(int argc, char **argv)
     tree::ParseTree *tree = parser.program();
 
     CProgCSTVisitor visitor;
-    visitor.visit(tree);
+    IRStore * ir = visitor.visit(tree);
     return 0;
 }
