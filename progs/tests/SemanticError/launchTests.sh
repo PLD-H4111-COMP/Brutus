@@ -1,11 +1,12 @@
 #!/bin/sh
 
+BRUTUS="$1"
 let "progsOk = 0"
 let "nbProgs = 0"
 for progs in *.c
 do
     let "nbProgs = nbProgs + 1"
-    ./../../../build/Brutus $progs > /dev/null
+    $BRUTUS $progs > /dev/null
     returncode=$?
     if [[ $returncode != 0 ]]
     then let "progsOk = progsOk + 1"

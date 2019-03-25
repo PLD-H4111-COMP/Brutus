@@ -1,5 +1,6 @@
 #!/bin/sh
 
+BRUTUS="$(readlink -f Brutus)"
 cd progs/tests
 let "progsOk = 0"
 let "nbProgs = 0"
@@ -11,7 +12,7 @@ for folder in *
         let "nbProgs = nbProgs + 1"
     done
     echo "Folder $folder : "
-    ./launchTests.sh
+    ./launchTests.sh $BRUTUS
     let "progsOk = progsOk + $?"
     cd ..
 done

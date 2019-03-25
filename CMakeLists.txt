@@ -34,6 +34,10 @@ include_directories(${ANTLR_CProg_OUTPUT_DIR})
 add_executable(Brutus main.cpp CProgCSTVisitor.cpp parserOptions.cpp Writer.cpp
                ${ANTLR_CProg_CXX_OUTPUTS})
 target_link_libraries(Brutus antlr4_static)
+add_custom_command(TARGET Brutus POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_SOURCE_DIR}/progs $<TARGET_FILE_DIR:Brutus>/progs)
 
-configure_file(compile.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(scripts/compile.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(scripts/tests.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
