@@ -56,15 +56,7 @@ antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *c
         std::cerr << "error: use of undeclared identifier '" << lhs_name << "'" << std::endl;
     }
     std::string rhs_name = visit(ctx->int_expr());
-    if(!tos.declared(rhs_name))
-    {
-        std::cerr << "error: use of undeclared identifier '" << rhs_name << "'" << std::endl;
-    }
     tos[lhs_name].initialized = tos[rhs_name].initialized;
-    if(!tos[rhs_name].initialized)
-    {
-        std::cerr << "warning: use of uninitialized variable '" << rhs_name << "'" << std::endl;
-    }
     std::cout << "    movl " << tos[rhs_name].index << "(%rbp)" << ", %eax" << std::endl;
     std::cout << "    movl " << "%eax, " << tos[lhs_name].index << "(%rbp)" << std::endl;
     return lhs_name;
@@ -172,6 +164,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
         std::string value = ctx->INT_LITTERAL()->getText();
         std::cout << "    movl " << "$" << value << ", " << tos[tmp_res].index << "(%rbp)" << std::endl;
         tos[tmp_res].initialized = true;
+        tos[tmp_res].used = true;
         return tmp_res;
     }
     if(ctx->IDENTIFIER() != nullptr)
@@ -180,6 +173,14 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
         if(!tos.declared(id))
         {
             std::cerr << "error: use of undeclared identifier '" << id << "'" << std::endl;
+        }
+        else
+        {
+            tos[id].used = true;
+            if(!tos[id].initialized)
+            {
+                std::cerr << "warning: use of uninitialized variable '" << id << "'" << std::endl;
+            }
         }
         return id;
     }
@@ -190,11 +191,13 @@ antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atom
 {
     if(ctx->OP_SUB() != nullptr) // will lead to an overflow for extreme litteral values
     {
+        std::string tmp_res = tos.add_tmp_result();
         std::string atom_name = visit(ctx->int_signed_atom());
         std::cout << "    movl " << tos[atom_name].index << "(%rbp)" << ", %eax" << std::endl;
         std::cout << "    imull $-1, %eax" << std::endl;
-        std::cout << "    movl %eax, " << tos[atom_name].index << "(%rbp)" << std::endl;
-        return atom_name;
+        std::cout << "    movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
+        tos[tmp_res].initialized = tos[atom_name].initialized;
+        return tmp_res;
     }
     if(ctx->OP_ADD() != nullptr)
     {
