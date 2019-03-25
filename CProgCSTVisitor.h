@@ -60,6 +60,7 @@ public:
     virtual antlrcpp::Any visitRhs_int_terms(CProgParser::Rhs_int_termsContext *ctx) override;
     virtual antlrcpp::Any visitInt_factors(CProgParser::Int_factorsContext *ctx) override;
     virtual antlrcpp::Any visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx) override;
+    virtual antlrcpp::Any visitInt_signed_atom(CProgParser::Int_signed_atomContext *ctx) override;
     virtual antlrcpp::Any visitInt_atom(CProgParser::Int_atomContext *ctx) override;
 
 private:

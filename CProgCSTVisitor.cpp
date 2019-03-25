@@ -119,9 +119,9 @@ antlrcpp::Any CProgCSTVisitor::visitInt_factors(CProgParser::Int_factorsContext 
 {
     if(ctx->rhs_int_factors().empty())
     {
-        return visit(ctx->int_atom());
+        return visit(ctx->int_signed_atom());
     }
-    std::string lhs_name = visit(ctx->int_atom());
+    std::string lhs_name = visit(ctx->int_signed_atom());
     std::string tmp_res = tos.add_tmp_result();
     std::cout << "    movl " << tos[lhs_name].index << "(%rbp)" << ", %eax" << std::endl;
     std::cout << "    movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
@@ -161,7 +161,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_factors(CProgParser::Int_factorsContext 
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx)
 {
-    return visit(ctx->int_atom());
+    return visit(ctx->int_signed_atom());
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
@@ -185,3 +185,21 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
     }
     return visit(ctx->int_expr());
 }
+
+antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atomContext *ctx)
+{
+    if(ctx->OP_SUB() != nullptr) // will lead to an overflow for extreme litteral values
+    {
+        std::string atom_name = visit(ctx->int_signed_atom());
+        std::cout << "    movl " << tos[atom_name].index << "(%rbp)" << ", %eax" << std::endl;
+        std::cout << "    imull $-1, %eax" << std::endl;
+        std::cout << "    movl %eax, " << tos[atom_name].index << "(%rbp)" << std::endl;
+        return atom_name;
+    }
+    if(ctx->OP_ADD() != nullptr)
+    {
+        return visit(ctx->int_signed_atom());
+    }
+    return visit(ctx->int_atom());
+}
+
