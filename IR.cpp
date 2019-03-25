@@ -92,6 +92,18 @@ std::string CFG::create_new_tempvar(VarType t) {
     nextFreeSymbolIndex -= 4; //offset sera variable en fonction du type -> nextFreeSymbolIndex += t.size;
 }
 
+void CFG::print() {
+    for (BasicBlock* bb : bbs){
+        bb->print();
+    }
+}
+
+void CFG::printVariables(){
+    for (std::map<std::string, VarType>::iterator it = SymbolType.begin(); it!=SymbolType.end(); ++it){
+        std::clog << it->first;
+    }
+}
+
 
 // ****************************************************************************
 
@@ -104,6 +116,16 @@ void IRStore::add_cfg(CFG* cfg) {
 IRStore::~IRStore() {
     for (CFG* cfg : cfgs){
         delete cfg;
+    }
+}
+
+void IRStore::print_IR(){
+    int i = 0;
+    std::clog << "Affichage de l'IR : " << std::endl;
+    for (CFG* cfg : cfgs){
+        std::clog << "CFG " << i << " : " << std::endl;
+        cfg->print();
+        ++i;
     }
 }
 

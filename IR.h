@@ -137,6 +137,8 @@ class CFG {
 	int get_var_index(std::string name);
 	VarType get_var_type(std::string name);
 
+    void print();
+    void printVariables();
 
 	DefFonction* ast; /**< The AST this CFG comes from */
 
@@ -161,6 +163,7 @@ public :
 	IRStore();
     virtual ~IRStore();
 	void add_cfg(CFG* cfg);
+    void print_IR();
 private :
 	std::vector<CFG*> cfgs;
 };
