@@ -14,9 +14,12 @@ statement: return_statement ';'
          | int_expr ';'
          | ';' ;
 return_statement: RETURN int_expr ;
-declaration: type_name (IDENTIFIER | assignment) (',' (IDENTIFIER | assignment))* ;
+declaration: type_name declarator (',' declarator)* ;
+declarator: IDENTIFIER
+          | assignment ;
 assignment: IDENTIFIER '=' int_expr ;
-int_expr: int_terms | assignment ;
+int_expr: int_terms
+        | assignment ;
 int_terms: int_factors rhs_int_terms* ;
 rhs_int_terms: OP_ADD int_factors
              | OP_SUB int_factors ;
@@ -27,7 +30,7 @@ rhs_int_factors: OP_MUL int_signed_atom
 int_signed_atom: OP_SUB int_signed_atom
                | OP_ADD int_signed_atom
                | int_atom ;
-int_atom: INT_LITTERAL
+int_atom: INT_LITERAL
         | IDENTIFIER
         | '(' int_expr ')' ;
 
@@ -47,5 +50,5 @@ OP_SUB: '-' ;
 OP_MUL: '*' ;
 OP_DIV: '/' ;
 OP_MOD: '%' ;
-INT_LITTERAL: [0-9]+ ;
+INT_LITERAL: [0-9]+ ;
 IDENTIFIER: [a-zA-Z_][0-9a-zA-Z_]* ;
