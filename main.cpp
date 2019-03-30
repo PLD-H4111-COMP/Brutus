@@ -50,6 +50,7 @@ int main(int argc, char **argv)
 
     Writer writer(options);
     CProgCSTVisitor visitor;
-    IRStore * ir = visitor.visit(tree);
+    CProgAST *ast = visitor.visit(tree);
+    ast->build_ir();
     return 0;
 }
