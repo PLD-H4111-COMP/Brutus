@@ -1,5 +1,5 @@
 #include "Writer.h"
-#include "parserOptions.h"
+#include "Options.h"
 #include <iostream>
 
 Writer::Writer(const Options &options) : m_output_file_stream(options.output_file)

@@ -2,7 +2,7 @@
 #include "CProgCSTVisitor.h"
 #include "CProgLexer.h"
 #include "CProgParser.h"
-#include "parserOptions.h"
+#include "Options.h"
 #include <istream>
 #include <iostream>
 #include <string>
