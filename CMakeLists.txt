@@ -20,7 +20,7 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 
 # set variable pointing to the antlr tool that supports C++
 # this is not required if the jar file can be found under PATH environment
-LIST(APPEND CMAKE_PROGRAM_PATH "/shares/public/tp/ANTLR4-CPP/bin")
+LIST(APPEND CMAKE_PROGRAM_PATH ${CMAKE_SOURCE_DIR}/deps)
 #set(ANTLR_EXECUTABLE /usr/bin/antlr4)
 # add macros to generate ANTLR Cpp code from grammar
 find_package(ANTLR REQUIRED)
