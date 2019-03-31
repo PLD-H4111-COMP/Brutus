@@ -6,7 +6,7 @@ let "nbProgs = 0"
 for progs in *.c
 do
     let "nbProgs = nbProgs + 1"
-    $BRUTUS $progs > /dev/null
+    $BRUTUS $progs -o /dev/null
     returncode=$?
     if [[ $returncode == 0 ]]
     then let "progsOk = progsOk + 1"
