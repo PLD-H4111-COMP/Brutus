@@ -6,10 +6,6 @@ env:
   global:
     - MAKEFLAGS="-j 2"
 
-cache:
-  directories:
-    - /home/travis/build/PLD-H4111-COMP/Brutus/build/antlr4_runtime
-
 compiler:
   - gcc
 
