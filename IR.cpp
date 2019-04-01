@@ -88,6 +88,7 @@ std::string CFG::create_new_tempvar(VarType t) {
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
     nextFreeSymbolIndex -= 4; //offset sera variable en fonction du type -> nextFreeSymbolIndex += t.size;
+    return name;
 }
 
 

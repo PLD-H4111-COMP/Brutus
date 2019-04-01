@@ -26,16 +26,7 @@ antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
     CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, INT_64);
     for(auto statement_ctx : ctx->block()->statement())
     {
-        antlrcpp::Any statement = visit(statement_ctx);
-        try {
-            funcdef->add_statement(statement.as<CProgASTReturn*>());
-        } catch (std::bad_cast e) {}
-        try {
-            funcdef->add_statement(statement.as<CProgASTDeclaration*>());
-        } catch (std::bad_cast e) {}
-        try {
-            funcdef->add_statement(statement.as<CProgASTExpression*>());
-        } catch (std::bad_cast e) {}
+        funcdef->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
     }
     return funcdef;
 }
@@ -44,15 +35,15 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
 {
     if(ctx->return_statement() != nullptr)
     {
-        return visit(ctx->return_statement()).as<CProgASTReturn*>();
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->return_statement()).as<CProgASTReturn*>());
     }
     else if(ctx->declaration() != nullptr)
     {
-        return visit(ctx->declaration()).as<CProgASTDeclaration*>();
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->declaration()).as<CProgASTDeclaration*>());
     }
     else if(ctx->int_expr() != nullptr)
     {
-        return visit(ctx->int_expr()).as<CProgASTExpression*>();
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->int_expr()).as<CProgASTExpression*>());
     }
     else
     {
@@ -99,7 +90,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_expr(CProgParser::Int_exprContext *ctx)
     {
         return visit(ctx->int_terms()).as<CProgASTExpression*>();
     }
-    return visit(ctx->assignment()).as<CProgASTExpression*>();
+    return dynamic_cast<CProgASTExpression*>(visit(ctx->assignment()).as<CProgASTAssignment*>());
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx)
@@ -110,14 +101,14 @@ antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx
         CProgASTExpression* expr = visit(rhs_int_terms_ctx).as<CProgASTExpression*>();
         if(rhs_int_terms_ctx->OP_ADD() != nullptr)
         {
-            rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTAddition(rexpr, expr));
+            rexpr = new CProgASTAddition(rexpr, expr);
         }
         else if(rhs_int_terms_ctx->OP_SUB() != nullptr)
         {
-            rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTSubtraction(rexpr, expr));
+            rexpr = new CProgASTSubtraction(rexpr, expr);
         }
     }
-    return rexpr;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_terms(CProgParser::Rhs_int_termsContext *ctx)
@@ -130,21 +121,21 @@ antlrcpp::Any CProgCSTVisitor::visitInt_factors(CProgParser::Int_factorsContext 
     CProgASTExpression* rexpr = visit(ctx->int_signed_atom()).as<CProgASTExpression*>();
     for(auto rhs_int_factors_ctx : ctx->rhs_int_factors())
     {
-        CProgASTExpression* expr = (CProgASTExpression*) visit(rhs_int_factors_ctx);
+        CProgASTExpression* expr = visit(rhs_int_factors_ctx).as<CProgASTExpression*>();
         if(rhs_int_factors_ctx->OP_MUL() != nullptr)
         {
-            rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTMultiplication(rexpr, expr));
+            rexpr = new CProgASTMultiplication(rexpr, expr);
         }
         else if(rhs_int_factors_ctx->OP_DIV() != nullptr)
         {
-            rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTDivision(rexpr, expr));
+            rexpr = new CProgASTDivision(rexpr, expr);
         }
         else if(rhs_int_factors_ctx->OP_MOD() != nullptr)
         {
-            rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTModulo(rexpr, expr));
+            rexpr = new CProgASTModulo(rexpr, expr);
         }
     }
-    return rexpr;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx)
@@ -157,7 +148,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atom
     CProgASTExpression* rexpr = nullptr;
     if(ctx->OP_SUB() != nullptr)
     {
-        rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTUnaryMinus(visit(ctx->int_signed_atom()).as<CProgASTExpression*>()));
+        rexpr = new CProgASTUnaryMinus(visit(ctx->int_signed_atom()).as<CProgASTExpression*>());
     }
     else if(ctx->OP_ADD() != nullptr)
     {
@@ -167,7 +158,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atom
     {
         rexpr = visit(ctx->int_atom()).as<CProgASTExpression*>();
     }
-    return rexpr;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
@@ -175,15 +166,15 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
     CProgASTExpression* rexpr = nullptr;
     if(ctx->INT_LITERAL() != nullptr)
     {
-        rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText())));
+        rexpr = new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText()));
     }
     else if(ctx->IDENTIFIER() != nullptr)
     {
-        rexpr = dynamic_cast<CProgASTExpression*>(new CProgASTIdentifier(ctx->IDENTIFIER()->getText()));
+        rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
     }
     else if(ctx->int_expr() != nullptr)
     {
         rexpr = visit(ctx->int_expr()).as<CProgASTExpression*>();
     }
-    return rexpr;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }

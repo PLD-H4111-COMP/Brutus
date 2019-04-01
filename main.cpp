@@ -53,6 +53,6 @@ int main(int argc, char **argv)
     CProgCSTVisitor visitor;
     CProgASTProgram *ast = nullptr;
     ast = (CProgASTProgram*) visitor.visit(tree);
-    //ast->build_ir();
+    ast->build_ir();
     return 0;
 }
