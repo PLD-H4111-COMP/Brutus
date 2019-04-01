@@ -5,6 +5,7 @@
 #include "Options.h"
 #include "Writer.h"
 #include "IR.h"
+#include "CProgAST.h"
 #include <istream>
 #include <iostream>
 #include <string>
@@ -50,7 +51,8 @@ int main(int argc, char **argv)
 
     Writer writer(options);
     CProgCSTVisitor visitor;
-    CProgAST *ast = visitor.visit(tree);
-    ast->build_ir();
+    CProgASTProgram *ast = nullptr;
+    ast = (CProgASTProgram*) visitor.visit(tree);
+    //ast->build_ir();
     return 0;
 }

@@ -5,46 +5,66 @@
 #include <string>
 #include <vector>
 
+#include "IR.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Forward Declarations                                                       //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CFG;
 class CProgASTExpression;
 class CProgASTFuncdef;
 class CProgASTStatement;
+class CProgASTDeclarator;
+class CProgASTIdentifier;
+class CProgASTIntLiteral;
+class CProgASTAssignment;
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgAST                                                             //
+// class CProgASTNode                                                         //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgAST {
+class CProgASTNode {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgAST() = default;
-    CProgAST(const CProgAST& src) = delete;
-    ~CProgAST();
+    CProgASTNode() = default;
+    CProgASTNode(const CProgASTNode& src) = delete;
+    virtual ~CProgASTNode() = default;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTNode& operator=(const CProgASTNode& src) = delete;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgAST : public CProgASTNode                                       //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTProgram : public CProgASTNode {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTProgram() = default;
+    CProgASTProgram(const CProgASTProgram& src) = delete;
+    virtual ~CProgASTProgram();
 
     // ------------------------------------------------- Public Member Functions
     void add_funcdef(CProgASTFuncdef* funcdef);
     std::vector<CFG*> build_ir() const;
 
     // ---------------------------------------------------- Overloaded Operators
-    CProgAST& operator=(const CProgAST& src) = delete;
+    CProgASTProgram& operator=(const CProgASTProgram& src) = delete;
 private:
-    std::vector<CProgASTFuncdef*> funcdef_nodes;
+    std::vector<CProgASTFuncdef*> funcdefs;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTFuncdef                                                      //
+// class CProgASTFuncdef : public CProgASTNode                                //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTFuncdef {
+class CProgASTFuncdef : public CProgASTNode {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTFuncdef(std::string identifier, Type type);
+    CProgASTFuncdef(std::string id, Type type);
     CProgASTFuncdef(const CProgASTFuncdef& src) = delete;
-    ~CProgASTFuncdef();
+    virtual ~CProgASTFuncdef();
 
     // ------------------------------------------------- Public Member Functions
     void add_statement(CProgASTStatement* statement);
@@ -53,16 +73,16 @@ public:
     // ---------------------------------------------------- Overloaded Operators
     CProgASTFuncdef& operator=(const CProgASTFuncdef& src) = delete;
 private:
-    std::string function_identifier;
+    std::string identifier;
     Type return_type;
-    std::vector<CProgASTStatement*> statement_nodes;
+    std::vector<CProgASTStatement*> statements;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTStatement                                                    //
+// class CProgASTStatement : public CProgASTNode                              //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTStatement {
+class CProgASTStatement : public CProgASTNode {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTStatement() = default;
@@ -108,8 +128,7 @@ public:
     virtual ~CProgASTDeclaration();
 
     // ------------------------------------------------- Public Member Functions
-    void add_identifier(std::string identifier);
-    void add_assignment(CProgASTAssignment* assignment);
+    void add_declarator(CProgASTDeclarator* declarator);
     virtual std::string build_ir(CFG* cfg) const;
 
     // ---------------------------------------------------- Overloaded Operators
@@ -120,42 +139,26 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTDeclarator                                                   //
+// class CProgASTDeclarator : public CProgASTNode                             //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTDeclarator {
+class CProgASTDeclarator : public CProgASTNode {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTDeclarator() = default;
+    CProgASTDeclarator(CProgASTIdentifier* id, CProgASTAssignment* init);
     CProgASTDeclarator(const CProgASTDeclarator& src) = delete;
-    virtual ~CProgASTDeclarator() = default;
+    virtual ~CProgASTDeclarator();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const = 0;
-
-    // ---------------------------------------------------- Overloaded Operators
-    CProgASTDeclarator& operator=(const CProgASTDeclarator& src) = delete;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// class CProgASTAssignment : public CProgASTStatement, CProgASTDeclarator    //
-////////////////////////////////////////////////////////////////////////////////
-
-class CProgASTAssignment : public CProgASTStatement, CProgASTDeclarator {
-public:
-    // ------------------------------------------------ Constructor / Destructor
-    CProgASTAssignment(CProgASTIdentifier* identifier, CProgASTExpression* expression);
-    CProgASTAssignment(const CProgASTAssignment& src) = delete;
-    virtual ~CProgASTAssignment();
-
-    // ------------------------------------------------- Public Member Functions
+    void set_type(Type type);
     virtual std::string build_ir(CFG* cfg) const;
 
     // ---------------------------------------------------- Overloaded Operators
-    CProgASTAssignment& operator=(const CProgASTAssignment& src) = delete;
-private:
-    const CProgASTIdentifier* lhs_identifier;
-    const CProgASTExpression* rhs_expression;
+    CProgASTDeclarator& operator=(const CProgASTDeclarator& src) = delete;
+protected:
+    const CProgASTIdentifier* identifier;
+    const CProgASTAssignment* initializer;
+    Type type_specifier;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,6 +177,27 @@ public:
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTExpression& operator=(const CProgASTExpression& src) = delete;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTAssignment : public CProgASTExpression                       //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTAssignment : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTAssignment(CProgASTIdentifier* identifier, CProgASTExpression* expression);
+    CProgASTAssignment(const CProgASTAssignment& src) = delete;
+    virtual ~CProgASTAssignment();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTAssignment& operator=(const CProgASTAssignment& src) = delete;
+private:
+    const CProgASTIdentifier* lhs_identifier;
+    const CProgASTExpression* rhs_expression;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,10 +346,10 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTIdentifier : public CProgASTExpression, CProgASTDeclarator   //
+// class CProgASTIdentifier : public CProgASTExpression                       //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTIdentifier : public CProgASTExpression, CProgASTDeclarator {
+class CProgASTIdentifier : public CProgASTExpression {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTIdentifier(std::string identifier);
@@ -333,6 +357,7 @@ public:
     virtual ~CProgASTIdentifier() = default;
 
     // ------------------------------------------------- Public Member Functions
+    std::string getText() const;
     virtual std::string build_ir(CFG* cfg) const;
 
     // ---------------------------------------------------- Overloaded Operators

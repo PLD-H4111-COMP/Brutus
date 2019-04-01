@@ -1,18 +1,16 @@
 #include "IR.h"
 
+std::map<Type, int> VarType::VAR_TYPE_SIZE = { {INT_64, 8} };
 
 // ****************************************************************************
 
 
-IRInstr::IRInstr(/*BasicBlock* bb,*/ Operation op, VarType t, std::vector<std::string> params){
-    // this->bb = bb;
-    this->op = op;
-    this->t = t;
-    this->params = params;
-}
+IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params) :
+    bb(bb), op(op), t(t), params(params)
+{}
 
-void IRInstr::gen_asm(std::ostream &o){
-    
+void IRInstr::gen_asm(std::ostream &o) {
+
 }
 
 
@@ -64,7 +62,7 @@ VarType CFG::get_var_type(std::string name){
     return SymbolType[name];
 }
 
-CFG::CFG(DefFonction* funcAst) : ast(funcAst), nextFreeSymbolIndex(0), nextBBnumber(0) {
+CFG::CFG(const CProgASTFuncdef* fundcef) : ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0) {
     bbs.push_back(new BasicBlock(this, "input"));
     bbs.push_back(new BasicBlock(this, "output"));
 }
@@ -106,5 +104,3 @@ IRStore::~IRStore() {
         delete cfg;
     }
 }
-
-
