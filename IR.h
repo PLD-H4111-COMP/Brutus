@@ -23,13 +23,21 @@ class VarType{
 public:
     VarType(){}
     inline int size() { return VAR_TYPE_SIZE[type]; }
+    friend std::ostream& operator<<(std::ostream& os, const VarType& varType);
     virtual ~VarType(){}
 private:
     TypeEnum type;
     static std::map<TypeEnum, int> VAR_TYPE_SIZE; /* number of bytes for each var */
+    static std::map<TypeEnum, std::string> VAR_TYPE_NAME; /* names of the types */
 };
 
 std::map<TypeEnum, int> VarType::VAR_TYPE_SIZE = { {INT_64, 8} };
+std::map<TypeEnum, std::string> VarType::VAR_TYPE_NAME = { {INT_64, "int_64"} };
+
+std::ostream& operator<<(std::ostream& os, const VarType& varType)
+{
+    return os << VarType::VAR_TYPE_NAME[varType.type];
+}
 
 // ****************************************************************************
 
@@ -52,12 +60,13 @@ class IRInstr {
 		cmp_le
 	} Operation;
 
-
 	/**  constructor */
 	IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params);
 	
 	/** Actual code generation */
 	void gen_asm(std::ostream &o); /**< x86 assembly code generation for this IR instruction */
+
+    void print();
 	
  private:
 	BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
@@ -66,6 +75,8 @@ class IRInstr {
 	std::vector<std::string> params; /**< For 3-op instrs: d, x, y; for ldconst: d, c;  For call: label, d, params;  for wmem and rmem: choose yourself */
 	// if you subclass IRInstr, each IRInstr subclass has its parameters and the previous (very important) comment becomes useless: it would be a better design. 
 };
+
+std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op);
 
 
 // ****************************************************************************
@@ -94,6 +105,8 @@ class BasicBlock {
 	void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
 	void add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params);
+
+    void print();
 
 	// No encapsulation whatsoever here. Feel free to do better.
 	BasicBlock* exit_true;  /**< pointer to the next basic block, true branch. If nullptr, return from procedure */ 

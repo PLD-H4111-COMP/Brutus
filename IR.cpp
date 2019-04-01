@@ -1,5 +1,44 @@
 #include "IR.h"
 
+// ****************************************************************************
+
+std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
+{
+    std::string operation;
+    switch(op){
+        case IRInstr::Operation::ldconst:
+            operation = "ldconst";
+        break;
+        case IRInstr::Operation::add:
+            operation = "add";
+        break;
+        case IRInstr::Operation::sub:
+            operation = "sub";
+        break;
+        case IRInstr::Operation::mul:
+            operation = "mul";
+        break;
+        case IRInstr::Operation::rmem:
+            operation = "rmem";
+        break;
+        case IRInstr::Operation::wmem:
+            operation = "wmem";
+        break;
+        case IRInstr::Operation::call:
+            operation = "call";
+        break;
+        case IRInstr::Operation::cmp_eq:
+            operation = "cmp_eq";
+        break;
+        case IRInstr::Operation::cmp_lt:
+            operation = "cmp_lt";
+        break;
+        case IRInstr::Operation::cmp_le:
+            operation = "cmp_le";
+        break;
+    }
+    return os << operation;
+}
 
 // ****************************************************************************
 
@@ -13,6 +52,15 @@ IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::strin
 
 void IRInstr::gen_asm(std::ostream &o){
     
+}
+
+void IRInstr::print(){
+    std::clog << "Type de retour : " << t << ", Operation : " << op << std::endl;
+    std::clog << "Parametres : ";
+    for (std::string param : params){
+        std::clog << param << ", ";
+    }
+    std::clog << std::endl;
 }
 
 
@@ -36,6 +84,14 @@ void BasicBlock::gen_asm(std::ostream &o){
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params){
     instrs.push_back(new IRInstr(this, op, t, params));
+}
+
+void BasicBlock::print(){
+    std::clog << "Basic Bloc : " << label << std::endl;
+    // Amelioration : ajouter les noms des blocs suivants (exit_true, exit_false)
+    for (IRInstr* instr : instrs){
+        instr->print();
+    }
 }
 
 
@@ -100,7 +156,7 @@ void CFG::print() {
 
 void CFG::printVariables(){
     for (std::map<std::string, VarType>::iterator it = SymbolType.begin(); it!=SymbolType.end(); ++it){
-        std::clog << it->first;
+        std::clog << "Nom variable : " << it->first << ", Type : " << it->second << ", Valeur : " << SymbolIndex[it->first] << std::endl;
     }
 }
 
