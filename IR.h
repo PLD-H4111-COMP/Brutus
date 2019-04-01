@@ -52,6 +52,8 @@ class IRInstr {
 		add,
 		sub,
 		mul,
+        div,
+        mod,
 		rmem,
 		wmem,
 		call, 
@@ -64,7 +66,7 @@ class IRInstr {
 	IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params);
 	
 	/** Actual code generation */
-	void gen_asm(std::ostream &o); /**< x86 assembly code generation for this IR instruction */
+	void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
 
     void print();
 	
@@ -180,6 +182,5 @@ public :
 private :
 	std::vector<CFG*> cfgs;
 };
-
 
 #endif

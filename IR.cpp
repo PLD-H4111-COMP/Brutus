@@ -1,4 +1,5 @@
 #include "IR.h"
+#include "Writer.h"
 
 // ****************************************************************************
 
@@ -17,6 +18,12 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         break;
         case IRInstr::Operation::mul:
             operation = "mul";
+        break;
+        case IRInstr::Operation::div:
+            operation = "div";
+        break;
+        case IRInstr::Operation::mod:
+            operation = "mod";
         break;
         case IRInstr::Operation::rmem:
             operation = "rmem";
@@ -43,15 +50,65 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
 // ****************************************************************************
 
 
-IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params){
-    this->bb = bb;
-    this->op = op;
-    this->t = t;
-    this->params = params;
+IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params)
+    : bb(bb), op(op), params(params) {
 }
 
-void IRInstr::gen_asm(std::ostream &o){
-    
+void IRInstr::gen_asm(std::ostream& os){
+    switch(op){
+        case Operation::ldconst:
+            os << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "%(rbp)";
+        break;
+        case Operation::add:
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
+            os << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "movq %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+        break;
+        case Operation::sub:
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
+            os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "movq %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+        break;
+        case Operation::mul:
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %eax" << std::endl;
+            os << "imull " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+        break;
+        case Operation::div:
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
+            os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "cltd" << std::endl;
+            os << "idivl %ebx " << std::endl;
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+        break;
+        case Operation::mod:
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
+            os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "cltd" << std::endl;
+            os << "idivl %ebx" << std::endl;
+            os << "movl %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+        break;
+        case Operation::rmem:
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "%(rbp), " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+            // attention difference registre/variable
+        break;
+        case Operation::wmem:
+            
+        break;
+        case Operation::call:
+            
+        break;
+        case Operation::cmp_eq:
+            
+        break;
+        case Operation::cmp_lt:
+            
+        break;
+        case Operation::cmp_le:
+            
+        break;
+    }
+    os << std::endl;
 }
 
 void IRInstr::print(){
@@ -99,6 +156,7 @@ void BasicBlock::print(){
 
 
 void CFG::gen_asm(std::ostream& o){
+    
 }
 
 std::string CFG::IR_reg_to_asm(std::string reg){
@@ -106,9 +164,11 @@ std::string CFG::IR_reg_to_asm(std::string reg){
 }
 
 void CFG::gen_asm_prologue(std::ostream& o){
+    
 }
 
 void CFG::gen_asm_epilogue(std::ostream& o){
+    
 }
 
 
@@ -162,8 +222,6 @@ void CFG::printVariables(){
 
 
 // ****************************************************************************
-
-
 
 void IRStore::add_cfg(CFG* cfg) {
 	cfgs.push_back(cfg);
