@@ -3,7 +3,6 @@
 #include "antlr4-runtime.h"
 #include "CProgBaseVisitor.h"
 #include <string>
-#include <vector>
 #include <unordered_map>
 
 enum class SymbolType { INTEGER };
