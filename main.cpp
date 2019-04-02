@@ -4,6 +4,8 @@
 #include "CProgParser.h"
 #include "Options.h"
 #include "Writer.h"
+#include "IR.h"
+#include "CProgAST.h"
 #include <istream>
 #include <iostream>
 #include <string>
@@ -48,7 +50,9 @@ int main(int argc, char **argv)
     tree::ParseTree *tree = parser.program();
 
     Writer writer(options);
-    CProgCSTVisitor visitor(writer);
-    visitor.visit(tree);
+    CProgCSTVisitor visitor;
+    CProgASTProgram *ast = nullptr;
+    ast = (CProgASTProgram*) visitor.visit(tree);
+    ast->build_ir();
     return 0;
 }

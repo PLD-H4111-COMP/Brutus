@@ -1,214 +1,180 @@
-#include "CProgCSTVisitor.h"
-#include "Writer.h"
+// ---------------------------------------------------------- C++ System Headers
 #include <iostream>
 #include <string>
 
-CProgCSTVisitor::CProgCSTVisitor(Writer &writer) : writer(writer), tos()
-{
+// ------------------------------------------------------------- Project Headers
+#include "CProgCSTVisitor.h"
+#include "CProgAST.h"
 
-}
+////////////////////////////////////////////////////////////////////////////////
+// class CProgCSTVisitor                                                      //
+////////////////////////////////////////////////////////////////////////////////
 
 antlrcpp::Any CProgCSTVisitor::visitProgram(CProgParser::ProgramContext *ctx)
 {
-    writer.assembly(0) << ".text" << std::endl;
-    return visitChildren(ctx);
+    CProgASTProgram *program = new CProgASTProgram();
+    for(auto funcdef_ctx : ctx->funcdef())
+    {
+        program->add_funcdef(visit(funcdef_ctx).as<CProgASTFuncdef*>());
+    }
+    return program;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
 {
-    writer.assembly(0) << ".global " << ctx->IDENTIFIER()->getText() << std::endl;
-    writer.assembly(0) << ctx->IDENTIFIER()->getText() << ":" << std::endl;
-    writer.assembly(1) << "pushq %rbp" << std::endl;
-    writer.assembly(1) << "movq %rsp, %rbp" << std::endl;
-    return visitChildren(ctx);
+    std::string identifier = ctx->IDENTIFIER()->getText();
+    CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, INT_64);
+    for(auto statement_ctx : ctx->block()->statement())
+    {
+        funcdef->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
+    }
+    return funcdef;
+}
+
+antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx)
+{
+    if(ctx->return_statement() != nullptr)
+    {
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->return_statement()).as<CProgASTReturn*>());
+    }
+    else if(ctx->declaration() != nullptr)
+    {
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->declaration()).as<CProgASTDeclaration*>());
+    }
+    else if(ctx->int_expr() != nullptr)
+    {
+        return dynamic_cast<CProgASTStatement*>(visit(ctx->int_expr()).as<CProgASTExpression*>());
+    }
+    else
+    {
+        std::cerr << "error: empty statement currently not supported" << std::endl;
+    }
 }
 
 antlrcpp::Any CProgCSTVisitor::visitReturn_statement(CProgParser::Return_statementContext *ctx)
 {
-    std::string tmp_res = visit(ctx->int_expr());
-    writer.assembly(1) << "movl " << tos[tmp_res].index << "(%rbp) , %eax" << std::endl;
-    writer.assembly(1) << "popq %rbp" << std::endl;
-    writer.assembly(1) << "ret" << std::endl;
-    return 0; // nothing to return, children were already visited
+    return new CProgASTReturn(visit(ctx->int_expr()).as<CProgASTExpression*>());
 }
 
 antlrcpp::Any CProgCSTVisitor::visitDeclaration(CProgParser::DeclarationContext *ctx)
 {
-    for(auto identifier : ctx->IDENTIFIER())
+    CProgASTDeclaration* declaration = new CProgASTDeclaration(INT_64);
+    for(auto declarator_ctx : ctx->declarator())
     {
-        std::string name = identifier->getText();
-        if(!tos.declared(name))
+        CProgASTIdentifier* identifier = nullptr;
+        CProgASTAssignment* initializer = nullptr;
+        if(declarator_ctx->IDENTIFIER() != nullptr)
         {
-            tos.add_variable(name);
+            identifier = new CProgASTIdentifier(declarator_ctx->IDENTIFIER()->getText());
         }
-    }
-    for(auto assignment : ctx->assignment())
-    {
-        std::string lhs_name = assignment->IDENTIFIER()->getText();
-        if(!tos.declared(lhs_name))
+        else if(declarator_ctx->assignment() != nullptr)
         {
-            tos.add_variable(lhs_name);
+            initializer = visit(declarator_ctx->assignment()).as<CProgASTAssignment*>();
+            identifier = new CProgASTIdentifier(declarator_ctx->assignment()->IDENTIFIER()->getText());
         }
-        visit(assignment);
+        declaration->add_declarator(new CProgASTDeclarator(identifier, initializer));
     }
-    return 0; // nothing to return, children were already visited
+    return declaration;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *ctx)
 {
-    std::string lhs_name = ctx->IDENTIFIER()->getText();
-    if(!tos.declared(lhs_name))
-    {
-        writer.error() << "use of undeclared identifier '" << lhs_name << "'" << std::endl;
-    }
-    std::string rhs_name = visit(ctx->int_expr());
-    tos[lhs_name].initialized = tos[rhs_name].initialized;
-    writer.assembly(1) << "movl " << tos[rhs_name].index << "(%rbp)" << ", %eax" << std::endl;
-    writer.assembly(1) << "movl " << "%eax, " << tos[lhs_name].index << "(%rbp)" << std::endl;
-    return lhs_name;
+    CProgASTIdentifier* identifier = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+    CProgASTExpression* expression = visit(ctx->int_expr()).as<CProgASTExpression*>();
+    return new CProgASTAssignment(identifier, expression);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_expr(CProgParser::Int_exprContext *ctx)
 {
     if(ctx->int_terms() != nullptr)
     {
-        return visit(ctx->int_terms());
+        return visit(ctx->int_terms()).as<CProgASTExpression*>();
     }
-    return visit(ctx->assignment());
+    return dynamic_cast<CProgASTExpression*>(visit(ctx->assignment()).as<CProgASTAssignment*>());
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx)
 {
-    if(ctx->rhs_int_terms().empty())
+    CProgASTExpression* rexpr = visit(ctx->int_factors()).as<CProgASTExpression*>();
+    for(auto rhs_int_terms_ctx : ctx->rhs_int_terms())
     {
-        return visit(ctx->int_factors());
-    }
-    std::string lhs_name = visit(ctx->int_factors());
-    std::string tmp_res = tos.add_tmp_result();
-    writer.assembly(1) << "movl " << tos[lhs_name].index << "(%rbp)" << ", %eax" << std::endl;
-    writer.assembly(1) << "movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
-    tos[tmp_res].initialized = tos[lhs_name].initialized;
-    for(auto term : ctx->rhs_int_terms())
-    {
-        std::string rhs_name = visit(term);
-        writer.assembly(1) << "movl " << tos[rhs_name].index << "(%rbp)" << ", %eax" << std::endl;
-        if(term->OP_ADD() != nullptr)
+        CProgASTExpression* expr = visit(rhs_int_terms_ctx).as<CProgASTExpression*>();
+        if(rhs_int_terms_ctx->OP_ADD() != nullptr)
         {
-            writer.assembly(1) << "addl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
+            rexpr = new CProgASTAddition(rexpr, expr);
         }
-        if(term->OP_SUB() != nullptr)
+        else if(rhs_int_terms_ctx->OP_SUB() != nullptr)
         {
-            writer.assembly(1) << "subl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
-        }
-        if(!tos[rhs_name].initialized)
-        {
-            tos[tmp_res].initialized = false;
+            rexpr = new CProgASTSubtraction(rexpr, expr);
         }
     }
-    return tmp_res;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_terms(CProgParser::Rhs_int_termsContext *ctx)
 {
-    return visit(ctx->int_factors());
+    return visit(ctx->int_factors()).as<CProgASTExpression*>();
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_factors(CProgParser::Int_factorsContext *ctx)
 {
-    if(ctx->rhs_int_factors().empty())
+    CProgASTExpression* rexpr = visit(ctx->int_signed_atom()).as<CProgASTExpression*>();
+    for(auto rhs_int_factors_ctx : ctx->rhs_int_factors())
     {
-        return visit(ctx->int_signed_atom());
-    }
-    std::string lhs_name = visit(ctx->int_signed_atom());
-    std::string tmp_res = tos.add_tmp_result();
-    writer.assembly(1) << "movl " << tos[lhs_name].index << "(%rbp)" << ", %eax" << std::endl;
-    writer.assembly(1) << "movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
-    tos[tmp_res].initialized = tos[lhs_name].initialized;
-    for(auto factor : ctx->rhs_int_factors())
-    {
-        std::string rhs_name = visit(factor);
-        writer.assembly(1) << "movl " << tos[rhs_name].index << "(%rbp)" << ", %eax" << std::endl;
-        if(factor->OP_MUL() != nullptr)
+        CProgASTExpression* expr = visit(rhs_int_factors_ctx).as<CProgASTExpression*>();
+        if(rhs_int_factors_ctx->OP_MUL() != nullptr)
         {
-            writer.assembly(1) << "imull " << tos[tmp_res].index << "(%rbp), %eax" << std::endl;
-            writer.assembly(1) << "movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
+            rexpr = new CProgASTMultiplication(rexpr, expr);
         }
-        if(factor->OP_DIV() != nullptr)
+        else if(rhs_int_factors_ctx->OP_DIV() != nullptr)
         {
-            writer.assembly(1) << "movl %eax, %ebx" << std::endl;
-            writer.assembly(1) << "movl " << tos[tmp_res].index << "(%rbp), %eax" << std::endl;
-            writer.assembly(1) << "cltd" << std::endl;
-            writer.assembly(1) << "idivl %ebx " << std::endl;
-            writer.assembly(1) << "movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
+            rexpr = new CProgASTDivision(rexpr, expr);
         }
-        if(factor->OP_MOD() != nullptr)
+        else if(rhs_int_factors_ctx->OP_MOD() != nullptr)
         {
-            writer.assembly(1) << "movl %eax, %ebx" << std::endl;
-            writer.assembly(1) << "movl " << tos[tmp_res].index << "(%rbp), %eax" << std::endl;
-            writer.assembly(1) << "cltd" << std::endl;
-            writer.assembly(1) << "idivl %ebx" << std::endl;
-            writer.assembly(1) << "movl %edx, " << tos[tmp_res].index << "(%rbp)" << std::endl;
-        }
-        if(!tos[rhs_name].initialized)
-        {
-            tos[tmp_res].initialized = false;
+            rexpr = new CProgASTModulo(rexpr, expr);
         }
     }
-    return tmp_res;
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx)
 {
-    return visit(ctx->int_signed_atom());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
-{
-    if(ctx->INT_LITTERAL() != nullptr)
-    {
-        std::string tmp_res = tos.add_tmp_result();
-        std::string value = ctx->INT_LITTERAL()->getText();
-        writer.assembly(1) << "movl " << "$" << value << ", " << tos[tmp_res].index << "(%rbp)" << std::endl;
-        tos[tmp_res].initialized = true;
-        tos[tmp_res].used = true;
-        return tmp_res;
-    }
-    if(ctx->IDENTIFIER() != nullptr)
-    {
-        std::string id = ctx->IDENTIFIER()->getText();
-        if(!tos.declared(id))
-        {
-            writer.error() << "use of undeclared identifier '" << id << "'" << std::endl;
-        }
-        else
-        {
-            tos[id].used = true;
-            if(!tos[id].initialized)
-            {
-                writer.warning() << "use of uninitialized variable '" << id << "'" << std::endl;
-            }
-        }
-        return id;
-    }
-    return visit(ctx->int_expr());
+    return visit(ctx->int_signed_atom()).as<CProgASTExpression*>();
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atomContext *ctx)
 {
-    if(ctx->OP_SUB() != nullptr) // will lead to an overflow for extreme litteral values
+    CProgASTExpression* rexpr = nullptr;
+    if(ctx->OP_SUB() != nullptr)
     {
-        std::string tmp_res = tos.add_tmp_result();
-        std::string atom_name = visit(ctx->int_signed_atom());
-        writer.assembly(1) << "movl " << tos[atom_name].index << "(%rbp)" << ", %eax" << std::endl;
-        writer.assembly(1) << "imull $-1, %eax" << std::endl;
-        writer.assembly(1) << "movl %eax, " << tos[tmp_res].index << "(%rbp)" << std::endl;
-        tos[tmp_res].initialized = tos[atom_name].initialized;
-        return tmp_res;
+        rexpr = new CProgASTUnaryMinus(visit(ctx->int_signed_atom()).as<CProgASTExpression*>());
     }
-    if(ctx->OP_ADD() != nullptr)
+    else if(ctx->OP_ADD() != nullptr)
     {
-        return visit(ctx->int_signed_atom());
+        rexpr = visit(ctx->int_signed_atom()).as<CProgASTExpression*>();
     }
-    return visit(ctx->int_atom());
+    else if(ctx->int_atom() != nullptr)
+    {
+        rexpr = visit(ctx->int_atom()).as<CProgASTExpression*>();
+    }
+    return dynamic_cast<CProgASTExpression*>(rexpr);
 }
 
+antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
+{
+    CProgASTExpression* rexpr = nullptr;
+    if(ctx->INT_LITERAL() != nullptr)
+    {
+        rexpr = new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText()));
+    }
+    else if(ctx->IDENTIFIER() != nullptr)
+    {
+        rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+    }
+    else if(ctx->int_expr() != nullptr)
+    {
+        rexpr = visit(ctx->int_expr()).as<CProgASTExpression*>();
+    }
+    return dynamic_cast<CProgASTExpression*>(rexpr);
+}

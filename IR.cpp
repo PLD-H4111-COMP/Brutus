@@ -1,6 +1,14 @@
 #include "IR.h"
 #include "Writer.h"
 
+std::map<Type, int> VarType::VAR_TYPE_SIZE = { {INT_64, 8} };
+std::map<Type, std::string> VarType::VAR_TYPE_NAME = { {INT_64, "int_64"} };
+
+std::ostream& operator<<(std::ostream& os, const VarType& varType)
+{
+    return os << VarType::VAR_TYPE_NAME[varType.type];
+}
+
 // ****************************************************************************
 
 std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
@@ -180,7 +188,7 @@ VarType CFG::get_var_type(std::string name){
     return SymbolType[name];
 }
 
-CFG::CFG(DefFonction* funcAst) : ast(funcAst), nextFreeSymbolIndex(0), nextBBnumber(0) {
+CFG::CFG(const CProgASTFuncdef* fundcef) : ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0) {
     bbs.push_back(new BasicBlock(this, "input"));
     bbs.push_back(new BasicBlock(this, "output"));
 }
