@@ -31,7 +31,7 @@ antlr_target(CProg CProg.g4 VISITOR)
 # include generated files in project environment
 include_directories(${ANTLR_CProg_OUTPUT_DIR})
 # add generated grammar to Brutus binary target
-add_executable(Brutus main.cpp CProgCSTVisitor.cpp Options.cpp Writer.cpp
+add_executable(Brutus main.cpp CProgCSTVisitor.cpp Options.cpp Writer.cpp IR.cpp CProgAST.cpp
                ${ANTLR_CProg_CXX_OUTPUTS})
 target_link_libraries(Brutus antlr4_static)
 add_custom_command(TARGET Brutus POST_BUILD
