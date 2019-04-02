@@ -243,7 +243,7 @@ CFG::CFG(const CProgASTFuncdef* fundcef) :
 
 std::string CFG::new_BB_name()
 {
-    std::string newName = "block_" + std::to_string(nextBBnumber++);
+    return "block_" + std::to_string(nextBBnumber++);
 }
 
 
