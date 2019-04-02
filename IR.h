@@ -1,17 +1,22 @@
-#ifndef IR_H
-#define IR_H
+#pragma once
 
-#include <vector>
-#include <string>
+// ---------------------------------------------------------- C++ System Headers
 #include <iostream>
 #include <map>
-#include <initializer_list>
+#include <string>
+#include <vector>
+
+////////////////////////////////////////////////////////////////////////////////
+// Forward Declarations                                                       //
+////////////////////////////////////////////////////////////////////////////////
 
 class CProgASTFuncdef;
 class BasicBlock;
 class CFG;
 
-// ****************************************************************************
+////////////////////////////////////////////////////////////////////////////////
+// class VarType                                                              //
+////////////////////////////////////////////////////////////////////////////////
 
 enum Type { INT_64 };
 
@@ -30,8 +35,17 @@ private:
     static std::map<Type, std::string> VAR_TYPE_NAME; /* names of the types */
 };
 
-// ****************************************************************************
+struct TypeProperties {
+    TypeProperties(size_t size, std::string name);
+    const size_t size;
+    const std::string name;
+};
 
+extern std::map<Type, const TypeProperties> types;
+
+////////////////////////////////////////////////////////////////////////////////
+// class IRInstr                                                              //
+////////////////////////////////////////////////////////////////////////////////
 
 //! The class for one 3-address instruction
 class IRInstr {
@@ -63,7 +77,7 @@ public:
     void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
 
     void print();
-    
+
 private:
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
@@ -74,24 +88,22 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op);
 
-
-// ****************************************************************************
-
-
-
+////////////////////////////////////////////////////////////////////////////////
+// class BasicBlock                                                           //
+////////////////////////////////////////////////////////////////////////////////
 
 /**  The class for a basic block */
 
 /* A few important comments.
      IRInstr has no jump instructions:
      assembly jumps are generated as follows in BasicBlock::gen_asm():
-     1/ a cmp_* comparison instructions, if it is the last instruction of its block, 
+     1/ a cmp_* comparison instructions, if it is the last instruction of its block,
        generates an actual assembly comparison followed by a conditional jump to the exit_false branch
              If it is not the last instruction of its block, it behaves as an arithmetic two-operand instruction (add or mult)
-         2/ BasicBlock::gen_asm() first calls IRInstr::gen_asm() on all its instructions, and then 
+         2/ BasicBlock::gen_asm() first calls IRInstr::gen_asm() on all its instructions, and then
             if  exit_true  is a  nullptr, it generates the epilogue
-                if  exit_false is not a nullptr, and the last instruction is not a cmp, it generates two conditional branches based on the value of the last variable assigned 
-        otherwise it generates an unconditional jmp to the exit_true branch 
+                if  exit_false is not a nullptr, and the last instruction is not a cmp, it generates two conditional branches based on the value of the last variable assigned
+        otherwise it generates an unconditional jmp to the exit_true branch
 */
 
 class BasicBlock {
@@ -115,9 +127,9 @@ protected:
 
 };
 
-
-// ****************************************************************************
-
+////////////////////////////////////////////////////////////////////////////////
+// class CFG                                                                  //
+////////////////////////////////////////////////////////////////////////////////
 
 /** The class for the control flow graph, also includes the symbol table */
 
@@ -164,8 +176,9 @@ protected:
     std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
 
-// ****************************************************************************
-
+////////////////////////////////////////////////////////////////////////////////
+// class IRStore                                                              //
+////////////////////////////////////////////////////////////////////////////////
 
 class IRStore {
 public :
@@ -176,5 +189,3 @@ public :
 private :
     std::vector<CFG*> cfgs;
 };
-
-#endif
