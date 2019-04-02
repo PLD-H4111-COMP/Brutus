@@ -20,14 +20,14 @@ public:
     VarType() = default;
     VarType(Type t) : type(t) {}
     inline int size() { return VAR_TYPE_SIZE[type]; }
-    virtual ~VarType() = default;
 
-    VarType& operator=(const VarType& src) {
-        type = src.type;
-    }
+    VarType& operator=(const VarType& src) = default;
+
+    friend std::ostream& operator<<(std::ostream& os, const VarType& varType);
 private:
     Type type;
     static std::map<Type, int> VAR_TYPE_SIZE; /* number of bytes for each var */
+    static std::map<Type, std::string> VAR_TYPE_NAME; /* names of the types */
 };
 
 // ****************************************************************************
@@ -60,8 +60,10 @@ public:
     IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params);
 
     /** Actual code generation */
-    void gen_asm(std::ostream &o); /**< x86 assembly code generation for this IR instruction */
+    void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
 
+    void print();
+    
 private:
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
@@ -69,6 +71,8 @@ private:
     std::vector<std::string> params; /**< For 3-op instrs: d, x, y; for ldconst: d, c;  For call: label, d, params;  for wmem and rmem: choose yourself */
     // if you subclass IRInstr, each IRInstr subclass has its parameters and the previous (very important) comment becomes useless: it would be a better design.
 };
+
+std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op);
 
 
 // ****************************************************************************
@@ -79,15 +83,15 @@ private:
 /**  The class for a basic block */
 
 /* A few important comments.
-IRInstr has no jump instructions:
-assembly jumps are generated as follows in BasicBlock::gen_asm():
-1/ a cmp_* comparison instructions, if it is the last instruction of its block,
-generates an actual assembly comparison followed by a conditional jump to the exit_false branch
-If it is not the last instruction of its block, it behaves as an arithmetic two-operand instruction (add or mult)
-2/ BasicBlock::gen_asm() first calls IRInstr::gen_asm() on all its instructions, and then
-if  exit_true  is a  nullptr, it generates the epilogue
-if  exit_false is not a nullptr, and the last instruction is not a cmp, it generates two conditional branches based on the value of the last variable assigned
-otherwise it generates an unconditional jmp to the exit_true branch
+     IRInstr has no jump instructions:
+     assembly jumps are generated as follows in BasicBlock::gen_asm():
+     1/ a cmp_* comparison instructions, if it is the last instruction of its block, 
+       generates an actual assembly comparison followed by a conditional jump to the exit_false branch
+             If it is not the last instruction of its block, it behaves as an arithmetic two-operand instruction (add or mult)
+         2/ BasicBlock::gen_asm() first calls IRInstr::gen_asm() on all its instructions, and then 
+            if  exit_true  is a  nullptr, it generates the epilogue
+                if  exit_false is not a nullptr, and the last instruction is not a cmp, it generates two conditional branches based on the value of the last variable assigned 
+        otherwise it generates an unconditional jmp to the exit_true branch 
 */
 
 class BasicBlock {
@@ -97,6 +101,8 @@ public:
     void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
     void add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params);
+
+    void print();
 
     // No encapsulation whatsoever here. Feel free to do better.
     BasicBlock* exit_true;  /**< pointer to the next basic block, true branch. If nullptr, return from procedure */
@@ -116,10 +122,10 @@ protected:
 /** The class for the control flow graph, also includes the symbol table */
 
 /* A few important comments:
-The entry block is the one with the same label as the AST function name.
-(it could be the first of bbs, or it could be defined by an attribute value)
-The exit block is the one with both exit pointers equal to nullptr.
-(again it could be identified in a more explicit way)
+     The entry block is the one with the same label as the AST function name.
+       (it could be the first of bbs, or it could be defined by an attribute value)
+     The exit block is the one with both exit pointers equal to nullptr.
+     (again it could be identified in a more explicit way)
 
 */
 class CFG {
@@ -140,6 +146,8 @@ public:
     int get_var_index(std::string name);
     VarType get_var_type(std::string name);
 
+    void print();
+    void printVariables();
 
     const CProgASTFuncdef* ast; /**< The AST this CFG comes from */
 
@@ -150,8 +158,6 @@ public:
 protected:
     std::map <std::string, VarType> SymbolType; /**< part of the symbol table  */
     std::map <std::string, int> SymbolIndex; /**< part of the symbol table  */
-    //std::map <std::string, int> SymbolDeclared; /**< part of the symbol table  */
-    //std::map <std::string, int> SymbolUsed; /**< part of the symbol table  */
     int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
     int nextBBnumber; /**< just for naming */
 
@@ -162,13 +168,13 @@ protected:
 
 
 class IRStore {
-    public :
+public :
     IRStore();
     virtual ~IRStore();
     void add_cfg(CFG* cfg);
-    private :
+    void print_IR();
+private :
     std::vector<CFG*> cfgs;
 };
-
 
 #endif
