@@ -8,6 +8,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # compiler must be 11 or 14
 set(CMAKE_CXX_STANDARD 11)
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+    add_definitions("-Wall -Wextra")
+endif()
+
 # required if linking to static library
 add_definitions(-DANTLR4CPP_STATIC)
 
