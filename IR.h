@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +16,7 @@ class BasicBlock;
 class CFG;
 
 ////////////////////////////////////////////////////////////////////////////////
-// class Type                                                              //
+// enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
 enum Type { INT_64, INT_32, INT_16, CHAR };
@@ -30,7 +31,42 @@ struct TypeProperties {
     const std::string name;
 };
 
-extern std::map<Type, const TypeProperties> types;
+extern std::unordered_map<Type, const TypeProperties> types;
+
+////////////////////////////////////////////////////////////////////////////////
+// class TableOfSymbols                                                       //
+////////////////////////////////////////////////////////////////////////////////
+
+struct SymbolProperties {
+    // ------------------------------------------------------------- Constructor
+    SymbolProperties() = default;
+    SymbolProperties(Type type, int index, bool initialized = false, bool used = false);
+
+    // ------------------------------------------------------- Public Properties
+    Type type;
+    int index;
+    bool initialized;
+    bool used;
+    // BasicBlock* scope;
+};
+
+class TableOfSymbols {
+public:
+    // ------------------------------------------------------------- Constructor
+    TableOfSymbols();
+
+    // ------------------------------------------------- Public Member Functions
+    std::string add_tmp_var(Type type);
+    void add_symbol(std::string identifier, Type type);
+    bool is_declared(std::string identifier) const;
+    const SymbolProperties& get_symbol(std::string identifier) const;
+
+    void print_debug_infos() const;
+protected:
+    std::unordered_map<std::string, SymbolProperties> symbols;
+    int next_free_symbol_index;
+    int next_tmp_var_id;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // class IRInstr                                                              //
@@ -111,9 +147,6 @@ public:
     std::string label; /**< label of the BB, also will be the label in the generated code */
     CFG* cfg; /** < the CFG where this block belongs */
     std::vector<IRInstr*> instrs; /** < the instructions themselves. */
-protected:
-
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,8 +175,8 @@ public:
     void gen_asm_epilogue(std::ostream& o);
 
     // symbol table methods
-    void add_to_symbol_table(std::string name, Type t);
-    std::string create_new_tempvar(Type t);
+    void add_to_symbol_table(std::string name, Type type);
+    std::string create_new_tempvar(Type type);
     int get_var_index(std::string name);
     Type get_var_type(std::string name);
 
@@ -157,11 +190,8 @@ public:
     BasicBlock* current_bb;
 
 protected:
-    std::map <std::string, Type> SymbolType; /**< part of the symbol table  */
-    std::map <std::string, int> SymbolIndex; /**< part of the symbol table  */
-    int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
+    TableOfSymbols symbols;
     int nextBBnumber; /**< just for naming */
-
     std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
 

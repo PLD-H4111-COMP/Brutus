@@ -352,7 +352,7 @@ std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
 {
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     std::string literal_str = std::to_string(value);
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {tmp_name, literal_str});
+    cfg->current_bb->add_IRInstr(IRInstr::ldconst, INT_64, {tmp_name, literal_str});
     return tmp_name;
 }
 

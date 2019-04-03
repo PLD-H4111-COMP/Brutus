@@ -4,25 +4,73 @@
 
 // ---------------------------------------------------------- C++ System Headers
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-// class Type                                                              //
+// enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
 TypeProperties::TypeProperties(size_t size, std::string name) :
     size(size), name(name)
 {}
 
-std::map<Type, const TypeProperties> types
+std::unordered_map<Type, const TypeProperties> types
 {
     { INT_64,   TypeProperties(8, "int64_t") },
     { INT_32,   TypeProperties(4, "int32_t") },
     { INT_16,   TypeProperties(2, "int16_t") },
     { CHAR,     TypeProperties(1, "char") }
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// class TableOfSymbols                                                       //
+////////////////////////////////////////////////////////////////////////////////
+
+// ----------------------------------------------------------------- Constructor
+SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool used) :
+    type(type), index(index), initialized(initialized), used(used)
+{}
+
+// ----------------------------------------------------------------- Constructor
+TableOfSymbols::TableOfSymbols() :
+    next_free_symbol_index(0), next_tmp_var_id(0)
+{}
+
+// ----------------------------------------------------- Public Member Functions
+std::string TableOfSymbols::add_tmp_var(Type type)
+{
+    std::string name = "!tmp" + std::to_string(next_tmp_var_id);
+    symbols[name] = SymbolProperties(type, next_free_symbol_index);
+    next_free_symbol_index -= types.at(type).size;
+    next_tmp_var_id++;
+    return name;
+}
+
+void TableOfSymbols::add_symbol(std::string identifier, Type type)
+{
+    symbols[identifier] = SymbolProperties(type, next_free_symbol_index);
+    next_free_symbol_index -= types.at(type).size;
+}
+
+bool TableOfSymbols::is_declared(std::string identifier) const
+{
+    return symbols.find(identifier) != symbols.end();
+}
+
+const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
+{
+    return symbols.at(identifier);
+}
+
+void TableOfSymbols::print_debug_infos() const
+{
+    for(auto p : symbols)
+    {
+        std::clog << "Nom variable : " << p.first << ", Type : " << p.second.type << ", Index : " << p.second.index << std::endl;
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // class IRInstr                                                              //
@@ -235,16 +283,16 @@ void CFG::gen_asm_epilogue(std::ostream& o)
 
 int CFG::get_var_index(std::string name)
 {
-    return SymbolIndex[name];
+    return symbols.get_symbol(name).index;
 }
 
 Type CFG::get_var_type(std::string name)
 {
-    return SymbolType[name];
+    return symbols.get_symbol(name).type;
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef) :
-    ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0)
+    ast(fundcef)
 {
     bbs.push_back(new BasicBlock(this, "input"));
     current_bb = new BasicBlock(this, "first_bb");
@@ -264,20 +312,14 @@ void CFG::add_bb(BasicBlock* bb)
     bbs.insert(bbs.end()-1, bb);
 }
 
-void CFG::add_to_symbol_table(std::string name, Type t)
+void CFG::add_to_symbol_table(std::string name, Type type)
 {
-    SymbolType[name] = t;
-    SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= types.at(t).size;
+    symbols.add_symbol(name, type);
 }
 
-std::string CFG::create_new_tempvar(Type t)
+std::string CFG::create_new_tempvar(Type type)
 {
-    std::string name = "!temp" + std::to_string(nextFreeSymbolIndex);
-    SymbolType[name] = t;
-    SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= types.at(t).size;
-    return name;
+    return symbols.add_tmp_var(type);
 }
 
 void CFG::print()
@@ -290,10 +332,7 @@ void CFG::print()
 
 void CFG::printVariables()
 {
-    for (auto it = SymbolType.begin(); it!=SymbolType.end(); ++it)
-    {
-        std::clog << "Nom variable : " << it->first << ", Type : " << it->second << ", Valeur : " << SymbolIndex[it->first] << std::endl;
-    }
+    symbols.print_debug_infos();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
