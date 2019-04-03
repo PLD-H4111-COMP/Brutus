@@ -173,6 +173,7 @@ public :
     virtual ~IRStore();
     void add_cfg(CFG* cfg);
     void print_IR();
+    void gen_asm(std::ostream& o);
 private :
     std::vector<CFG*> cfgs;
 };
