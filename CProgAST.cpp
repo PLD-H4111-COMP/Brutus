@@ -186,8 +186,9 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     {
         // error
     }
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {"%eax", init});
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, "%eax"});
+    // Soucis ici
+    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, init});
+    return name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -212,6 +213,7 @@ std::string CProgASTAddition::build_ir(CFG* cfg) const
     std::string rhs_name = rhs_operand->build_ir(cfg);
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     cfg->current_bb->add_IRInstr(IRInstr::add, INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,6 +238,7 @@ std::string CProgASTSubtraction::build_ir(CFG* cfg) const
     std::string rhs_name = rhs_operand->build_ir(cfg);
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     cfg->current_bb->add_IRInstr(IRInstr::sub, INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -260,6 +263,7 @@ std::string CProgASTMultiplication::build_ir(CFG* cfg) const
     std::string rhs_name = rhs_operand->build_ir(cfg);
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     cfg->current_bb->add_IRInstr(IRInstr::mul, INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -284,6 +288,7 @@ std::string CProgASTDivision::build_ir(CFG* cfg) const
     std::string rhs_name = rhs_operand->build_ir(cfg);
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     cfg->current_bb->add_IRInstr(IRInstr::div, INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +313,7 @@ std::string CProgASTModulo::build_ir(CFG* cfg) const
     std::string rhs_name = rhs_operand->build_ir(cfg);
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     cfg->current_bb->add_IRInstr(IRInstr::mod, INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -347,7 +353,7 @@ std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
 {
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     std::string literal_str = std::to_string(value);
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {tmp_name, literal_str});
+    cfg->current_bb->add_IRInstr(IRInstr::ldconst, INT_64, {tmp_name, literal_str});
     return tmp_name;
 }
 
@@ -378,3 +384,4 @@ std::string CProgASTIdentifier::build_ir(CFG* cfg) const
     }*/
     return name;
 }
+

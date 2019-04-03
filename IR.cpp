@@ -250,7 +250,7 @@ void CFG::print() {
 
 void CFG::printVariables(){
     for (std::map<std::string, VarType>::iterator it = SymbolType.begin(); it!=SymbolType.end(); ++it){
-        std::clog << "Nom variable : " << it->first << ", Type : " << it->second << ", Valeur : " << SymbolIndex[it->first] << std::endl;
+        std::clog << "Nom variable : " << it->first << ", Type : " << it->second << ", Offset : " << SymbolIndex[it->first] << std::endl;
     }
 }
 
@@ -277,6 +277,9 @@ void IRStore::print_IR(){
     for (CFG* cfg : cfgs){
         std::clog << "CFG " << i << " : " << std::endl;
         cfg->print();
+        std::clog << std::endl;
+        cfg->printVariables();
+        std::clog << std::endl;
         ++i;
     }
 }
