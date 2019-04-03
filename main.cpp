@@ -53,9 +53,13 @@ int main(int argc, char **argv)
     CProgCSTVisitor visitor;
     CProgASTProgram *ast = nullptr;
     ast = (CProgASTProgram*) visitor.visit(tree);
-    for(CFG* cfg : ast->build_ir())
-    {
-        cfg->print();
-    }
+
+    IRStore irStore;
+
+    ast->build_ir(irStore);
+
+    irStore.print_IR();
+    irStore.gen_asm(cout);
+    
     return 0;
 }

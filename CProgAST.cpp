@@ -27,14 +27,12 @@ void CProgASTProgram::add_funcdef(CProgASTFuncdef* funcdef)
     funcdefs.push_back(funcdef);
 }
 
-std::vector<CFG*> CProgASTProgram::build_ir() const
+void CProgASTProgram::build_ir(IRStore& irStore) const
 {
-    std::vector<CFG*> ir;
     for(CProgASTFuncdef* funcdef : funcdefs)
     {
-        ir.push_back(funcdef->build_ir());
+        irStore.add_cfg(funcdef->build_ir());
     }
-    return ir;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
