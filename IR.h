@@ -35,6 +35,7 @@ private:
     static std::map<Type, std::string> VAR_TYPE_NAME; /* names of the types */
 };
 
+/*
 struct TypeProperties {
     TypeProperties(size_t size, std::string name);
     const size_t size;
@@ -42,6 +43,7 @@ struct TypeProperties {
 };
 
 extern std::map<Type, const TypeProperties> types;
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // class IRInstr                                                              //

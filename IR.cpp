@@ -79,12 +79,18 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::cmp_le:
             operation = "cmp_le";
         break;
+        case IRInstr::Operation::ret:
+            operation = "ret";
+        break;
+        case IRInstr::Operation::neg:
+            operation = "neg";
+        break;
     }
     return os << operation;
 }
 
 IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params) :
-    bb(bb), op(op), params(params)
+    bb(bb), op(op), t(t), params(params)
 {}
 
 void IRInstr::gen_asm(std::ostream& os)
@@ -140,6 +146,12 @@ void IRInstr::gen_asm(std::ostream& os)
 
         break;
         case Operation::cmp_le:
+
+        break;
+        case Operation::ret:
+
+        break;
+        case Operation::neg:
 
         break;
     }
@@ -238,6 +250,8 @@ CFG::CFG(const CProgASTFuncdef* fundcef) :
 {
     bbs.push_back(new BasicBlock(this, "input"));
     bbs.push_back(new BasicBlock(this, "output"));
+    current_bb = new BasicBlock(this, new_BB_name()); // debug
+    add_bb(current_bb);
 }
 
 
