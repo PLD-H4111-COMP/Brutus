@@ -186,8 +186,7 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     {
         // error
     }
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {"%eax", init});
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, "%eax"});
+    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, init});
     return name;
 }
 
