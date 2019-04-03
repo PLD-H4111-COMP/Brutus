@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+// ------------------------------------------------------------- Project Headers
 #include "IR.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,25 +21,10 @@ class CProgASTIntLiteral;
 class CProgASTAssignment;
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTNode                                                         //
+// class CProgAST                                                             //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTNode {
-public:
-    // ------------------------------------------------ Constructor / Destructor
-    CProgASTNode() = default;
-    CProgASTNode(const CProgASTNode& src) = delete;
-    virtual ~CProgASTNode() = default;
-
-    // ---------------------------------------------------- Overloaded Operators
-    CProgASTNode& operator=(const CProgASTNode& src) = delete;
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// class CProgAST : public CProgASTNode                                       //
-////////////////////////////////////////////////////////////////////////////////
-
-class CProgASTProgram : public CProgASTNode {
+class CProgASTProgram {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTProgram() = default;
@@ -56,10 +42,10 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTFuncdef : public CProgASTNode                                //
+// class CProgASTFuncdef                                                      //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTFuncdef : public CProgASTNode {
+class CProgASTFuncdef {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTFuncdef(std::string id, Type type);
@@ -79,10 +65,10 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTStatement : public CProgASTNode                              //
+// class CProgASTStatement                                                    //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTStatement : public CProgASTNode {
+class CProgASTStatement {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTStatement() = default;
@@ -139,10 +125,10 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class CProgASTDeclarator : public CProgASTNode                             //
+// class CProgASTDeclarator                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
-class CProgASTDeclarator : public CProgASTNode {
+class CProgASTDeclarator {
 public:
     // ------------------------------------------------ Constructor / Destructor
     CProgASTDeclarator(CProgASTIdentifier* id, CProgASTAssignment* init);

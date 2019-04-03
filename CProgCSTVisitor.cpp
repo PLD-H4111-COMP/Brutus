@@ -35,19 +35,20 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
 {
     if(ctx->return_statement() != nullptr)
     {
-        return dynamic_cast<CProgASTStatement*>(visit(ctx->return_statement()).as<CProgASTReturn*>());
+        return static_cast<CProgASTStatement*>(visit(ctx->return_statement()).as<CProgASTReturn*>());
     }
     else if(ctx->declaration() != nullptr)
     {
-        return dynamic_cast<CProgASTStatement*>(visit(ctx->declaration()).as<CProgASTDeclaration*>());
+        return static_cast<CProgASTStatement*>(visit(ctx->declaration()).as<CProgASTDeclaration*>());
     }
     else if(ctx->int_expr() != nullptr)
     {
-        return dynamic_cast<CProgASTStatement*>(visit(ctx->int_expr()).as<CProgASTExpression*>());
+        return static_cast<CProgASTStatement*>(visit(ctx->int_expr()).as<CProgASTExpression*>());
     }
     else
     {
         std::cerr << "error: empty statement currently not supported" << std::endl;
+        return nullptr;
     }
 }
 
@@ -90,7 +91,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_expr(CProgParser::Int_exprContext *ctx)
     {
         return visit(ctx->int_terms()).as<CProgASTExpression*>();
     }
-    return dynamic_cast<CProgASTExpression*>(visit(ctx->assignment()).as<CProgASTAssignment*>());
+    return static_cast<CProgASTExpression*>(visit(ctx->assignment()).as<CProgASTAssignment*>());
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx)
@@ -108,7 +109,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx
             rexpr = new CProgASTSubtraction(rexpr, expr);
         }
     }
-    return dynamic_cast<CProgASTExpression*>(rexpr);
+    return static_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_terms(CProgParser::Rhs_int_termsContext *ctx)
@@ -135,7 +136,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_factors(CProgParser::Int_factorsContext 
             rexpr = new CProgASTModulo(rexpr, expr);
         }
     }
-    return dynamic_cast<CProgASTExpression*>(rexpr);
+    return static_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx)
@@ -158,7 +159,7 @@ antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atom
     {
         rexpr = visit(ctx->int_atom()).as<CProgASTExpression*>();
     }
-    return dynamic_cast<CProgASTExpression*>(rexpr);
+    return static_cast<CProgASTExpression*>(rexpr);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
@@ -176,5 +177,5 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
     {
         rexpr = visit(ctx->int_expr()).as<CProgASTExpression*>();
     }
-    return dynamic_cast<CProgASTExpression*>(rexpr);
+    return static_cast<CProgASTExpression*>(rexpr);
 }
