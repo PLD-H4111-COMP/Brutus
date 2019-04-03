@@ -21,7 +21,7 @@ CProgASTProgram::~CProgASTProgram()
     }
 }
 
-// ------------------------------------------------------ Public Member Funcions
+// ----------------------------------------------------- Public Member Functions
 void CProgASTProgram::add_funcdef(CProgASTFuncdef* funcdef)
 {
     funcdefs.push_back(funcdef);
@@ -86,7 +86,7 @@ CProgASTReturn::~CProgASTReturn()
 std::string CProgASTReturn::build_ir(CFG* cfg) const
 {
     std::string rval = return_expression->build_ir(cfg);
-    cfg->current_bb->add_IRInstr(IRInstr::ret, VarType(INT_64), {rval});
+    cfg->current_bb->add_IRInstr(IRInstr::ret, INT_64, {rval});
     return ""; // ??
 }
 

@@ -9,30 +9,20 @@
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
-// class VarType                                                              //
+// class Type                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
-std::map<Type, int> VarType::VAR_TYPE_SIZE = { {INT_64, 8} };
-std::map<Type, std::string> VarType::VAR_TYPE_NAME = { {INT_64, "int_64"} };
-
-std::ostream& operator<<(std::ostream& os, const VarType& varType)
-{
-    return os << VarType::VAR_TYPE_NAME[varType.type];
-}
-
-/*
 TypeProperties::TypeProperties(size_t size, std::string name) :
     size(size), name(name)
 {}
 
-std::map<Type, const TypeProperties> types =
+std::map<Type, const TypeProperties> types
 {
     { INT_64,   TypeProperties(8, "int64_t") },
     { INT_32,   TypeProperties(4, "int32_t") },
     { INT_16,   TypeProperties(2, "int16_t") },
     { CHAR,     TypeProperties(1, "char") }
 };
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // class IRInstr                                                              //
@@ -89,7 +79,7 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
     return os << operation;
 }
 
-IRInstr::IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params) :
+IRInstr::IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> params) :
     bb(bb), op(op), t(t), params(params)
 {}
 
@@ -130,7 +120,7 @@ void IRInstr::gen_asm(std::ostream& os)
             os << "movl %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::neg:
-            
+
         break;
         case Operation::rmem:
             os << "movl " << bb->cfg->get_var_index(params[1]) << "%(rbp), %eax" << std::endl;
@@ -141,16 +131,16 @@ void IRInstr::gen_asm(std::ostream& os)
             os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp), (%eax)" << std::endl;
         break;
         case Operation::call:
-            
+
         break;
         case Operation::cmp_eq:
-            
+
         break;
         case Operation::cmp_lt:
-            
+
         break;
         case Operation::cmp_le:
-            
+
         break;
         case Operation::ret:
             os << "movl " << bb->cfg->get_var_index(params[0]) << "(%rbp), %eax" << std::endl;
@@ -201,7 +191,7 @@ void BasicBlock::gen_asm(std::ostream &o)
     }
 }
 
-void BasicBlock::add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params)
+void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params)
 {
     instrs.push_back(new IRInstr(this, op, t, params));
 }
@@ -248,7 +238,7 @@ int CFG::get_var_index(std::string name)
     return SymbolIndex[name];
 }
 
-VarType CFG::get_var_type(std::string name)
+Type CFG::get_var_type(std::string name)
 {
     return SymbolType[name];
 }
@@ -274,19 +264,19 @@ void CFG::add_bb(BasicBlock* bb)
     bbs.insert(bbs.end()-1, bb);
 }
 
-void CFG::add_to_symbol_table(std::string name, VarType t)
+void CFG::add_to_symbol_table(std::string name, Type t)
 {
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= t.size();
+    nextFreeSymbolIndex -= types.at(t).size;
 }
 
-std::string CFG::create_new_tempvar(VarType t)
+std::string CFG::create_new_tempvar(Type t)
 {
     std::string name = "!temp" + std::to_string(nextFreeSymbolIndex);
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= t.size();
+    nextFreeSymbolIndex -= types.at(t).size;
     return name;
 }
 
@@ -311,7 +301,7 @@ void CFG::printVariables()
 ////////////////////////////////////////////////////////////////////////////////
 
 IRStore::IRStore() {
-    
+
 }
 
 void IRStore::add_cfg(CFG* cfg)
@@ -344,4 +334,3 @@ void IRStore::gen_asm(std::ostream& o){
         cfg->gen_asm(o);
     }
 }
-

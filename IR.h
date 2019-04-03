@@ -15,35 +15,22 @@ class BasicBlock;
 class CFG;
 
 ////////////////////////////////////////////////////////////////////////////////
-// class VarType                                                              //
+// class Type                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
-enum Type { INT_64 };
+enum Type { INT_64, INT_32, INT_16, CHAR };
 
-class VarType {
-public:
-    VarType() = default;
-    VarType(Type t) : type(t) {}
-    inline int size() { return VAR_TYPE_SIZE[type]; }
-
-    VarType& operator=(const VarType& src) = default;
-
-    friend std::ostream& operator<<(std::ostream& os, const VarType& varType);
-private:
-    Type type;
-    static std::map<Type, int> VAR_TYPE_SIZE; /* number of bytes for each var */
-    static std::map<Type, std::string> VAR_TYPE_NAME; /* names of the types */
-};
-
-/*
 struct TypeProperties {
+    // ------------------------------------------------------------- Constructor
+    TypeProperties() = delete;
     TypeProperties(size_t size, std::string name);
+
+    // ------------------------------------------------------- Public Properties
     const size_t size;
     const std::string name;
 };
 
 extern std::map<Type, const TypeProperties> types;
-*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // class IRInstr                                                              //
@@ -73,7 +60,7 @@ public:
 
 
     /**  constructor */
-    IRInstr(BasicBlock* bb, Operation op, VarType t, std::vector<std::string> params);
+    IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> params);
 
     /** Actual code generation */
     void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
@@ -83,7 +70,7 @@ public:
 private:
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
-    VarType t;
+    Type t;
     std::vector<std::string> params; /**< For 3-op instrs: d, x, y; for ldconst: d, c;  For call: label, d, params;  for wmem and rmem: choose yourself */
     // if you subclass IRInstr, each IRInstr subclass has its parameters and the previous (very important) comment becomes useless: it would be a better design.
 };
@@ -114,7 +101,7 @@ public:
     virtual ~BasicBlock();
     void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
 
-    void add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params);
+    void add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params);
 
     void print();
 
@@ -155,10 +142,10 @@ public:
     void gen_asm_epilogue(std::ostream& o);
 
     // symbol table methods
-    void add_to_symbol_table(std::string name, VarType t);
-    std::string create_new_tempvar(VarType t);
+    void add_to_symbol_table(std::string name, Type t);
+    std::string create_new_tempvar(Type t);
     int get_var_index(std::string name);
-    VarType get_var_type(std::string name);
+    Type get_var_type(std::string name);
 
     void print();
     void printVariables();
@@ -170,7 +157,7 @@ public:
     BasicBlock* current_bb;
 
 protected:
-    std::map <std::string, VarType> SymbolType; /**< part of the symbol table  */
+    std::map <std::string, Type> SymbolType; /**< part of the symbol table  */
     std::map <std::string, int> SymbolIndex; /**< part of the symbol table  */
     int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
     int nextBBnumber; /**< just for naming */
