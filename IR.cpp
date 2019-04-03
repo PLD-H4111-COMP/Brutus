@@ -4,8 +4,8 @@
 
 // ---------------------------------------------------------- C++ System Headers
 #include <iostream>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +200,7 @@ void IRInstr::gen_asm(std::ostream& os)
     os << std::endl;
 }
 
-void IRInstr::print()
+void IRInstr::print_debug_infos() const
 {
     std::clog << "Type de retour : " << t << ", Operation : " << op << std::endl;
     std::clog << "Parametres : ";
@@ -244,13 +244,13 @@ void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::str
     instrs.push_back(new IRInstr(this, op, t, params));
 }
 
-void BasicBlock::print()
+void BasicBlock::print_debug_infos() const
 {
     std::clog << "Basic Bloc : " << label << std::endl;
     // Amelioration : ajouter les noms des blocs suivants (exit_true, exit_false)
     for (IRInstr* instr : instrs)
     {
-        instr->print();
+        instr->print_debug_infos();
     }
 }
 
@@ -322,15 +322,15 @@ std::string CFG::create_new_tempvar(Type type)
     return symbols.add_tmp_var(type);
 }
 
-void CFG::print()
+void CFG::print_debug_infos() const
 {
     for (BasicBlock* bb : bbs)
     {
-        bb->print();
+        bb->print_debug_infos();
     }
 }
 
-void CFG::printVariables()
+void CFG::print_debug_infos_variables() const
 {
     symbols.print_debug_infos();
 }
@@ -339,16 +339,7 @@ void CFG::printVariables()
 // class IRStore                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
-IRStore::IRStore() {
-
-}
-
-void IRStore::add_cfg(CFG* cfg)
-{
-	cfgs.push_back(cfg);
-}
-
-IRStore::~IRStore()
+IR::~IR()
 {
     for (CFG* cfg : cfgs)
     {
@@ -356,20 +347,24 @@ IRStore::~IRStore()
     }
 }
 
-void IRStore::print_IR()
+void IR::add_cfg(CFG* cfg)
 {
-    int i = 0;
-    std::clog << "Affichage de l'IR : " << std::endl;
+	cfgs.push_back(cfg);
+}
+
+void IR::gen_asm(std::ostream& o){
     for (CFG* cfg : cfgs)
     {
-        std::clog << "CFG " << i << " : " << std::endl;
-        cfg->print();
-        ++i;
+        cfg->gen_asm(o);
     }
 }
 
-void IRStore::gen_asm(std::ostream& o){
-    for (CFG* cfg : cfgs){
-        cfg->gen_asm(o);
+void IR::print_debug_infos() const
+{
+    std::clog << "Affichage de l'IR : " << std::endl;
+    for (size_t i=0; i<cfgs.size(); ++i)
+    {
+        std::clog << "CFG " << i << " : " << std::endl;
+        cfgs[i]->print_debug_infos();
     }
 }

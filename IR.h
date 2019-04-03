@@ -101,7 +101,7 @@ public:
     /** Actual code generation */
     void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
 
-    void print();
+    void print_debug_infos() const;
 
 private:
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
@@ -139,7 +139,7 @@ public:
 
     void add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params);
 
-    void print();
+    void print_debug_infos() const;
 
     // No encapsulation whatsoever here. Feel free to do better.
     BasicBlock* exit_true;  /**< pointer to the next basic block, true branch. If nullptr, return from procedure */
@@ -180,8 +180,8 @@ public:
     int get_var_index(std::string name);
     Type get_var_type(std::string name);
 
-    void print();
-    void printVariables();
+    void print_debug_infos() const;
+    void print_debug_infos_variables() const;
 
     const CProgASTFuncdef* ast; /**< The AST this CFG comes from */
 
@@ -196,16 +196,16 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// class IRStore                                                              //
+// class IR                                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
-class IRStore {
+class IR {
 public :
-    IRStore();
-    virtual ~IRStore();
+    IR() = default;
+    virtual ~IR();
     void add_cfg(CFG* cfg);
-    void print_IR();
     void gen_asm(std::ostream& o);
+    void print_debug_infos() const;
 private :
     std::vector<CFG*> cfgs;
 };

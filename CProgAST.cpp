@@ -27,11 +27,11 @@ void CProgASTProgram::add_funcdef(CProgASTFuncdef* funcdef)
     funcdefs.push_back(funcdef);
 }
 
-void CProgASTProgram::build_ir(IRStore& irStore) const
+void CProgASTProgram::build_ir(IR& ir) const
 {
     for(CProgASTFuncdef* funcdef : funcdefs)
     {
-        irStore.add_cfg(funcdef->build_ir());
+        ir.add_cfg(funcdef->build_ir());
     }
 }
 
