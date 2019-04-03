@@ -1,12 +1,12 @@
+// ------------------------------------------------------------- Project Headers
+#include "IR.h"
+#include "Writer.h"
+
 // ---------------------------------------------------------- C++ System Headers
 #include <iostream>
 #include <map>
 #include <string>
 #include <vector>
-
-// ------------------------------------------------------------- Project Headers
-#include "IR.h"
-#include "Writer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // class VarType                                                              //
@@ -61,6 +61,9 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::mod:
             operation = "mod";
         break;
+        case IRInstr::Operation::neg:
+            operation = "neg";
+        break;
         case IRInstr::Operation::rmem:
             operation = "rmem";
         break;
@@ -82,9 +85,6 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::ret:
             operation = "ret";
         break;
-        case IRInstr::Operation::neg:
-            operation = "neg";
-        break;
     }
     return os << operation;
 }
@@ -98,61 +98,65 @@ void IRInstr::gen_asm(std::ostream& os)
     switch(op)
     {
         case Operation::ldconst:
-            os << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "%(rbp)";
+            os << "movl $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
         break;
         case Operation::add:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
             os << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movq %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::sub:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
+            os << "movl" << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
             os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movq %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mul:
             os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %eax" << std::endl;
             os << "imull " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::div:
             os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
             os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
             os << "cltd" << std::endl;
             os << "idivl %ebx " << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
+            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mod:
             os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
             os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
             os << "cltd" << std::endl;
             os << "idivl %ebx" << std::endl;
-            os << "movl %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
-        break;
-        case Operation::rmem:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "%(rbp), " << bb->cfg->get_var_index(params[0]) << "(%rbp)";
-            // attention difference registre/variable
-        break;
-        case Operation::wmem:
-
-        break;
-        case Operation::call:
-
-        break;
-        case Operation::cmp_eq:
-
-        break;
-        case Operation::cmp_lt:
-
-        break;
-        case Operation::cmp_le:
-
-        break;
-        case Operation::ret:
-
+            os << "movl %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::neg:
-
+            
+        break;
+        case Operation::rmem:
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "%(rbp), %eax" << std::endl;
+            os << "movl " << "%eax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
+        break;
+        case Operation::wmem:
+            os << "movl " << bb->cfg->get_var_index(params[0]) << "(%rbp), %eax" << std::endl;
+            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp), (%eax)" << std::endl;
+        break;
+        case Operation::call:
+            
+        break;
+        case Operation::cmp_eq:
+            
+        break;
+        case Operation::cmp_lt:
+            
+        break;
+        case Operation::cmp_le:
+            
+        break;
+        case Operation::ret:
+            os << "movl " << bb->cfg->get_var_index(params[0]) << "(%rbp), %eax" << std::endl;
+            os << "movl %rbp, %rsp" << std::endl;
+            os << "pop %rbp" << std::endl;
+            os << "ret" << std::endl;
         break;
     }
     os << std::endl;
@@ -192,7 +196,9 @@ BasicBlock::~BasicBlock()
 
 void BasicBlock::gen_asm(std::ostream &o)
 {
-
+    for (IRInstr* instr : instrs){
+        instr->gen_asm(o);
+    }
 }
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, VarType t, std::vector<std::string> params)
@@ -216,7 +222,9 @@ void BasicBlock::print()
 
 void CFG::gen_asm(std::ostream& o)
 {
-
+    for (BasicBlock* bb : bbs){
+        bb->gen_asm(o);
+    }
 }
 
 std::string CFG::IR_reg_to_asm(std::string reg)
@@ -249,9 +257,9 @@ CFG::CFG(const CProgASTFuncdef* fundcef) :
     ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0)
 {
     bbs.push_back(new BasicBlock(this, "input"));
+    current_bb = new BasicBlock(this, "first_bb");
+    bbs.push_back(current_bb);
     bbs.push_back(new BasicBlock(this, "output"));
-    current_bb = new BasicBlock(this, new_BB_name()); // debug
-    add_bb(current_bb);
 }
 
 
@@ -270,7 +278,7 @@ void CFG::add_to_symbol_table(std::string name, VarType t)
 {
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= 4; //offset sera variable en fonction du type -> nextFreeSymbolIndex += t.size;
+    nextFreeSymbolIndex -= t.size();
 }
 
 std::string CFG::create_new_tempvar(VarType t)
@@ -278,7 +286,7 @@ std::string CFG::create_new_tempvar(VarType t)
     std::string name = "!temp" + std::to_string(nextFreeSymbolIndex);
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
-    nextFreeSymbolIndex -= 4; //offset sera variable en fonction du type -> nextFreeSymbolIndex += t.size;
+    nextFreeSymbolIndex -= t.size();
     return name;
 }
 
@@ -301,6 +309,10 @@ void CFG::printVariables()
 ////////////////////////////////////////////////////////////////////////////////
 // class IRStore                                                              //
 ////////////////////////////////////////////////////////////////////////////////
+
+IRStore::IRStore() {
+    
+}
 
 void IRStore::add_cfg(CFG* cfg)
 {
@@ -326,3 +338,10 @@ void IRStore::print_IR()
         ++i;
     }
 }
+
+void IRStore::gen_asm(std::ostream& o){
+    for (CFG* cfg : cfgs){
+        cfg->gen_asm(o);
+    }
+}
+
