@@ -169,10 +169,10 @@ public:
     void add_bb(BasicBlock* bb);
 
     // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
-    void gen_asm(std::ostream& o);
+    void gen_asm(std::ostream& os);
     std::string IR_reg_to_asm(std::string reg); /**< helper method: inputs a IR reg or input variable, returns e.g. "-24(%rbp)" for the proper value of 24 */
-    void gen_asm_prologue(std::ostream& o);
-    void gen_asm_epilogue(std::ostream& o);
+    void gen_asm_prologue(std::ostream& os);
+    void gen_asm_epilogue(std::ostream& os);
 
     // symbol table methods
     void add_to_symbol_table(std::string name, Type type);
@@ -205,7 +205,7 @@ public :
     IR() = default;
     virtual ~IR();
     void add_cfg(CFG* cfg);
-    void gen_asm(std::ostream& o);
+    void gen_asm(std::ostream& os);
     void print_debug_infos() const;
 private :
     std::vector<CFG*> cfgs;

@@ -136,47 +136,47 @@ void IRInstr::gen_asm(std::ostream& os)
     switch(op)
     {
         case Operation::ldconst:
-            os << "movl $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
+            os << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::add:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
-            os << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::sub:
-            os << "movl" << bb->cfg->get_var_index(params[1]) << "(%rbp), %eax" << std::endl;
-            os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "movq" << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mul:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %eax" << std::endl;
-            os << "imull " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %rax" << std::endl;
+            os << "imulq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::div:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
-            os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
             os << "cltd" << std::endl;
-            os << "idivl %ebx " << std::endl;
-            os << "movl %eax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "idivq %ebx " << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mod:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
-            os << "movl " << bb->cfg->get_var_index(params[2]) << "(%rbp), %eax" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
             os << "cltd" << std::endl;
-            os << "idivl %ebx" << std::endl;
-            os << "movl %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "idivq %ebx" << std::endl;
+            os << "movq %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::neg:
 
         break;
         case Operation::rmem:
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "%(rbp), %eax" << std::endl;
-            os << "movl " << "%eax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "%(rbp), %rax" << std::endl;
+            os << "movq " << "%rax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
         break;
         case Operation::wmem:
-            os << "movl " << bb->cfg->get_var_index(params[0]) << "(%rbp), %eax" << std::endl;
-            os << "movl " << bb->cfg->get_var_index(params[1]) << "(%rbp), (%eax)" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::call:
 
@@ -191,10 +191,7 @@ void IRInstr::gen_asm(std::ostream& os)
 
         break;
         case Operation::ret:
-            os << "movl " << bb->cfg->get_var_index(params[0]) << "(%rbp), %eax" << std::endl;
-            os << "movl %rbp, %rsp" << std::endl;
-            os << "pop %rbp" << std::endl;
-            os << "ret" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[0]) << "(%rbp), %rax" << std::endl;
         break;
     }
     os << std::endl;
@@ -270,14 +267,15 @@ std::string CFG::IR_reg_to_asm(std::string reg)
     return "";
 }
 
-void CFG::gen_asm_prologue(std::ostream& o)
-{
-
+void CFG::gen_asm_prologue(std::ostream& os){
+    os << "pushq %rbp" << std::endl;
+    os << "movq %rsp, %rbp" << std::endl;
 }
 
-void CFG::gen_asm_epilogue(std::ostream& o)
-{
-
+void CFG::gen_asm_epilogue(std::ostream& os){
+    os << "movq %rbp, %rsp" << std::endl;
+    os << "pop %rbp" << std::endl;
+    os << "ret" << std::endl;
 }
 
 
@@ -366,10 +364,16 @@ void IR::add_cfg(CFG* cfg)
 	cfgs.push_back(cfg);
 }
 
-void IR::gen_asm(std::ostream& o){
-    for (CFG* cfg : cfgs)
-    {
-        cfg->gen_asm(o);
+void IR::gen_asm(std::ostream& os){
+    os << "\t.file\t\"ret42.c\"" << std::endl;
+    os << "\t.text" << std::endl;
+    os << "\t.globl\tmain" << std::endl;
+    os << "\t.type\tmain, @function" << std::endl;
+    os << "main:" << std::endl;
+    for (CFG* cfg : cfgs){
+        cfg->gen_asm_prologue(os);
+        cfg->gen_asm(os);
+        cfg->gen_asm_epilogue(os);
     }
 }
 
@@ -382,3 +386,4 @@ void IR::print_debug_infos() const
         cfgs[i]->print_debug_infos();
     }
 }
+
