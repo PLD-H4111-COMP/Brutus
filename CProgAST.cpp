@@ -152,6 +152,7 @@ std::string CProgASTDeclarator::build_ir(CFG* cfg) const
     {
         cfg->tos.add_declaration(name, type_specifier);
     }*/
+    cfg->declare_new_symbol(INT_64, name);
     if(initializer != nullptr)
     {
         initializer->build_ir(cfg);
