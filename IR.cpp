@@ -294,10 +294,9 @@ Type CFG::get_var_type(std::string name)
 CFG::CFG(const CProgASTFuncdef* fundcef) :
     ast(fundcef)
 {
-    bbs.push_back(new BasicBlock(this, "input"));
-    current_bb = new BasicBlock(this, "first_bb");
+    current_bb = new BasicBlock(this, "entry"));
     bbs.push_back(current_bb);
-    bbs.push_back(new BasicBlock(this, "output"));
+    bbs.push_back(new BasicBlock(this, "exit"));
 }
 
 
