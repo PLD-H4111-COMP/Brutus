@@ -283,12 +283,22 @@ void CFG::gen_asm_epilogue(std::ostream& o)
 
 int CFG::get_var_index(std::string name)
 {
-    return symbols.get_symbol(name).index;
+    if(symbols.is_declared(name))
+    {
+        return symbols.get_symbol(name).index;
+    }
+    std::cerr << "error: use of undeclared identifier '" << name << "'" << std::endl;
+    return 0;
 }
 
 Type CFG::get_var_type(std::string name)
 {
-    return symbols.get_symbol(name).type;
+    if(symbols.is_declared(name))
+    {
+        return symbols.get_symbol(name).type;
+    }
+    std::cerr << "error: use of undeclared identifier '" << name << "'" << std::endl;
+    return INT_64;
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef) :
@@ -319,6 +329,11 @@ void CFG::add_to_symbol_table(std::string name, Type type)
 std::string CFG::create_new_tempvar(Type type)
 {
     return symbols.add_tmp_var(type);
+}
+
+bool CFG::is_declared(std::string name) const
+{
+    return symbols.is_declared(name);
 }
 
 void CFG::print_debug_infos() const

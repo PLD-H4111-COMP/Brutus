@@ -179,6 +179,7 @@ public:
     std::string create_new_tempvar(Type type);
     int get_var_index(std::string name);
     Type get_var_type(std::string name);
+    bool is_declared(std::string name) const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;

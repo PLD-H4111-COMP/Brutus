@@ -148,10 +148,10 @@ void CProgASTDeclarator::set_type(Type type)
 std::string CProgASTDeclarator::build_ir(CFG* cfg) const
 {
     std::string name = identifier->getText();
-    /*if(!cfg->tos.declared(name))
+    if(!cfg->is_declared(name))
     {
-        cfg->tos.add_declaration(name, type_specifier);
-    }*/
+        cfg->add_to_symbol_table(name, type_specifier);
+    }
     if(initializer != nullptr)
     {
         initializer->build_ir(cfg);
