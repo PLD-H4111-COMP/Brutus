@@ -60,11 +60,14 @@ public:
     void add_symbol(std::string identifier, Type type);
     bool is_declared(std::string identifier) const;
     const SymbolProperties& get_symbol(std::string identifier) const;
+    size_t get_aligned_size(size_t alignment_size) const;
 
     void print_debug_infos() const;
 protected:
+    int get_next_free_symbol_index() const;
+
     std::map<std::string, SymbolProperties> symbols;
-    int next_free_symbol_index;
+    size_t size;
     int next_tmp_var_id;
 };
 
@@ -164,7 +167,7 @@ public:
 */
 class CFG {
 public:
-    CFG(const CProgASTFuncdef* funcdef);
+    CFG(const CProgASTFuncdef* funcdef, std::string name);
 
     void add_bb(BasicBlock* bb);
 
@@ -193,6 +196,8 @@ public:
 protected:
     TableOfSymbols symbols;
     int nextBBnumber; /**< just for naming */
+    std::string function_name;
+
     std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
 

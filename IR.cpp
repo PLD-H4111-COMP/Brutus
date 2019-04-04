@@ -35,23 +35,23 @@ SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool 
 
 // ----------------------------------------------------------------- Constructor
 TableOfSymbols::TableOfSymbols() :
-    next_free_symbol_index(0), next_tmp_var_id(0)
+    size(0), next_tmp_var_id(0)
 {}
 
 // ----------------------------------------------------- Public Member Functions
 std::string TableOfSymbols::add_tmp_var(Type type)
 {
     std::string name = "!tmp" + std::to_string(next_tmp_var_id);
-    symbols[name] = SymbolProperties(type, next_free_symbol_index);
-    next_free_symbol_index -= types.at(type).size;
+    symbols[name] = SymbolProperties(type, get_next_free_symbol_index());
+    size += types.at(type).size;
     next_tmp_var_id++;
     return name;
 }
 
 void TableOfSymbols::add_symbol(std::string identifier, Type type)
 {
-    symbols[identifier] = SymbolProperties(type, next_free_symbol_index);
-    next_free_symbol_index -= types.at(type).size;
+    symbols[identifier] = SymbolProperties(type, get_next_free_symbol_index());
+    size += types.at(type).size;
 }
 
 bool TableOfSymbols::is_declared(std::string identifier) const
@@ -62,6 +62,20 @@ bool TableOfSymbols::is_declared(std::string identifier) const
 const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
 {
     return symbols.at(identifier);
+}
+
+size_t TableOfSymbols::get_aligned_size(size_t alignment_size) const
+{
+    const size_t remainder = size % alignment_size;
+    if (!remainder)
+        return size;
+    else
+        return size + (alignment_size-remainder);
+}
+
+int TableOfSymbols::get_next_free_symbol_index() const
+{
+    return -static_cast<int>(size);
 }
 
 void TableOfSymbols::print_debug_infos() const
@@ -144,7 +158,7 @@ void IRInstr::gen_asm(std::ostream& os)
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::sub:
-            os << "movq" << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
             os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
@@ -154,21 +168,23 @@ void IRInstr::gen_asm(std::ostream& os)
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::div:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
-            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            os << "cltd" << std::endl;
-            os << "idivq %ebx " << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
+            os << "cqto" << std::endl;
+            os << "idivq %rbx " << std::endl;
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mod:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %ebx" << std::endl;
-            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            os << "cltd" << std::endl;
-            os << "idivq %ebx" << std::endl;
-            os << "movq %edx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
+            os << "cqto" << std::endl;
+            os << "idivq %rbx" << std::endl;
+            os << "movq %rdx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::neg:
-
+            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            os << "negq %rax" << std::endl;
+            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::rmem:
             os << "movq " << bb->cfg->get_var_index(params[1]) << "%(rbp), %rax" << std::endl;
@@ -179,7 +195,8 @@ void IRInstr::gen_asm(std::ostream& os)
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::call:
-
+            os << "movq $0, %rax" << std::endl;
+            os << "call " << params[1] << std::endl;
         break;
         case Operation::cmp_eq:
 
@@ -268,8 +285,14 @@ std::string CFG::IR_reg_to_asm(std::string reg)
 }
 
 void CFG::gen_asm_prologue(std::ostream& os){
+    os << "\t.globl\t" << function_name << std::endl;
+    os << "\t.type\t" << function_name << ", @function" << std::endl;
+    os << function_name << ":" << std::endl;
     os << "pushq %rbp" << std::endl;
     os << "movq %rsp, %rbp" << std::endl;
+    size_t stack_size = symbols.get_aligned_size(32);
+    if (stack_size != 0)
+        os << "subq $" << std::to_string(stack_size) << ", %rsp" << std::endl;
 }
 
 void CFG::gen_asm_epilogue(std::ostream& os){
@@ -299,8 +322,8 @@ Type CFG::get_var_type(std::string name)
     return INT_64;
 }
 
-CFG::CFG(const CProgASTFuncdef* fundcef) :
-    ast(fundcef)
+CFG::CFG(const CProgASTFuncdef* fundcef, std::string name) :
+    ast(fundcef), function_name(name)
 {
     current_bb = new BasicBlock(this, "entry");
     bbs.push_back(current_bb);
@@ -367,9 +390,6 @@ void IR::add_cfg(CFG* cfg)
 void IR::gen_asm(std::ostream& os){
     os << "\t.file\t\"ret42.c\"" << std::endl;
     os << "\t.text" << std::endl;
-    os << "\t.globl\tmain" << std::endl;
-    os << "\t.type\tmain, @function" << std::endl;
-    os << "main:" << std::endl;
     for (CFG* cfg : cfgs){
         cfg->gen_asm_prologue(os);
         cfg->gen_asm(os);
