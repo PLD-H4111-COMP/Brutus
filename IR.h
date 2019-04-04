@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ struct TypeProperties {
     const std::string name;
 };
 
-extern std::unordered_map<Type, const TypeProperties> types;
+extern std::map<Type, const TypeProperties> types;
 
 ////////////////////////////////////////////////////////////////////////////////
 // class TableOfSymbols                                                       //
@@ -63,7 +63,7 @@ public:
 
     void print_debug_infos() const;
 protected:
-    std::unordered_map<std::string, SymbolProperties> symbols;
+    std::map<std::string, SymbolProperties> symbols;
     int next_free_symbol_index;
     int next_tmp_var_id;
 };

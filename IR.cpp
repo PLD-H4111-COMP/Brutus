@@ -5,7 +5,7 @@
 // ---------------------------------------------------------- C++ System Headers
 #include <iostream>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ TypeProperties::TypeProperties(size_t size, std::string name) :
     size(size), name(name)
 {}
 
-std::unordered_map<Type, const TypeProperties> types
+std::map<Type, const TypeProperties> types =
 {
     { INT_64,   TypeProperties(8, "int64_t") },
     { INT_32,   TypeProperties(4, "int32_t") },
