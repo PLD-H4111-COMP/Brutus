@@ -60,7 +60,7 @@ void CProgASTFuncdef::add_statement(CProgASTStatement* statement)
 
 CFG* CProgASTFuncdef::build_ir() const
 {
-    CFG* cfg = new CFG(this);
+    CFG* cfg = new CFG(this, identifier);
     for(CProgASTStatement* statement : statements)
     {
         statement->build_ir(cfg);

@@ -130,7 +130,7 @@ protected:
 */
 class CFG {
 public:
-    CFG(const CProgASTFuncdef* funcdef);
+    CFG(const CProgASTFuncdef* funcdef, std::string name);
 
     void add_bb(BasicBlock* bb);
 
@@ -146,6 +146,7 @@ public:
     bool declare_new_symbol(VarType t, std::string name);
     int get_var_index(std::string name);
     VarType get_var_type(std::string name);
+    int get_size_on_stack();
 
     void print();
     void printVariables();
@@ -161,6 +162,8 @@ protected:
     std::map <std::string, int> SymbolIndex; /**< part of the symbol table  */
     int nextFreeSymbolIndex; /**< to allocate new symbols in the symbol table */
     int nextBBnumber; /**< just for naming */
+    std::string function_name;
+    int real_size;
 
     std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };

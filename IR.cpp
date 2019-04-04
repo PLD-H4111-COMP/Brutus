@@ -117,7 +117,8 @@ void IRInstr::gen_asm(std::ostream& os){
             os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::call:
-            
+            os << "movq $0, %rax" << std::endl;
+            os << "call " << params[1] << std::endl;
         break;
         case Operation::cmp_eq:
             
@@ -192,8 +193,13 @@ std::string CFG::IR_reg_to_asm(std::string reg){
 }
 
 void CFG::gen_asm_prologue(std::ostream& os){
+    os << "\t.globl\t" << function_name << std::endl;
+    os << "\t.type\t" << function_name << ", @function" << std::endl;
+    os << function_name << ":" << std::endl;
     os << "pushq %rbp" << std::endl;
     os << "movq %rsp, %rbp" << std::endl;
+    if (real_size != 0)
+        os << "subq $" << std::to_string(get_size_on_stack()) << ", %rsp" << std::endl;
 }
 
 void CFG::gen_asm_epilogue(std::ostream& os){
@@ -211,7 +217,7 @@ VarType CFG::get_var_type(std::string name){
     return SymbolType[name];
 }
 
-CFG::CFG(const CProgASTFuncdef* fundcef) : ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0) {
+CFG::CFG(const CProgASTFuncdef* fundcef, std::string name) : ast(fundcef), nextFreeSymbolIndex(0), nextBBnumber(0), function_name(name), real_size(0) {
     bbs.push_back(new BasicBlock(this, "input"));
     current_bb = new BasicBlock(this, "first_bb");
     bbs.push_back(current_bb);
@@ -239,13 +245,19 @@ std::string CFG::create_new_tempvar(VarType t) {
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
     nextFreeSymbolIndex -= t.size();
+    real_size += t.size();
     return name;
+}
+
+int CFG::get_size_on_stack() {
+    return 32*(((int)real_size/32)+1); // retourne le premier multiple de 32 superieur a real_size
 }
 
 bool CFG::declare_new_symbol(VarType t, std::string name){
     SymbolType[name] = t;
     SymbolIndex[name] = nextFreeSymbolIndex;
     nextFreeSymbolIndex -= t.size();
+    real_size += t.size();
     return true; // will return false when the name is already set in the map (later)
 }
 
@@ -294,9 +306,6 @@ void IRStore::print_IR(){
 void IRStore::gen_asm(std::ostream& os){
     os << "\t.file\t\"ret42.c\"" << std::endl;
     os << "\t.text" << std::endl;
-    os << "\t.globl\tmain" << std::endl;
-    os << "\t.type\tmain, @function" << std::endl;
-    os << "main:" << std::endl;
     for (CFG* cfg : cfgs){
         cfg->gen_asm_prologue(os);
         cfg->gen_asm(os);
