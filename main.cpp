@@ -47,12 +47,11 @@ int main(int argc, char **argv)
 
     Writer writer(options);
     CProgCSTVisitor visitor;
-    CProgASTProgram *ast = nullptr;
-    ast = (CProgASTProgram*) visitor.visit(tree);
+    CProgASTProgram *ast = visitor.visit(tree).as<CProgASTProgram*>();
 
-    IR ir;
+    IR ir(writer);
     ast->build_ir(ir);
     ir.print_debug_infos();
-    ir.gen_asm(cout);
+    ir.gen_asm();
     return 0;
 }

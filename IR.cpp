@@ -82,7 +82,7 @@ void TableOfSymbols::print_debug_infos() const
 {
     for(auto p : symbols)
     {
-        std::clog << "Nom variable : " << p.first << ", Type : " << types.at(p.second.type).name << ", Index : " << p.second.index << std::endl;
+        Writer::info() << "Nom variable : " << p.first << ", Type : " << types.at(p.second.type).name << ", Index : " << p.second.index << std::endl;
     }
 }
 
@@ -145,58 +145,58 @@ IRInstr::IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> 
     bb(bb), op(op), t(t), params(params)
 {}
 
-void IRInstr::gen_asm(std::ostream& os)
+void IRInstr::gen_asm(Writer& w)
 {
     switch(op)
     {
         case Operation::ldconst:
-            os << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::add:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::sub:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mul:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %rax" << std::endl;
-            os << "imulq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %rax" << std::endl;
+            w.assembly(1) << "imulq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::div:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
-            os << "cqto" << std::endl;
-            os << "idivq %rbx " << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
+            w.assembly(1) << "cqto" << std::endl;
+            w.assembly(1) << "idivq %rbx " << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::mod:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
-            os << "cqto" << std::endl;
-            os << "idivq %rbx" << std::endl;
-            os << "movq %rdx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
+            w.assembly(1) << "cqto" << std::endl;
+            w.assembly(1) << "idivq %rbx" << std::endl;
+            w.assembly(1) << "movq %rdx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::neg:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "negq %rax" << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "negq %rax" << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::rmem:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "%(rbp), %rax" << std::endl;
-            os << "movq " << "%rax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "%(rbp), %rax" << std::endl;
+            w.assembly(1) << "movq " << "%rax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
         break;
         case Operation::wmem:
-            os << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            os << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
         break;
         case Operation::call:
-            os << "movq $0, %rax" << std::endl;
-            os << "call " << params[1] << std::endl;
+            w.assembly(1) << "movq $0, %rax" << std::endl;
+            w.assembly(1) << "call " << params[1] << std::endl;
         break;
         case Operation::cmp_eq:
 
@@ -208,21 +208,20 @@ void IRInstr::gen_asm(std::ostream& os)
 
         break;
         case Operation::ret:
-            os << "movq " << bb->cfg->get_var_index(params[0]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[0]) << "(%rbp), %rax" << std::endl;
         break;
     }
-    os << std::endl;
 }
 
 void IRInstr::print_debug_infos() const
 {
-    std::clog << "Type de retour : " << types.at(t).name << ", Operation : " << op << std::endl;
-    std::clog << "Parametres : ";
+    Writer::info() << "Type de retour : " << types.at(t).name << ", Operation : " << op << std::endl;
+    Writer::info() << "Parametres : ";
     for (std::string param : params)
     {
-        std::clog << param << ", ";
+        Writer::info() << param << ", ";
     }
-    std::clog << std::endl;
+    Writer::info() << std::endl;
 }
 
 
@@ -246,10 +245,10 @@ BasicBlock::~BasicBlock()
     }
 }
 
-void BasicBlock::gen_asm(std::ostream &o)
+void BasicBlock::gen_asm(Writer& writer)
 {
     for (IRInstr* instr : instrs){
-        instr->gen_asm(o);
+        instr->gen_asm(writer);
     }
 }
 
@@ -260,7 +259,7 @@ void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::str
 
 void BasicBlock::print_debug_infos() const
 {
-    std::clog << "Basic Bloc : " << label << std::endl;
+    Writer::info() << "Basic Bloc : " << label << std::endl;
     // Amelioration : ajouter les noms des blocs suivants (exit_true, exit_false)
     for (IRInstr* instr : instrs)
     {
@@ -272,10 +271,10 @@ void BasicBlock::print_debug_infos() const
 // class CFG                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-void CFG::gen_asm(std::ostream& o)
+void CFG::gen_asm(Writer& writer)
 {
     for (BasicBlock* bb : bbs){
-        bb->gen_asm(o);
+        bb->gen_asm(writer);
     }
 }
 
@@ -284,21 +283,21 @@ std::string CFG::IR_reg_to_asm(std::string reg)
     return "";
 }
 
-void CFG::gen_asm_prologue(std::ostream& os){
-    os << "\t.globl\t" << function_name << std::endl;
-    os << "\t.type\t" << function_name << ", @function" << std::endl;
-    os << function_name << ":" << std::endl;
-    os << "pushq %rbp" << std::endl;
-    os << "movq %rsp, %rbp" << std::endl;
+void CFG::gen_asm_prologue(Writer& w){
+    w.assembly(1) << ".globl\t" << function_name << std::endl;
+    w.assembly(1) << ".type\t" << function_name << ", @function" << std::endl;
+    w.assembly(0) << function_name << ":" << std::endl;
+    w.assembly(1) << "pushq %rbp" << std::endl;
+    w.assembly(1) << "movq %rsp, %rbp" << std::endl;
     size_t stack_size = symbols.get_aligned_size(32);
     if (stack_size != 0)
-        os << "subq $" << std::to_string(stack_size) << ", %rsp" << std::endl;
+        w.assembly(1) << "subq $" << std::to_string(stack_size) << ", %rsp" << std::endl;
 }
 
-void CFG::gen_asm_epilogue(std::ostream& os){
-    os << "movq %rbp, %rsp" << std::endl;
-    os << "pop %rbp" << std::endl;
-    os << "ret" << std::endl;
+void CFG::gen_asm_epilogue(Writer& w){
+    w.assembly(1) << "movq %rbp, %rsp" << std::endl;
+    w.assembly(1) << "pop %rbp" << std::endl;
+    w.assembly(1) << "ret" << std::endl;
 }
 
 
@@ -308,7 +307,7 @@ int CFG::get_var_index(std::string name)
     {
         return symbols.get_symbol(name).index;
     }
-    std::cerr << "error: use of undeclared identifier '" << name << "'" << std::endl;
+    Writer::error() << "use of undeclared identifier '" << name << "'" << std::endl;
     return 0;
 }
 
@@ -318,7 +317,7 @@ Type CFG::get_var_type(std::string name)
     {
         return symbols.get_symbol(name).type;
     }
-    std::cerr << "error: use of undeclared identifier '" << name << "'" << std::endl;
+    Writer::error() << "use of undeclared identifier '" << name << "'" << std::endl;
     return Type::INT_64;
 }
 
@@ -374,6 +373,11 @@ void CFG::print_debug_infos_variables() const
 // class IRStore                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
+IR::IR(Writer &writer) : writer(writer)
+{
+
+}
+
 IR::~IR()
 {
     for (CFG* cfg : cfgs)
@@ -387,22 +391,22 @@ void IR::add_cfg(CFG* cfg)
 	cfgs.push_back(cfg);
 }
 
-void IR::gen_asm(std::ostream& os){
-    os << "\t.file\t\"ret42.c\"" << std::endl;
-    os << "\t.text" << std::endl;
+void IR::gen_asm(){
+    writer.assembly(1) << ".file\t\"ret42.c\"" << std::endl;
+    writer.assembly(1) << ".text" << std::endl;
     for (CFG* cfg : cfgs){
-        cfg->gen_asm_prologue(os);
-        cfg->gen_asm(os);
-        cfg->gen_asm_epilogue(os);
+        cfg->gen_asm_prologue(writer);
+        cfg->gen_asm(writer);
+        cfg->gen_asm_epilogue(writer);
     }
 }
 
 void IR::print_debug_infos() const
 {
-    std::clog << "Affichage de l'IR : " << std::endl;
+    Writer::info() << "Affichage de l'IR : " << std::endl;
     for (size_t i=0; i<cfgs.size(); ++i)
     {
-        std::clog << "CFG " << i << " : " << std::endl;
+        Writer::info() << "CFG " << i << " : " << std::endl;
         cfgs[i]->print_debug_infos();
     }
 }

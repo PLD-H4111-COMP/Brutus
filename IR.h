@@ -14,6 +14,7 @@
 class CProgASTFuncdef;
 class BasicBlock;
 class CFG;
+class Writer;
 
 ////////////////////////////////////////////////////////////////////////////////
 // enum Type                                                                  //
@@ -102,7 +103,7 @@ public:
     IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> params);
 
     /** Actual code generation */
-    void gen_asm(std::ostream& os); /**< x86 assembly code generation for this IR instruction */
+    void gen_asm(Writer& writer); /**< x86 assembly code generation for this IR instruction */
 
     void print_debug_infos() const;
 
@@ -138,7 +139,7 @@ class BasicBlock {
 public:
     BasicBlock(CFG* cfg, std::string entry_label);
     virtual ~BasicBlock();
-    void gen_asm(std::ostream &o); /**< x86 assembly code generation for this basic block (very simple) */
+    void gen_asm(Writer& writer); /**< x86 assembly code generation for this basic block (very simple) */
 
     void add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params);
 
@@ -172,10 +173,10 @@ public:
     void add_bb(BasicBlock* bb);
 
     // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
-    void gen_asm(std::ostream& os);
+    void gen_asm(Writer& writer);
     std::string IR_reg_to_asm(std::string reg); /**< helper method: inputs a IR reg or input variable, returns e.g. "-24(%rbp)" for the proper value of 24 */
-    void gen_asm_prologue(std::ostream& os);
-    void gen_asm_epilogue(std::ostream& os);
+    void gen_asm_prologue(Writer& writer);
+    void gen_asm_epilogue(Writer& writer);
 
     // symbol table methods
     void add_to_symbol_table(std::string name, Type type);
@@ -207,11 +208,12 @@ protected:
 
 class IR {
 public :
-    IR() = default;
-    virtual ~IR();
+    IR(Writer &writer);
+    ~IR();
     void add_cfg(CFG* cfg);
-    void gen_asm(std::ostream& os);
+    void gen_asm();
     void print_debug_infos() const;
 private :
+    Writer &writer;
     std::vector<CFG*> cfgs;
 };

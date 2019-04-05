@@ -12,8 +12,8 @@ private:
 public:
     Writer(const Options &options);
     std::ostream& assembly(unsigned int indent);
-    std::ostream& info();
-    std::ostream& warning();
-    std::ostream& error();
+    static std::ostream& info();
+    static std::ostream& warning();
+    static std::ostream& error();
 };
 

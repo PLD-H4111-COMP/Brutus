@@ -1,10 +1,11 @@
-// ---------------------------------------------------------- C++ System Headers
-#include <iostream>
-#include <string>
-
 // ------------------------------------------------------------- Project Headers
 #include "CProgCSTVisitor.h"
 #include "CProgAST.h"
+#include "Writer.h"
+
+// ---------------------------------------------------------- C++ System Headers
+#include <iostream>
+#include <string>
 
 ////////////////////////////////////////////////////////////////////////////////
 // class CProgCSTVisitor                                                      //
@@ -47,7 +48,7 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
     }
     else
     {
-        std::cerr << "error: empty statement currently not supported" << std::endl;
+        Writer::error() << "empty statement currently not supported" << std::endl;
         return nullptr;
     }
 }
