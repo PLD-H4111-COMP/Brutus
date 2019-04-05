@@ -17,29 +17,86 @@ type_name: VOID_TYPE_NAME
 block: '{' statement* '}' ;
 statement: return_statement ';'
          | declaration ';'
-         | int_expr ';'
+         | expr ';'
          | ';' ;
-return_statement: RETURN int_expr ;
+return_statement: RETURN expr ;
 declaration: type_name declarator (',' declarator)* ;
 declarator: IDENTIFIER
           | assignment ;
-assignment: IDENTIFIER '=' int_expr ;
-int_expr: int_terms
-        | assignment ;
-int_terms: int_factors rhs_int_terms* ;
-rhs_int_terms: OP_PLUS int_factors
-             | OP_MINUS int_factors ;
-int_factors: int_signed_atom rhs_int_factors* ;
-rhs_int_factors: OP_MUL int_signed_atom
-               | OP_DIV int_signed_atom
-               | OP_MOD int_signed_atom ;
-int_signed_atom: OP_MINUS int_signed_atom
-               | OP_PLUS int_signed_atom
-               | int_atom ;
-int_atom: INT_LITERAL
-        | CHAR_LITERAL
-        | IDENTIFIER
-        | '(' int_expr ')' ;
+
+assignment: IDENTIFIER OP_ASGN expr ;
+
+expr: asgn_expr ;
+
+// binary operators r-t-l
+asgn_expr: asgn_lhs* or_expr ;
+asgn_lhs: IDENTIFIER asgn_op ;
+asgn_op: OP_ASGN ;
+
+// binary operators
+or_expr: and_expr or_rhs* ;
+or_rhs: or_op and_expr ;
+or_op: OP_OR ;
+
+// binary operators
+and_expr: bor_expr and_rhs* ;
+and_rhs: and_op bor_expr ;
+and_op: OP_AND ;
+
+// binary operators
+bor_expr: xor_expr bor_rhs* ;
+bor_rhs: bor_op xor_expr ;
+bor_op: OP_BOR ;
+
+// binary operators
+xor_expr: band_expr xor_rhs* ;
+xor_rhs: xor_op band_expr ;
+xor_op: OP_XOR ;
+
+// binary operators
+band_expr: eq_expr band_rhs* ;
+band_rhs: band_op eq_expr ;
+band_op: OP_BAND ;
+
+// binary operators
+eq_expr: rel_expr eq_rhs* ;
+eq_rhs: eq_op rel_expr ;
+eq_op: OP_EQ | OP_NE ;
+
+// binary operators
+rel_expr: add_expr rel_rhs* ;
+rel_rhs: rel_op add_expr ;
+rel_op: OP_LT | OP_LTE | OP_GT | OP_GTE ;
+
+// binary operators
+add_expr: mult_expr add_rhs* ;
+add_rhs: add_op mult_expr ;
+add_op: OP_PLUS | OP_MINUS ;
+
+// binary operators
+mult_expr: unary_expr mult_rhs* ;
+mult_rhs: mult_op unary_expr ;
+mult_op: OP_MUL | OP_DIV | OP_MOD ;
+
+// prefix unary operators
+unary_expr: unary_lhs* postfix_expr ;
+unary_lhs: unary_op ;
+unary_op: OP_PP | OP_MM | OP_PLUS | OP_MINUS | OP_NOT | OP_BNOT ;
+
+// suffix unary operators
+postfix_expr: atom_expr postfix_rhs* ;
+postfix_rhs: postfix_op ;
+postfix_op: OP_PP | OP_MM | func_call ;
+
+func_call: '(' arg_list? ')' ;
+
+arg_list: expr (',' expr)* ;
+
+atom_expr: INT_LITERAL
+         | CHAR_LITERAL
+         | IDENTIFIER
+         | '(' expr ')' ;
+
 
 // -------------------------------------------------------------- skipped tokens
 
