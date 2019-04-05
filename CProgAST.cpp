@@ -86,7 +86,7 @@ CProgASTReturn::~CProgASTReturn()
 std::string CProgASTReturn::build_ir(CFG* cfg) const
 {
     std::string rval = return_expression->build_ir(cfg);
-    cfg->current_bb->add_IRInstr(IRInstr::ret, Type::INT_64, {rval});
+    cfg->current_bb->add_IRInstr(IRInstr::ret, cfg->get_var_type(rval), {rval});
     return ""; // ??
 }
 
@@ -186,7 +186,7 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     {
         // error
     }
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, Type::INT_64, {name, init});
+    cfg->current_bb->add_IRInstr(IRInstr::wmem, cfg->get_var_type(name), {name, init});
     return name;
 }
 
@@ -210,8 +210,9 @@ std::string CProgASTAddition::build_ir(CFG* cfg) const
 {
     std::string lhs_name = lhs_operand->build_ir(cfg);
     std::string rhs_name = rhs_operand->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::add, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::add, result_type, {tmp_name, lhs_name, rhs_name});
     return tmp_name;
 }
 
@@ -235,8 +236,9 @@ std::string CProgASTSubtraction::build_ir(CFG* cfg) const
 {
     std::string lhs_name = lhs_operand->build_ir(cfg);
     std::string rhs_name = rhs_operand->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::sub, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::sub, result_type, {tmp_name, lhs_name, rhs_name});
     return tmp_name;
 }
 
@@ -260,8 +262,9 @@ std::string CProgASTMultiplication::build_ir(CFG* cfg) const
 {
     std::string lhs_name = lhs_operand->build_ir(cfg);
     std::string rhs_name = rhs_operand->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::mul, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::mul, result_type, {tmp_name, lhs_name, rhs_name});
     return tmp_name;
 }
 
@@ -285,8 +288,9 @@ std::string CProgASTDivision::build_ir(CFG* cfg) const
 {
     std::string lhs_name = lhs_operand->build_ir(cfg);
     std::string rhs_name = rhs_operand->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::div, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::div, result_type, {tmp_name, lhs_name, rhs_name});
     return tmp_name;
 }
 
@@ -310,8 +314,9 @@ std::string CProgASTModulo::build_ir(CFG* cfg) const
 {
     std::string lhs_name = lhs_operand->build_ir(cfg);
     std::string rhs_name = rhs_operand->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::mod, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::mod, result_type, {tmp_name, lhs_name, rhs_name});
     return tmp_name;
 }
 
@@ -333,8 +338,9 @@ CProgASTUnaryMinus::~CProgASTUnaryMinus()
 std::string CProgASTUnaryMinus::build_ir(CFG* cfg) const
 {
     std::string exp_name = inner_expression->build_ir(cfg);
-    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
-    cfg->current_bb->add_IRInstr(IRInstr::neg, Type::INT_64, {tmp_name, exp_name});
+    Type result_type = cfg->get_var_type(exp_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::neg, result_type, {tmp_name, exp_name});
     return tmp_name;
 }
 
@@ -353,6 +359,65 @@ std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
     std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
     std::string literal_str = std::to_string(value);
     cfg->current_bb->add_IRInstr(IRInstr::ldconst, Type::INT_64, {tmp_name, literal_str});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTCharLiteral : public CProgASTExpression                      //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTCharLiteral::CProgASTCharLiteral(const std::string &val)
+    : value(val)
+{}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTCharLiteral::build_ir(CFG* cfg) const
+{
+    std::string tmp_name = cfg->create_new_tempvar(Type::CHAR);
+    std::string literal_str;
+    if (value.at(0) != '\\')
+        literal_str = std::to_string(value.at(0));
+    else
+    {
+        switch (value.at(1))
+        {
+            case 'a':
+                literal_str = std::to_string(static_cast<unsigned int>('\a'));
+            break;
+            case 'b':
+                literal_str = std::to_string(static_cast<unsigned int>('\b'));
+            break;
+            case 'f':
+                literal_str = std::to_string(static_cast<unsigned int>('\f'));
+            break;
+            case 'n':
+                literal_str = std::to_string(static_cast<unsigned int>('\n'));
+            break;
+            case 'r':
+                literal_str = std::to_string(static_cast<unsigned int>('\r'));
+            break;
+            case 't':
+                literal_str = std::to_string(static_cast<unsigned int>('\t'));
+            break;
+            case 'v':
+                literal_str = std::to_string(static_cast<unsigned int>('\v'));
+            break;
+            case '\\':
+                literal_str = std::to_string(static_cast<unsigned int>('\\'));
+            break;
+            case '\'':
+                literal_str = std::to_string(static_cast<unsigned int>('\''));
+            break;
+            case '"':
+                literal_str = std::to_string(static_cast<unsigned int>('\"'));
+            break;
+            case '?':
+                literal_str = std::to_string(static_cast<unsigned int>('\?'));
+            break;
+        }
+    }
+    cfg->current_bb->add_IRInstr(IRInstr::ldconst, Type::CHAR, {tmp_name, literal_str});
     return tmp_name;
 }
 

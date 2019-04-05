@@ -30,6 +30,9 @@ struct TypeProperties {
     // ------------------------------------------------------- Public Properties
     const size_t size;
     const std::string name;
+
+    // ---------------------------------------------------------- Static methods
+    static Type max(Type a, Type b);
 };
 
 extern std::map<Type, const TypeProperties> types;
@@ -104,10 +107,16 @@ public:
 
     /** Actual code generation */
     void gen_asm(Writer& writer); /**< x86 assembly code generation for this IR instruction */
+    static std::string IR_reg_to_asm(const std::string &reg, Type type); /**< helper method: inputs a, IR reg , returns e.g. "eax" for for the Type::INT_32 reg "a" */
 
     void print_debug_infos() const;
 
 private:
+    std::string x86_instr(const std::string &instr, Type type) const;
+    std::string x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const;
+    std::string x86_instr_reg_var(const std::string &instr, const std::string &var, const std::string &reg) const;
+    std::string x86_instr_reg(const std::string &instr, const std::string &reg, Type type) const;
+
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
     Type t;
@@ -168,22 +177,23 @@ public:
 */
 class CFG {
 public:
-    CFG(const CProgASTFuncdef* funcdef, std::string name);
+    CFG(const CProgASTFuncdef* funcdef, const std::string &name);
 
     void add_bb(BasicBlock* bb);
 
     // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
     void gen_asm(Writer& writer);
-    std::string IR_reg_to_asm(std::string reg); /**< helper method: inputs a IR reg or input variable, returns e.g. "-24(%rbp)" for the proper value of 24 */
+    std::string IR_var_to_asm(const std::string &reg); /**< helper method: inputs a IR input variable, returns e.g. "-24(%rbp)" for the proper value of -24 */
     void gen_asm_prologue(Writer& writer);
     void gen_asm_epilogue(Writer& writer);
 
     // symbol table methods
-    void add_to_symbol_table(std::string name, Type type);
+    void add_to_symbol_table(const std::string &name, Type type);
     std::string create_new_tempvar(Type type);
-    int get_var_index(std::string name);
-    Type get_var_type(std::string name);
-    bool is_declared(std::string name) const;
+    int get_var_index(const std::string &name) const;
+    Type get_var_type(const std::string &name) const;
+    bool is_declared(const std::string &name) const;
+    Type get_max_type(const std::string &lhs, const std::string &rhs) const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;

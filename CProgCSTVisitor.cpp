@@ -60,7 +60,27 @@ antlrcpp::Any CProgCSTVisitor::visitReturn_statement(CProgParser::Return_stateme
 
 antlrcpp::Any CProgCSTVisitor::visitDeclaration(CProgParser::DeclarationContext *ctx)
 {
-    CProgASTDeclaration* declaration = new CProgASTDeclaration(Type::INT_64);
+    Type type;
+    if (ctx->type_name()->CHAR_TYPE_NAME())
+        type = Type::CHAR;
+    else if (ctx->type_name()->INT_16_TYPE_NAME())
+        type = Type::INT_16;
+    else if (ctx->type_name()->INT_32_TYPE_NAME())
+        type = Type::INT_32;
+    else if (ctx->type_name()->INT_64_TYPE_NAME() || ctx->type_name()->INT_TYPE_NAME())
+        type = Type::INT_64;
+    else if (ctx->type_name()->VOID_TYPE_NAME())
+    {
+        Writer::error() << "can't declare a void variable" << std::endl;
+        return nullptr;
+    }
+    else if (ctx->type_name()->IDENTIFIER())
+    {
+        Writer::error() << "unknown type name '" << ctx->type_name()->IDENTIFIER()->getText() << "'" << std::endl;
+        return nullptr;
+    }
+
+    CProgASTDeclaration* declaration = new CProgASTDeclaration(type);
     for(auto declarator_ctx : ctx->declarator())
     {
         CProgASTIdentifier* identifier = nullptr;
@@ -101,11 +121,11 @@ antlrcpp::Any CProgCSTVisitor::visitInt_terms(CProgParser::Int_termsContext *ctx
     for(auto rhs_int_terms_ctx : ctx->rhs_int_terms())
     {
         CProgASTExpression* expr = visit(rhs_int_terms_ctx).as<CProgASTExpression*>();
-        if(rhs_int_terms_ctx->OP_ADD() != nullptr)
+        if(rhs_int_terms_ctx->OP_PLUS() != nullptr)
         {
             rexpr = new CProgASTAddition(rexpr, expr);
         }
-        else if(rhs_int_terms_ctx->OP_SUB() != nullptr)
+        else if(rhs_int_terms_ctx->OP_MINUS() != nullptr)
         {
             rexpr = new CProgASTSubtraction(rexpr, expr);
         }
@@ -148,11 +168,11 @@ antlrcpp::Any CProgCSTVisitor::visitRhs_int_factors(CProgParser::Rhs_int_factors
 antlrcpp::Any CProgCSTVisitor::visitInt_signed_atom(CProgParser::Int_signed_atomContext *ctx)
 {
     CProgASTExpression* rexpr = nullptr;
-    if(ctx->OP_SUB() != nullptr)
+    if(ctx->OP_MINUS() != nullptr)
     {
         rexpr = new CProgASTUnaryMinus(visit(ctx->int_signed_atom()).as<CProgASTExpression*>());
     }
-    else if(ctx->OP_ADD() != nullptr)
+    else if(ctx->OP_PLUS() != nullptr)
     {
         rexpr = visit(ctx->int_signed_atom()).as<CProgASTExpression*>();
     }
@@ -169,6 +189,11 @@ antlrcpp::Any CProgCSTVisitor::visitInt_atom(CProgParser::Int_atomContext *ctx)
     if(ctx->INT_LITERAL() != nullptr)
     {
         rexpr = new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText()));
+    }
+    else if(ctx->CHAR_LITERAL() != nullptr)
+    {
+        std::string literal = ctx->CHAR_LITERAL()->getText();
+        rexpr = new CProgASTCharLiteral(literal.substr(1, literal.size()-2));
     }
     else if(ctx->IDENTIFIER() != nullptr)
     {

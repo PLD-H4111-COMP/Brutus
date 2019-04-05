@@ -332,6 +332,26 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTCharLiteral : public CProgASTExpression                      //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTCharLiteral : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTCharLiteral(const std::string &val);
+    CProgASTCharLiteral(const CProgASTCharLiteral& src) = delete;
+    virtual ~CProgASTCharLiteral() = default;
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTCharLiteral& operator=(const CProgASTCharLiteral& src) = delete;
+private:
+    const std::string value;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTIdentifier : public CProgASTExpression                       //
 ////////////////////////////////////////////////////////////////////////////////
 

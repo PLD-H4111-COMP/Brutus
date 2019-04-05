@@ -16,6 +16,11 @@ TypeProperties::TypeProperties(size_t size, std::string name) :
     size(size), name(name)
 {}
 
+Type TypeProperties::max(Type a, Type b)
+{
+    return types.at(a).size >= types.at(b).size ? a : b;
+}
+
 std::map<Type, const TypeProperties> types =
 {
     { Type::INT_64,   TypeProperties(8, "int64_t") },
@@ -150,49 +155,49 @@ void IRInstr::gen_asm(Writer& w)
     switch(op)
     {
         case Operation::ldconst:
-            w.assembly(1) << "movq $" << params[1] << ", " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr("mov", bb->cfg->get_var_type(params[0])) << " $" << params[1] << ", " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
         break;
         case Operation::add:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "addq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("add", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::sub:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "subq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("sub", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::mul:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp)" << ", %rax" << std::endl;
-            w.assembly(1) << "imulq " << bb->cfg->get_var_index(params[2]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("imul", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::div:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
-            w.assembly(1) << "cqto" << std::endl;
-            w.assembly(1) << "idivq %rbx " << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[2], "b") << std::endl;
+            w.assembly(1) << "cqto" << std::endl; // TODO : fix
+            w.assembly(1) << x86_instr_reg("idiv", "b", bb->cfg->get_var_type(params[0])) << std::endl; // TODO : check type
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::mod:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[2]) << "(%rbp)" << ", %rbx" << std::endl;
-            w.assembly(1) << "cqto" << std::endl;
-            w.assembly(1) << "idivq %rbx" << std::endl;
-            w.assembly(1) << "movq %rdx, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[2], "b") << std::endl;
+            w.assembly(1) << "cqto" << std::endl; // TODO : fix
+            w.assembly(1) << x86_instr_reg("idiv", "b", bb->cfg->get_var_type(params[0])) << std::endl; // TODO : check type
+            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
         break;
         case Operation::neg:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "negq %rax" << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg("neg", "a", bb->cfg->get_var_type(params[1])) << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::rmem:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "%(rbp), %rax" << std::endl;
-            w.assembly(1) << "movq " << "%rax, " << bb->cfg->get_var_index(params[0]) << "%(rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::wmem:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[1]) << "(%rbp), %rax" << std::endl;
-            w.assembly(1) << "movq %rax, " << bb->cfg->get_var_index(params[0]) << "(%rbp)" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::call:
             w.assembly(1) << "movq $0, %rax" << std::endl;
@@ -208,10 +213,62 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::ret:
-            w.assembly(1) << "movq " << bb->cfg->get_var_index(params[0]) << "(%rbp), %rax" << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[0], "a") << std::endl;
         break;
     }
 }
+
+std::string IRInstr::IR_reg_to_asm(const std::string &reg, Type type)
+{
+    switch (type)
+    {
+        case Type::CHAR:
+            return "%" + reg + "l";
+        case Type::INT_16:
+            return "%" + reg + "x";
+        case Type::INT_32:
+            return "%e" + reg + "x";
+        case Type::INT_64:
+            return "%r" + reg + "x";
+    }
+
+    return "error";
+}
+
+std::string IRInstr::x86_instr(const std::string &instr, Type type) const
+{
+    switch (type)
+    {
+        case Type::CHAR:
+            return instr + "b";
+        case Type::INT_16:
+            return instr + "w";
+        case Type::INT_32:
+            return instr + "l";
+        case Type::INT_64:
+            return instr + "q";
+    }
+    return "error type";
+}
+
+std::string IRInstr::x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const
+{
+    Type type = bb->cfg->get_var_type(var);
+    return x86_instr(instr, type) + " " + bb->cfg->IR_var_to_asm(var) + ", " + IR_reg_to_asm(reg, type);
+}
+
+std::string IRInstr::x86_instr_reg_var(const std::string &instr, const std::string &reg, const std::string &var) const
+{
+    Type type = bb->cfg->get_var_type(var);
+    return x86_instr(instr, type) + " " + IR_reg_to_asm(reg, type) + ", " + bb->cfg->IR_var_to_asm(var);
+}
+
+
+std::string IRInstr::x86_instr_reg(const std::string &instr, const std::string &reg, Type type) const
+{
+    return x86_instr(instr, type) + " " + IR_reg_to_asm(reg, type);
+}
+
 
 void IRInstr::print_debug_infos() const
 {
@@ -278,9 +335,9 @@ void CFG::gen_asm(Writer& writer)
     }
 }
 
-std::string CFG::IR_reg_to_asm(std::string reg)
+std::string CFG::IR_var_to_asm(const std::string &var)
 {
-    return "";
+    return std::to_string(get_var_index(var)) + "(%rbp)";
 }
 
 void CFG::gen_asm_prologue(Writer& w){
@@ -296,12 +353,12 @@ void CFG::gen_asm_prologue(Writer& w){
 
 void CFG::gen_asm_epilogue(Writer& w){
     w.assembly(1) << "movq %rbp, %rsp" << std::endl;
-    w.assembly(1) << "pop %rbp" << std::endl;
+    w.assembly(1) << "popq %rbp" << std::endl;
     w.assembly(1) << "ret" << std::endl;
 }
 
 
-int CFG::get_var_index(std::string name)
+int CFG::get_var_index(const std::string &name) const
 {
     if(symbols.is_declared(name))
     {
@@ -311,7 +368,7 @@ int CFG::get_var_index(std::string name)
     return 0;
 }
 
-Type CFG::get_var_type(std::string name)
+Type CFG::get_var_type(const std::string &name) const
 {
     if(symbols.is_declared(name))
     {
@@ -321,7 +378,7 @@ Type CFG::get_var_type(std::string name)
     return Type::INT_64;
 }
 
-CFG::CFG(const CProgASTFuncdef* fundcef, std::string name) :
+CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name) :
     ast(fundcef), function_name(name)
 {
     current_bb = new BasicBlock(this, "entry");
@@ -341,7 +398,7 @@ void CFG::add_bb(BasicBlock* bb)
     bbs.insert(bbs.end()-1, bb);
 }
 
-void CFG::add_to_symbol_table(std::string name, Type type)
+void CFG::add_to_symbol_table(const std::string &name, Type type)
 {
     symbols.add_symbol(name, type);
 }
@@ -351,9 +408,14 @@ std::string CFG::create_new_tempvar(Type type)
     return symbols.add_tmp_var(type);
 }
 
-bool CFG::is_declared(std::string name) const
+bool CFG::is_declared(const std::string &name) const
 {
     return symbols.is_declared(name);
+}
+
+Type CFG::get_max_type(const std::string &lhs, const std::string &rhs) const
+{
+    return TypeProperties::max(get_var_type(lhs), get_var_type(rhs));
 }
 
 void CFG::print_debug_infos() const
