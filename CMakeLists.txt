@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 11)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-    add_definitions("-Wall -Wextra")
+    add_definitions("-Wall -Wextra -Wno-attributes")
 endif()
 
 # required if linking to static library
