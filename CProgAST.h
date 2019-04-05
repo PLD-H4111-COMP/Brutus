@@ -33,7 +33,7 @@ public:
 
     // ------------------------------------------------- Public Member Functions
     void add_funcdef(CProgASTFuncdef* funcdef);
-    void build_ir(IRStore& irStore) const;
+    void build_ir(IR& ir) const;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTProgram& operator=(const CProgASTProgram& src) = delete;

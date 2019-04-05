@@ -1,52 +1,11 @@
 #pragma once
 
+// ------------------------------------------------------------- Project Headers
 #include "antlr4-runtime.h"
 #include "CProgBaseVisitor.h"
+
+// ---------------------------------------------------------- C++ System Headers
 #include <string>
-#include <unordered_map>
-
-enum class SymbolType { INTEGER };
-
-struct SymbolDef
-{
-    SymbolType type;
-    int index;
-    bool initialized;
-    bool used;
-};
-
-class TableOfSymbols {
-public:
-    TableOfSymbols() : index(0), tmp_res_num(0) {}
-
-    std::string add_tmp_result()
-    {
-        std::string name = "!tmp" + std::to_string(tmp_res_num++);
-        add_variable(name);
-        return name;
-    }
-
-    void add_variable(std::string identifier)
-    {
-        index -= 4; // size of the identifier's type
-        symbols[identifier] = {SymbolType::INTEGER, index, false, false};
-    }
-
-    bool declared(std::string identifier)
-    {
-        return symbols.find(identifier) != symbols.end();
-    }
-
-    SymbolDef & operator[](const std::string & name)
-    {
-        return symbols[name];
-    }
-
-protected:
-    std::unordered_map<std::string, SymbolDef> symbols;
-    int index;
-    int tmp_res_num;
-};
 
 class CProgCSTVisitor : public CProgBaseVisitor {
 public:
@@ -63,7 +22,4 @@ public:
     virtual antlrcpp::Any visitRhs_int_factors(CProgParser::Rhs_int_factorsContext *ctx) override;
     virtual antlrcpp::Any visitInt_signed_atom(CProgParser::Int_signed_atomContext *ctx) override;
     virtual antlrcpp::Any visitInt_atom(CProgParser::Int_atomContext *ctx) override;
-
-private:
-    TableOfSymbols tos;
 };

@@ -21,17 +21,17 @@ CProgASTProgram::~CProgASTProgram()
     }
 }
 
-// ------------------------------------------------------ Public Member Funcions
+// ----------------------------------------------------- Public Member Functions
 void CProgASTProgram::add_funcdef(CProgASTFuncdef* funcdef)
 {
     funcdefs.push_back(funcdef);
 }
 
-void CProgASTProgram::build_ir(IRStore& irStore) const
+void CProgASTProgram::build_ir(IR& ir) const
 {
     for(CProgASTFuncdef* funcdef : funcdefs)
     {
-        irStore.add_cfg(funcdef->build_ir());
+        ir.add_cfg(funcdef->build_ir());
     }
 }
 
@@ -86,7 +86,7 @@ CProgASTReturn::~CProgASTReturn()
 std::string CProgASTReturn::build_ir(CFG* cfg) const
 {
     std::string rval = return_expression->build_ir(cfg);
-    cfg->current_bb->add_IRInstr(IRInstr::ret, VarType(INT_64), {rval});
+    cfg->current_bb->add_IRInstr(IRInstr::ret, INT_64, {rval});
     return ""; // ??
 }
 
@@ -148,10 +148,10 @@ void CProgASTDeclarator::set_type(Type type)
 std::string CProgASTDeclarator::build_ir(CFG* cfg) const
 {
     std::string name = identifier->getText();
-    /*if(!cfg->tos.declared(name))
+    if(!cfg->is_declared(name))
     {
-        cfg->tos.add_declaration(name, type_specifier);
-    }*/
+        cfg->add_to_symbol_table(name, type_specifier);
+    }
     if(initializer != nullptr)
     {
         initializer->build_ir(cfg);
@@ -186,8 +186,7 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     {
         // error
     }
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {"%eax", init});
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, "%eax"});
+    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {name, init});
     return name;
 }
 
@@ -353,7 +352,7 @@ std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
 {
     std::string tmp_name = cfg->create_new_tempvar(INT_64);
     std::string literal_str = std::to_string(value);
-    cfg->current_bb->add_IRInstr(IRInstr::wmem, INT_64, {tmp_name, literal_str});
+    cfg->current_bb->add_IRInstr(IRInstr::ldconst, INT_64, {tmp_name, literal_str});
     return tmp_name;
 }
 
