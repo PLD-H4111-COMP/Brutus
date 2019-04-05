@@ -18,10 +18,10 @@ TypeProperties::TypeProperties(size_t size, std::string name) :
 
 std::map<Type, const TypeProperties> types =
 {
-    { INT_64,   TypeProperties(8, "int64_t") },
-    { INT_32,   TypeProperties(4, "int32_t") },
-    { INT_16,   TypeProperties(2, "int16_t") },
-    { CHAR,     TypeProperties(1, "char") }
+    { Type::INT_64,   TypeProperties(8, "int64_t") },
+    { Type::INT_32,   TypeProperties(4, "int32_t") },
+    { Type::INT_16,   TypeProperties(2, "int16_t") },
+    { Type::CHAR,     TypeProperties(1, "char") }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ void TableOfSymbols::print_debug_infos() const
 {
     for(auto p : symbols)
     {
-        std::clog << "Nom variable : " << p.first << ", Type : " << p.second.type << ", Index : " << p.second.index << std::endl;
+        std::clog << "Nom variable : " << p.first << ", Type : " << types.at(p.second.type).name << ", Index : " << p.second.index << std::endl;
     }
 }
 
@@ -216,7 +216,7 @@ void IRInstr::gen_asm(std::ostream& os)
 
 void IRInstr::print_debug_infos() const
 {
-    std::clog << "Type de retour : " << t << ", Operation : " << op << std::endl;
+    std::clog << "Type de retour : " << types.at(t).name << ", Operation : " << op << std::endl;
     std::clog << "Parametres : ";
     for (std::string param : params)
     {
@@ -319,7 +319,7 @@ Type CFG::get_var_type(std::string name)
         return symbols.get_symbol(name).type;
     }
     std::cerr << "error: use of undeclared identifier '" << name << "'" << std::endl;
-    return INT_64;
+    return Type::INT_64;
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef, std::string name) :

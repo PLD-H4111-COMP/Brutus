@@ -23,7 +23,7 @@ antlrcpp::Any CProgCSTVisitor::visitProgram(CProgParser::ProgramContext *ctx)
 antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
 {
     std::string identifier = ctx->IDENTIFIER()->getText();
-    CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, INT_64);
+    CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, Type::INT_64);
     for(auto statement_ctx : ctx->block()->statement())
     {
         funcdef->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
@@ -59,7 +59,7 @@ antlrcpp::Any CProgCSTVisitor::visitReturn_statement(CProgParser::Return_stateme
 
 antlrcpp::Any CProgCSTVisitor::visitDeclaration(CProgParser::DeclarationContext *ctx)
 {
-    CProgASTDeclaration* declaration = new CProgASTDeclaration(INT_64);
+    CProgASTDeclaration* declaration = new CProgASTDeclaration(Type::INT_64);
     for(auto declarator_ctx : ctx->declarator())
     {
         CProgASTIdentifier* identifier = nullptr;

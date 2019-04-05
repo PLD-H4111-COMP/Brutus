@@ -19,7 +19,7 @@ class CFG;
 // enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-enum Type { INT_64, INT_32, INT_16, CHAR };
+enum class Type { INT_64, INT_32, INT_16, CHAR };
 
 struct TypeProperties {
     // ------------------------------------------------------------- Constructor
