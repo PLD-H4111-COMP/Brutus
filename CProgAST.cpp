@@ -191,6 +191,31 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTLessThan : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTLessThan::CProgASTLessThan(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTLessThan::~CProgASTLessThan()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTLessThan::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_lt, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAddition : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 

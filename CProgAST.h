@@ -187,6 +187,27 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTLessThan : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTLessThan : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTLessThan(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTLessThan(const CProgASTLessThan& src) = delete;
+    virtual ~CProgASTLessThan();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTLessThan& operator=(const CProgASTLessThan& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAddition : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 
