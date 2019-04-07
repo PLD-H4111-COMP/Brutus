@@ -26,77 +26,27 @@ declarator: IDENTIFIER
 
 assignment: IDENTIFIER OP_ASGN expr ;
 
-expr: asgn_expr ;
-
-// binary operators r-t-l
-asgn_expr: asgn_lhs* or_expr ;
-asgn_lhs: IDENTIFIER asgn_op ;
-asgn_op: OP_ASGN ;
-
-// binary operators
-or_expr: and_expr or_rhs* ;
-or_rhs: or_op and_expr ;
-or_op: OP_OR ;
-
-// binary operators
-and_expr: bor_expr and_rhs* ;
-and_rhs: and_op bor_expr ;
-and_op: OP_AND ;
-
-// binary operators
-bor_expr: xor_expr bor_rhs* ;
-bor_rhs: bor_op xor_expr ;
-bor_op: OP_BOR ;
-
-// binary operators
-xor_expr: band_expr xor_rhs* ;
-xor_rhs: xor_op band_expr ;
-xor_op: OP_XOR ;
-
-// binary operators
-band_expr: eq_expr band_rhs* ;
-band_rhs: band_op eq_expr ;
-band_op: OP_BAND ;
-
-// binary operators
-eq_expr: rel_expr eq_rhs* ;
-eq_rhs: eq_op rel_expr ;
-eq_op: OP_EQ | OP_NE ;
-
-// binary operators
-rel_expr: add_expr rel_rhs* ;
-rel_rhs: rel_op add_expr ;
-rel_op: OP_LT | OP_LTE | OP_GT | OP_GTE ;
-
-// binary operators
-add_expr: mult_expr add_rhs* ;
-add_rhs: add_op mult_expr ;
-add_op: OP_PLUS | OP_MINUS ;
-
-// binary operators
-mult_expr: unary_expr mult_rhs* ;
-mult_rhs: mult_op unary_expr ;
-mult_op: OP_MUL | OP_DIV | OP_MOD ;
-
-// prefix unary operators
-unary_expr: unary_lhs* postfix_expr ;
-unary_lhs: unary_op ;
-unary_op: OP_PP | OP_MM | OP_PLUS | OP_MINUS | OP_NOT | OP_BNOT ;
-
-// suffix unary operators
-postfix_expr: atom_expr postfix_rhs* ;
-postfix_rhs: postfix_op ;
-postfix_op: OP_PP | OP_MM | func_call ;
-
-func_call: '(' arg_list? ')' ;
+expr: PAR_OP='(' expr ')'
+    | expr POSTFIX_OP=(OP_PP | OP_MM)
+    | expr ARG_OP='(' arg_list? ')'
+    |<assoc=right> PREFIX_OP=(OP_PP | OP_MM | OP_PLUS | OP_MINUS | OP_NOT | OP_BNOT) expr
+    | expr (OP_MUL | OP_DIV | OP_MOD) expr
+    | expr (OP_PLUS | OP_MINUS) expr
+    | expr (OP_LT | OP_LTE | OP_GT | OP_GTE) expr
+    | expr (OP_EQ | OP_NE) expr
+    | expr OP_BAND expr
+    | expr OP_XOR expr
+    | expr OP_BOR expr
+    | expr OP_AND expr
+    | expr OP_OR expr
+    |<assoc=right> IDENTIFIER OP_ASGN expr
+    | INT_LITERAL
+    | CHAR_LITERAL
+    | IDENTIFIER ;
 
 arg_list: expr (',' expr)* ;
 
-atom_expr: INT_LITERAL
-         | CHAR_LITERAL
-         | IDENTIFIER
-         | '(' expr ')' ;
-
+inner_expr: '(' expr ')' ;
 
 // -------------------------------------------------------------- skipped tokens
 

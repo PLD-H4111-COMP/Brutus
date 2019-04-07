@@ -108,155 +108,101 @@ antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *c
 
 antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
 {
-    return static_cast<CProgASTExpression*>(visit(ctx->asgn_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitAsgn_expr(CProgParser::Asgn_exprContext *ctx)
-{
-    CProgASTExpression* rexpr = visit(ctx->or_expr()).as<CProgASTExpression*>();
-    for(auto asgn_lhs_ctx : ctx->asgn_lhs())
-    {
-        if(asgn_lhs_ctx->asgn_op()->OP_ASGN() != nullptr)
-        {
-            CProgASTIdentifier *identifier = new CProgASTIdentifier(asgn_lhs_ctx->IDENTIFIER()->getText());
-            rexpr = new CProgASTAssignment(identifier, rexpr);
-        }
-    }
-    return static_cast<CProgASTExpression*>(rexpr);
-}
-
-antlrcpp::Any CProgCSTVisitor::visitOr_expr(CProgParser::Or_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->and_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitAnd_expr(CProgParser::And_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->bor_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitBor_expr(CProgParser::Bor_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->xor_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitXor_expr(CProgParser::Xor_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->band_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitBand_expr(CProgParser::Band_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->eq_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitEq_expr(CProgParser::Eq_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->rel_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitRel_expr(CProgParser::Rel_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->add_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitAdd_expr(CProgParser::Add_exprContext *ctx)
-{
-    CProgASTExpression* rexpr = visit(ctx->mult_expr()).as<CProgASTExpression*>();
-    for(auto add_rhs_ctx : ctx->add_rhs())
-    {
-        CProgASTExpression* expr = visit(add_rhs_ctx->mult_expr()).as<CProgASTExpression*>();
-        if(add_rhs_ctx->add_op()->OP_PLUS() != nullptr)
-        {
-            rexpr = new CProgASTAddition(rexpr, expr);
-        }
-        else if(add_rhs_ctx->add_op()->OP_MINUS() != nullptr)
-        {
-            rexpr = new CProgASTSubtraction(rexpr, expr);
-        }
-    }
-    return static_cast<CProgASTExpression*>(rexpr);
-}
-
-antlrcpp::Any CProgCSTVisitor::visitMult_expr(CProgParser::Mult_exprContext *ctx)
-{
-    CProgASTExpression* rexpr = visit(ctx->unary_expr()).as<CProgASTExpression*>();
-    for(auto mult_rhs_ctx : ctx->mult_rhs())
-    {
-        CProgASTExpression* expr = visit(mult_rhs_ctx->unary_expr()).as<CProgASTExpression*>();
-        if(mult_rhs_ctx->mult_op()->OP_MUL() != nullptr)
-        {
-            rexpr = new CProgASTMultiplication(rexpr, expr);
-        }
-        else if(mult_rhs_ctx->mult_op()->OP_DIV() != nullptr)
-        {
-            rexpr = new CProgASTDivision(rexpr, expr);
-        }
-        else if(mult_rhs_ctx->mult_op()->OP_MOD() != nullptr)
-        {
-            rexpr = new CProgASTModulo(rexpr, expr);
-        }
-    }
-    return static_cast<CProgASTExpression*>(rexpr);
-}
-
-antlrcpp::Any CProgCSTVisitor::visitUnary_expr(CProgParser::Unary_exprContext *ctx)
-{
-    CProgASTExpression* rexpr = visit(ctx->postfix_expr()).as<CProgASTExpression*>();
-    for(auto unary_lhs_ctx : ctx->unary_lhs()) // TODO : reverse order
-    {
-        if(unary_lhs_ctx->unary_op()->OP_PLUS() != nullptr)
-        {
-            // NOP
-        }
-        else if(unary_lhs_ctx->unary_op()->OP_MINUS() != nullptr)
-        {
-            rexpr = new CProgASTUnaryMinus(rexpr);
-        }
-        else if(unary_lhs_ctx->unary_op()->OP_PP() != nullptr)
-        {
-            // TODO
-        }
-        else if(unary_lhs_ctx->unary_op()->OP_MM() != nullptr)
-        {
-            // TODO
-        }
-        else if(unary_lhs_ctx->unary_op()->OP_NOT() != nullptr)
-        {
-            // TODO
-        }
-        else if(unary_lhs_ctx->unary_op()->OP_BNOT() != nullptr)
-        {
-            // TODO
-        }
-    }
-    return static_cast<CProgASTExpression*>(rexpr);
-}
-
-antlrcpp::Any CProgCSTVisitor::visitPostfix_expr(CProgParser::Postfix_exprContext *ctx)
-{
-    return static_cast<CProgASTExpression*>(visit(ctx->atom_expr()).as<CProgASTExpression*>());
-}
-
-antlrcpp::Any CProgCSTVisitor::visitAtom_expr(CProgParser::Atom_exprContext *ctx)
-{
     CProgASTExpression* rexpr = nullptr;
-    if(ctx->INT_LITERAL() != nullptr)
+    size_t op_size = ctx->expr().size();
+    if (op_size == 0)
     {
-        rexpr = new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText()));
+        if(ctx->INT_LITERAL())
+        {
+            rexpr = new CProgASTIntLiteral(std::stoi(ctx->INT_LITERAL()->getText()));
+        }
+        else if(ctx->CHAR_LITERAL())
+        {
+            std::string literal = ctx->CHAR_LITERAL()->getText();
+            rexpr = new CProgASTCharLiteral(literal.substr(1, literal.size()-2));
+        }
+        else if(ctx->IDENTIFIER())
+        {
+            rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+        }
     }
-    else if(ctx->CHAR_LITERAL() != nullptr)
+    else if (op_size == 1)
     {
-        std::string literal = ctx->CHAR_LITERAL()->getText();
-        rexpr = new CProgASTCharLiteral(literal.substr(1, literal.size()-2));
+        CProgASTExpression* expr = visit(ctx->expr(0)).as<CProgASTExpression*>();
+        if (ctx->PAR_OP)
+        {
+            rexpr = expr;
+        }
+        else if (ctx->POSTFIX_OP)
+        {
+            // TODO
+        }
+        else if (ctx->ARG_OP)
+        {
+            // TODO
+        }
+        else if (ctx->PREFIX_OP)
+        {
+            if(ctx->OP_PLUS())
+            {
+                // NOP
+            }
+            else if(ctx->OP_MINUS())
+            {
+                rexpr = new CProgASTUnaryMinus(expr);
+            }
+            else if(ctx->OP_PP())
+            {
+                // TODO
+            }
+            else if(ctx->OP_MM())
+            {
+                // TODO
+            }
+            else if(ctx->OP_NOT())
+            {
+                // TODO
+            }
+            else if(ctx->OP_BNOT())
+            {
+                // TODO
+            }
+        }
+        else if (ctx->OP_ASGN())
+        {
+            CProgASTIdentifier *identifier = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+            rexpr = new CProgASTAssignment(identifier, expr);
+        }
     }
-    else if(ctx->IDENTIFIER() != nullptr)
+    else if (op_size == 2)
     {
-        rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+        CProgASTExpression* lhs = visit(ctx->expr(0)).as<CProgASTExpression*>();
+        CProgASTExpression* rhs = visit(ctx->expr(1)).as<CProgASTExpression*>();
+        if(ctx->OP_MUL())
+        {
+            rexpr = new CProgASTMultiplication(lhs, rhs);
+        }
+        else if(ctx->OP_DIV())
+        {
+            rexpr = new CProgASTDivision(lhs, rhs);
+        }
+        else if(ctx->OP_MOD())
+        {
+            rexpr = new CProgASTModulo(lhs, rhs);
+        }
+        else if(ctx->OP_PLUS())
+        {
+            rexpr = new CProgASTAddition(lhs, rhs);
+        }
+        else if(ctx->OP_MINUS())
+        {
+            rexpr = new CProgASTSubtraction(lhs, rhs);
+        }
     }
-    else if(ctx->expr() != nullptr)
-    {
-        rexpr = visit(ctx->expr()).as<CProgASTExpression*>();
-    }
-    return static_cast<CProgASTExpression*>(rexpr);
+    return rexpr;
+}
+
+antlrcpp::Any CProgCSTVisitor::visitArg_list(CProgParser::Arg_listContext *ctx)
+{
+    return visitChildren(ctx);
 }
