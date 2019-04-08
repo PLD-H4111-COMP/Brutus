@@ -20,7 +20,7 @@ class Writer;
 // enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-enum class Type { INT_64, INT_32, INT_16, CHAR };
+enum class Type { INT_64, INT_32, INT_16, CHAR, VOID };
 
 struct TypeProperties {
     // ------------------------------------------------------------- Constructor
@@ -213,6 +213,8 @@ public:
     void print_debug_infos_variables() const;
 
     const CProgASTFuncdef* ast; /**< The AST this CFG comes from */
+
+    std::string get_name();
 
     // basic block management
     std::string new_BB_name();
