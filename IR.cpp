@@ -34,13 +34,13 @@ std::map<Type, const TypeProperties> types =
 ////////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------- Constructor
-SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool used) :
-    type(type), index(index), initialized(initialized), used(used)
+SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool used, bool callable) :
+    type(type), index(index), initialized(initialized), used(used), callable(callable)
 {}
 
 // ----------------------------------------------------------------- Constructor
-TableOfSymbols::TableOfSymbols() :
-    size(0), next_tmp_var_id(0)
+TableOfSymbols::TableOfSymbols(TableOfSymbols* parent) :
+    parent(parent), size(0), next_tmp_var_id(0)
 {}
 
 // ----------------------------------------------------- Public Member Functions
@@ -65,6 +65,11 @@ bool TableOfSymbols::is_declared(std::string identifier) const
 }
 
 const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
+{
+    return symbols.at(identifier);
+}
+
+SymbolProperties& TableOfSymbols::get_symbol(std::string identifier)
 {
     return symbols.at(identifier);
 }
@@ -458,8 +463,8 @@ Type CFG::get_var_type(const std::string &name) const
     return Type::INT_64;
 }
 
-CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name) :
-    ast(fundcef), function_name(name)
+CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
+    ast(fundcef), function_name(name), symbols(global_symbols)
 {
     current_bb = new BasicBlock(this, "entry");
     bbs.push_back(current_bb);

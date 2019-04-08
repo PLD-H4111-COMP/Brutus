@@ -30,7 +30,7 @@ assignment: IDENTIFIER OP_ASGN expr ;
 
 expr: PAR_OP='(' expr ')'
     | expr POSTFIX_OP=(OP_PP | OP_MM)
-    | expr ARG_OP='(' arg_list? ')'
+    | IDENTIFIER ARG_OP='(' arg_list? ')'
     |<assoc=right> PREFIX_OP=(OP_PP | OP_MM | OP_PLUS | OP_MINUS | OP_NOT | OP_BNOT) expr
     | expr (OP_MUL | OP_DIV | OP_MOD) expr
     | expr (OP_PLUS | OP_MINUS) expr

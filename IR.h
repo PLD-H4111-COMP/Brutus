@@ -44,26 +44,29 @@ extern std::map<Type, const TypeProperties> types;
 struct SymbolProperties {
     // ------------------------------------------------------------- Constructor
     SymbolProperties() = default;
-    SymbolProperties(Type type, int index, bool initialized = false, bool used = false);
+    SymbolProperties(Type type, int index, bool initialized = false, bool used = false, bool callable = false);
 
     // ------------------------------------------------------- Public Properties
     Type type;
     int index;
     bool initialized;
     bool used;
+    bool callable;
+    std::vector<Type> arg_types;
     // BasicBlock* scope;
 };
 
 class TableOfSymbols {
 public:
     // ------------------------------------------------------------- Constructor
-    TableOfSymbols();
+    TableOfSymbols(TableOfSymbols* parent = nullptr);
 
     // ------------------------------------------------- Public Member Functions
     std::string add_tmp_var(Type type);
     void add_symbol(std::string identifier, Type type);
     bool is_declared(std::string identifier) const;
     const SymbolProperties& get_symbol(std::string identifier) const;
+    SymbolProperties& get_symbol(std::string identifier);
     size_t get_aligned_size(size_t alignment_size) const;
     const std::string get_last_symbol_name() const;
 
@@ -71,6 +74,7 @@ public:
 protected:
     int get_next_free_symbol_index() const;
 
+    TableOfSymbols* parent;
     std::map<std::string, SymbolProperties> symbols;
     size_t size;
     int next_tmp_var_id;
@@ -186,7 +190,7 @@ public:
 */
 class CFG {
 public:
-    CFG(const CProgASTFuncdef* funcdef, const std::string &name);
+    CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols* global_symbols);
 
     void add_bb(BasicBlock* bb);
 
@@ -214,10 +218,10 @@ public:
     std::string new_BB_name();
     BasicBlock* current_bb;
 
-protected:
-    TableOfSymbols symbols;
+protected:    
     int nextBBnumber; /**< just for naming */
     std::string function_name;
+    TableOfSymbols symbols;
 
     std::vector <BasicBlock*> bbs; /**< all the basic blocks of this CFG*/
 };
@@ -233,6 +237,8 @@ public :
     void add_cfg(CFG* cfg);
     void gen_asm();
     void print_debug_infos() const;
+    
+    TableOfSymbols global_symbols;
 private :
     Writer &writer;
     std::vector<CFG*> cfgs;
