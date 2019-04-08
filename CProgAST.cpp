@@ -72,6 +72,10 @@ CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
     fproperties.arg_types = arg_types;
     
     CFG* cfg = new CFG(this, identifier, global_symbols);
+    for(size_t i=0; i<arg_names.size(); ++i)
+    {
+        cfg->add_to_symbol_table(arg_names[i], arg_types[i]);
+    }
     for(CProgASTStatement* statement : statements)
     {
         statement->build_ir(cfg);
