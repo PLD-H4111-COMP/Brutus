@@ -6,7 +6,8 @@ program: PREPROC_DIR* funcdef* ;
 
 // -------------------------------------------------------- non-terminal symbols
 
-funcdef: type_name IDENTIFIER '(' ')' block ;
+funcdef: type_name IDENTIFIER '(' arg_decl_list? ')' block ;
+arg_decl_list: VOID_TYPE_NAME | type_name IDENTIFIER (',' type_name IDENTIFIER)* ;
 type_name: VOID_TYPE_NAME
          | CHAR_TYPE_NAME
          | INT_TYPE_NAME
@@ -46,7 +47,7 @@ expr: PAR_OP='(' expr ')'
 
 arg_list: expr (',' expr)* ;
 
-inner_expr: '(' expr ')' ;
+if_condition: IF '(' expr ')' block (ELSE IF '(' expr ')' block)* (ELSE block)? ;
 
 // -------------------------------------------------------------- skipped tokens
 
