@@ -18,6 +18,7 @@ type_name: VOID_TYPE_NAME
 block: '{' statement* '}' ;
 statement: return_statement ';'
          | declaration ';'
+         | if_condition
          | expr ';'
          | ';' ;
 return_statement: RETURN expr ;
