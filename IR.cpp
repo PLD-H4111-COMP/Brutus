@@ -139,14 +139,23 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::cmp_le:
             operation = "cmp_le";
         break;
-		case IRInstr::Operation::cmp_gt:
+        case IRInstr::Operation::cmp_gt:
             operation = "cmp_gt";
         break;
-		case IRInstr::Operation::cmp_ge:
+        case IRInstr::Operation::cmp_ge:
             operation = "cmp_ge";
         break;
-		case IRInstr::Operation::cmp_ne:
+        case IRInstr::Operation::cmp_ne:
             operation = "cmp_ne";
+        break;
+        case IRInstr::Operation::band:
+            operation = "and";
+        break;
+        case IRInstr::Operation::bor:
+            operation = "or";
+        break;
+        case IRInstr::Operation::bxor:
+            operation = "xor";
         break;
         case IRInstr::Operation::ret:
             operation = "ret";
@@ -221,14 +230,29 @@ void IRInstr::gen_asm(Writer& w)
         case Operation::cmp_le:
 
         break;
-		case Operation::cmp_gt:
+        case Operation::cmp_gt:
 
         break;
-		case Operation::cmp_ge:
+        case Operation::cmp_ge:
 
         break;
-		case Operation::cmp_ne:
+        case Operation::cmp_ne:
 
+        break;
+        case Operation::band:
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("and", params[2], "d") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+        break;
+        case Operation::bor:
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("or", params[2], "d") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+        break;
+        case Operation::bxor:
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("xor", params[2], "d") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
         break;
         case Operation::ret:
             w.assembly(1) << x86_instr_var_reg("mov", params[0], "a") << std::endl;
@@ -360,7 +384,7 @@ std::string CFG::IR_var_to_asm(const std::string &var)
 
 void CFG::gen_asm_prologue(Writer& w){
     w.assembly(1) << ".globl\t" << function_name << std::endl;
-    w.assembly(1) << ".type\t" << function_name << ", @function" << std::endl;
+    //w.assembly(1) << ".type\t" << function_name << ", @function" << std::endl;
     w.assembly(0) << function_name << ":" << std::endl;
     w.assembly(1) << "pushq %rbp" << std::endl;
     w.assembly(1) << "movq %rsp, %rbp" << std::endl;
@@ -468,7 +492,7 @@ IR::~IR()
 
 void IR::add_cfg(CFG* cfg)
 {
-	cfgs.push_back(cfg);
+    cfgs.push_back(cfg);
 }
 
 void IR::gen_asm(){
