@@ -26,7 +26,8 @@ std::map<Type, const TypeProperties> types =
     { Type::INT_64,   TypeProperties(8, "int64_t") },
     { Type::INT_32,   TypeProperties(4, "int32_t") },
     { Type::INT_16,   TypeProperties(2, "int16_t") },
-    { Type::CHAR,     TypeProperties(1, "char") }
+    { Type::CHAR,     TypeProperties(1, "char") },
+    { Type::VOID,     TypeProperties(0, "void") }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,6 +244,10 @@ void IRInstr::gen_asm(Writer& w)
         case Operation::call:
             w.assembly(1) << "movq $0, %rax" << std::endl;
             w.assembly(1) << "call " << params[1] << std::endl;
+            if (params[0] != "")
+            {
+                w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            }
         break;
         case Operation::cmp_eq:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -476,7 +481,7 @@ Type CFG::get_var_type(const std::string &name) const
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
-    ast(fundcef), function_name(name), symbols(global_symbols)
+    ast(fundcef), function_name(name), symbols(global_symbols), nextBBnumber(0)
 {
     current_bb = new BasicBlock(this, new_BB_name());
     bbs.push_back(current_bb);

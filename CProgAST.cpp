@@ -617,7 +617,12 @@ void CProgASTFunccall::add_arg(CProgASTExpression* arg)
 std::string CProgASTFunccall::build_ir(CFG* cfg) const
 {
     Type result_type = cfg->get_var_type(func_name->getText());
-    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    std::cout << "Hey ! : " << types.at(result_type).name << std::endl;
+    std::string tmp_name = "";
+    if (result_type != Type::VOID)
+    {
+        tmp_name = cfg->create_new_tempvar(result_type);
+    }
     std::vector<std::string> params{tmp_name, func_name->getText()};
     for(CProgASTExpression* arg : args)
     {

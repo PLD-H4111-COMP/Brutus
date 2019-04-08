@@ -20,7 +20,7 @@ class Writer;
 // enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-enum class Type { INT_64, INT_32, INT_16, CHAR };
+enum class Type { INT_64, INT_32, INT_16, CHAR, VOID };
 
 struct TypeProperties {
     // ------------------------------------------------------------- Constructor
