@@ -69,6 +69,12 @@ const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
     return symbols.at(identifier);
 }
 
+const std::string TableOfSymbols::get_last_symbol_name() const
+{
+    std::string name = "!tmp" + std::to_string(next_tmp_var_id-1);
+    return name;
+}
+
 size_t TableOfSymbols::get_aligned_size(size_t alignment_size) const
 {
     const size_t remainder = size % alignment_size;
@@ -204,7 +210,11 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << "call " << params[1] << std::endl;
         break;
         case Operation::cmp_eq:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("cmp", "a", params[2]) << std::endl;
+            w.assembly(1) << "sete %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_lt:
 
@@ -281,6 +291,11 @@ void IRInstr::print_debug_infos() const
     Writer::info() << std::endl;
 }
 
+IRInstr::Operation IRInstr::get_operation() const
+{
+    return op;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // class BasicBlock                                                           //
@@ -304,8 +319,26 @@ BasicBlock::~BasicBlock()
 
 void BasicBlock::gen_asm(Writer& writer)
 {
+    writer.assembly(0) << "." << label << ":" << std::endl;
     for (IRInstr* instr : instrs){
         instr->gen_asm(writer);
+    }
+    
+    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
+    {
+        writer.assembly(1) << "jne " << exit_false->label << std::endl;
+    }
+    else if (exit_false != nullptr)
+    {
+        std::string name = cfg->get_last_var_name();
+        
+        writer.assembly(1) << "movq " << cfg->get_var_index(name) << "(%rbp), %rax" << std::endl;
+        writer.assembly(1) << "cmp %rax, $0" << std::endl;
+        writer.assembly(1) << "je " << exit_false->label << std::endl;
+    }
+    else
+    {
+        writer.assembly(1) << "jmp " << exit_true->label << std::endl;
     }
 }
 
@@ -366,6 +399,11 @@ int CFG::get_var_index(const std::string &name) const
     }
     Writer::error() << "use of undeclared identifier '" << name << "'" << std::endl;
     return 0;
+}
+
+std::string CFG::get_last_var_name() const
+{
+    return symbols.get_last_symbol_name();
 }
 
 Type CFG::get_var_type(const std::string &name) const

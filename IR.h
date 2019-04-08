@@ -65,6 +65,7 @@ public:
     bool is_declared(std::string identifier) const;
     const SymbolProperties& get_symbol(std::string identifier) const;
     size_t get_aligned_size(size_t alignment_size) const;
+    const std::string get_last_symbol_name() const;
 
     void print_debug_infos() const;
 protected:
@@ -110,6 +111,8 @@ public:
     static std::string IR_reg_to_asm(const std::string &reg, Type type); /**< helper method: inputs a, IR reg , returns e.g. "eax" for for the Type::INT_32 reg "a" */
 
     void print_debug_infos() const;
+
+    Operation get_operation() const;
 
 private:
     std::string x86_instr(const std::string &instr, Type type) const;
@@ -194,6 +197,7 @@ public:
     Type get_var_type(const std::string &name) const;
     bool is_declared(const std::string &name) const;
     Type get_max_type(const std::string &lhs, const std::string &rhs) const;
+    std::string get_last_var_name() const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;
