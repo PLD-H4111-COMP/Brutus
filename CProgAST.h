@@ -54,7 +54,8 @@ public:
 
     // ------------------------------------------------- Public Member Functions
     void add_statement(CProgASTStatement* statement);
-    CFG* build_ir() const;
+    void add_arg(std::string id, Type type);
+    CFG* build_ir(TableOfSymbols* global_symbols) const;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTFuncdef& operator=(const CProgASTFuncdef& src) = delete;
@@ -62,6 +63,8 @@ private:
     std::string identifier;
     Type return_type;
     std::vector<CProgASTStatement*> statements;
+    std::vector<std::string> arg_names;
+    std::vector<Type> arg_types;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -501,13 +504,35 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTFunccall : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTFunccall : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTFunccall(CProgASTIdentifier* identifier);
+    CProgASTFunccall(const CProgASTFunccall& src) = delete;
+    virtual ~CProgASTFunccall();
+
+    // ------------------------------------------------- Public Member Functions
+    void add_arg(CProgASTExpression* arg);
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTFunccall& operator=(const CProgASTFunccall& src) = delete;
+private:
+    const CProgASTIdentifier* func_name;
+    std::vector<CProgASTExpression*> args;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTIntLiteral : public CProgASTExpression                       //
 ////////////////////////////////////////////////////////////////////////////////
 
 class CProgASTIntLiteral : public CProgASTExpression {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTIntLiteral(int val);
+    CProgASTIntLiteral(int64_t val);
     CProgASTIntLiteral(const CProgASTIntLiteral& src) = delete;
     virtual ~CProgASTIntLiteral() = default;
 
@@ -517,7 +542,7 @@ public:
     // ---------------------------------------------------- Overloaded Operators
     CProgASTIntLiteral& operator=(const CProgASTIntLiteral& src) = delete;
 private:
-    const int value;
+    const int64_t value;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

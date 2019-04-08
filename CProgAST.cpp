@@ -31,7 +31,7 @@ void CProgASTProgram::build_ir(IR& ir) const
 {
     for(CProgASTFuncdef* funcdef : funcdefs)
     {
-        ir.add_cfg(funcdef->build_ir());
+        ir.add_cfg(funcdef->build_ir(&ir.global_symbols));
     }
 }
 
@@ -53,14 +53,29 @@ CProgASTFuncdef::~CProgASTFuncdef()
 }
 
 // ----------------------------------------------------- Public Member Functions
+void CProgASTFuncdef::add_arg(std::string id, Type type)
+{
+    arg_types.push_back(type);
+    arg_names.push_back(id);
+}
+
 void CProgASTFuncdef::add_statement(CProgASTStatement* statement)
 {
     statements.push_back(statement);
 }
 
-CFG* CProgASTFuncdef::build_ir() const
+CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
 {
-    CFG* cfg = new CFG(this, identifier);
+    global_symbols->add_symbol(identifier, return_type);
+    SymbolProperties& fproperties = global_symbols->get_symbol(identifier);
+    fproperties.callable = true;
+    fproperties.arg_types = arg_types;
+    
+    CFG* cfg = new CFG(this, identifier, global_symbols);
+    for(size_t i=0; i<arg_names.size(); ++i)
+    {
+        cfg->add_to_symbol_table(arg_names[i], arg_types[i]);
+    }
     for(CProgASTStatement* statement : statements)
     {
         statement->build_ir(cfg);
@@ -135,8 +150,10 @@ CProgASTDeclarator::CProgASTDeclarator(CProgASTIdentifier* id, CProgASTAssignmen
 
 CProgASTDeclarator::~CProgASTDeclarator()
 {
-    delete identifier;
-    delete initializer;
+    if(identifier)
+        delete identifier;
+    if(initializer)
+        delete initializer;
 }
 
 // ----------------------------------------------------- Public Member Functions
@@ -574,11 +591,48 @@ std::string CProgASTUnaryMinus::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTFunccall : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTFunccall::CProgASTFunccall(CProgASTIdentifier* identifier) :
+    func_name(identifier)
+{}
+
+CProgASTFunccall::~CProgASTFunccall()
+{
+    delete func_name;
+    for(CProgASTExpression* arg : args)
+    {
+        delete arg;
+    }
+}
+
+// ----------------------------------------------------- Public Member Functions
+void CProgASTFunccall::add_arg(CProgASTExpression* arg)
+{
+    args.push_back(arg);
+}
+
+std::string CProgASTFunccall::build_ir(CFG* cfg) const
+{
+    Type result_type = cfg->get_var_type(func_name->getText());
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    std::vector<std::string> params{tmp_name, func_name->getText()};
+    for(CProgASTExpression* arg : args)
+    {
+        params.push_back(arg->build_ir(cfg));
+    }
+    cfg->current_bb->add_IRInstr(IRInstr::call, result_type, params);
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTIntLiteral : public CProgASTExpression                       //
 ////////////////////////////////////////////////////////////////////////////////
 
 // ---------------------------------------------------- Constructor / Destructor
-CProgASTIntLiteral::CProgASTIntLiteral(int val)
+CProgASTIntLiteral::CProgASTIntLiteral(int64_t val)
     : value(val)
 {}
 
@@ -665,7 +719,7 @@ std::string CProgASTIdentifier::getText() const
     return name;
 }
 
-std::string CProgASTIdentifier::build_ir(CFG* cfg) const
+std::string CProgASTIdentifier::build_ir(CFG*) const
 {
     /*if(!cfg->tos.declared(name))
     {

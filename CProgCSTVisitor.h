@@ -16,5 +16,4 @@ public:
     virtual antlrcpp::Any visitDeclaration(CProgParser::DeclarationContext *ctx) override;
     virtual antlrcpp::Any visitAssignment(CProgParser::AssignmentContext *ctx) override;
     virtual antlrcpp::Any visitExpr(CProgParser::ExprContext *ctx) override;
-    virtual antlrcpp::Any visitArg_list(CProgParser::Arg_listContext *ctx) override;
 };

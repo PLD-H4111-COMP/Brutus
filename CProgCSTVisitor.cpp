@@ -1,6 +1,7 @@
 // ------------------------------------------------------------- Project Headers
 #include "CProgCSTVisitor.h"
 #include "CProgAST.h"
+#include "IR.h"
 #include "Writer.h"
 
 // ---------------------------------------------------------- C++ System Headers
@@ -25,6 +26,25 @@ antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
 {
     std::string identifier = ctx->IDENTIFIER()->getText();
     CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, Type::INT_64);
+    if(ctx->arg_decl_list())
+    {
+        for(size_t i=0; i<ctx->arg_decl_list()->IDENTIFIER().size(); ++i)
+        {
+            std::string arg_name = ctx->arg_decl_list()->IDENTIFIER(i)->getText();
+            if(ctx->arg_decl_list()->type_name(i)->CHAR_TYPE_NAME())
+                funcdef->add_arg(arg_name, Type::CHAR);
+            else if(ctx->arg_decl_list()->type_name(i)->INT_TYPE_NAME())
+                funcdef->add_arg(arg_name, Type::INT_64);
+            else if(ctx->arg_decl_list()->type_name(i)->INT_64_TYPE_NAME())
+                funcdef->add_arg(arg_name, Type::INT_64);
+            else if(ctx->arg_decl_list()->type_name(i)->INT_32_TYPE_NAME())
+                funcdef->add_arg(arg_name, Type::INT_32);
+            else if(ctx->arg_decl_list()->type_name(i)->INT_16_TYPE_NAME())
+                funcdef->add_arg(arg_name, Type::INT_16);
+            else
+                ; // error
+        }
+    }
     for(auto statement_ctx : ctx->block()->statement())
     {
         funcdef->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
@@ -121,6 +141,19 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             std::string literal = ctx->CHAR_LITERAL()->getText();
             rexpr = new CProgASTCharLiteral(literal.substr(1, literal.size()-2));
         }
+        else if (ctx->ARG_OP)
+        {
+            CProgASTIdentifier* func_name = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
+            CProgASTFunccall* func_call = new CProgASTFunccall(func_name);
+            if(ctx->arg_list())
+            {
+                for(auto arg_ctx : ctx->arg_list()->expr())
+                {
+                    func_call->add_arg(visit(arg_ctx).as<CProgASTExpression*>());
+                }
+            }
+            rexpr = func_call;
+        }
         else if(ctx->IDENTIFIER())
         {
             rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
@@ -134,10 +167,6 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             rexpr = expr;
         }
         else if (ctx->POSTFIX_OP)
-        {
-            // TODO
-        }
-        else if (ctx->ARG_OP)
         {
             // TODO
         }
@@ -211,7 +240,3 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
     return rexpr;
 }
 
-antlrcpp::Any CProgCSTVisitor::visitArg_list(CProgParser::Arg_listContext *ctx)
-{
-    return visitChildren(ctx);
-}
