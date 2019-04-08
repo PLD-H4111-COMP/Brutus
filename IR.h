@@ -214,6 +214,8 @@ public:
 
     const CProgASTFuncdef* ast; /**< The AST this CFG comes from */
 
+    std::string get_name();
+
     // basic block management
     std::string new_BB_name();
     BasicBlock* current_bb;

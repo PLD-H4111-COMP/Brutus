@@ -478,15 +478,15 @@ Type CFG::get_var_type(const std::string &name) const
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
     ast(fundcef), function_name(name), symbols(global_symbols)
 {
-    current_bb = new BasicBlock(this, "entry");
+    current_bb = new BasicBlock(this, new_BB_name());
     bbs.push_back(current_bb);
-    bbs.push_back(new BasicBlock(this, "exit"));
+    bbs.push_back(new BasicBlock(this, new_BB_name()));
 }
 
 
 std::string CFG::new_BB_name()
 {
-    return "block_" + std::to_string(nextBBnumber++);
+    return function_name + "_block" + std::to_string(nextBBnumber++);
 }
 
 
@@ -513,6 +513,11 @@ bool CFG::is_declared(const std::string &name) const
 Type CFG::get_max_type(const std::string &lhs, const std::string &rhs) const
 {
     return TypeProperties::max(get_var_type(lhs), get_var_type(rhs));
+}
+
+std::string CFG::get_name()
+{
+    return function_name;
 }
 
 void CFG::print_debug_infos() const
