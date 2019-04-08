@@ -47,16 +47,16 @@ TableOfSymbols::TableOfSymbols() :
 std::string TableOfSymbols::add_tmp_var(Type type)
 {
     std::string name = "!tmp" + std::to_string(next_tmp_var_id);
-    symbols[name] = SymbolProperties(type, get_next_free_symbol_index());
-    size += types.at(type).size;
     next_tmp_var_id++;
+    size += types.at(type).size;
+    symbols[name] = SymbolProperties(type, get_next_free_symbol_index());
     return name;
 }
 
 void TableOfSymbols::add_symbol(std::string identifier, Type type)
 {
-    symbols[identifier] = SymbolProperties(type, get_next_free_symbol_index());
     size += types.at(type).size;
+    symbols[identifier] = SymbolProperties(type, get_next_free_symbol_index());
 }
 
 bool TableOfSymbols::is_declared(std::string identifier) const
