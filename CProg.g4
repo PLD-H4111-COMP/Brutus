@@ -36,7 +36,7 @@ expr: PAR_OP='(' expr ')'
     | expr (OP_LT | OP_LTE | OP_GT | OP_GTE) expr
     | expr (OP_EQ | OP_NE) expr
     | expr OP_BAND expr
-    | expr OP_XOR expr
+    | expr OP_BXOR expr
     | expr OP_BOR expr
     | expr OP_AND expr
     | expr OP_OR expr
@@ -87,7 +87,7 @@ OP_AND: '&&' ;
 OP_BAND: '&' ;
 OP_OR: '||' ;
 OP_BOR: '|' ;
-OP_XOR: '^' ;
+OP_BXOR: '^' ;
 INT_LITERAL: [0-9]+ ;
 CHAR_LITERAL: '\'' '\\'? . '\'' ;
 IDENTIFIER: [a-zA-Z_][0-9a-zA-Z_]* ;

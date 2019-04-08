@@ -197,6 +197,15 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         else if(ctx->OP_MINUS())
         {
             rexpr = new CProgASTSubtraction(lhs, rhs);
+        }else if(ctx->OP_BAND())
+        {
+            rexpr = new CProgASTBAnd(lhs, rhs);
+        }else if(ctx->OP_BOR())
+        {
+            rexpr = new CProgASTBOr(lhs, rhs);
+        }else if(ctx->OP_BXOR())
+        {
+            rexpr = new CProgASTBXor(lhs, rhs);
         }
     }
     return rexpr;
