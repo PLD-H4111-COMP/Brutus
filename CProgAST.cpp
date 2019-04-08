@@ -216,6 +216,132 @@ std::string CProgASTLessThan::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTLessThanOrEqual : public CProgASTExpression                  //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTLessThanOrEqual::CProgASTLessThanOrEqual(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTLessThanOrEqual::~CProgASTLessThanOrEqual()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTLessThanOrEqual::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_le, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTGreaterThan : public CProgASTExpression                      //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTGreaterThan::CProgASTGreaterThan(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTGreaterThan::~CProgASTGreaterThan()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTGreaterThan::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_gt, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTGreaterThanOrEqual : public CProgASTExpression               //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTGreaterThanOrEqual::CProgASTGreaterThanOrEqual(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTGreaterThanOrEqual::~CProgASTGreaterThanOrEqual()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTGreaterThanOrEqual::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_ge, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTEqual : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTEqual::CProgASTEqual(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTEqual::~CProgASTEqual()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTEqual::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_eq, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTNotEqual : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTNotEqual::CProgASTNotEqual(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTNotEqual::~CProgASTNotEqual()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTNotEqual::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_ne, Type::INT_64, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAddition : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 
