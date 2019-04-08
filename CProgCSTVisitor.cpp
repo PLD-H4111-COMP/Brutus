@@ -141,10 +141,6 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             std::string literal = ctx->CHAR_LITERAL()->getText();
             rexpr = new CProgASTCharLiteral(literal.substr(1, literal.size()-2));
         }
-        else if(ctx->IDENTIFIER())
-        {
-            rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
-        }
         else if (ctx->ARG_OP)
         {
             CProgASTIdentifier* func_name = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
@@ -157,6 +153,10 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
                 }
             }
             rexpr = func_call;
+        }
+        else if(ctx->IDENTIFIER())
+        {
+            rexpr = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
         }
     }
     else if (op_size == 1)

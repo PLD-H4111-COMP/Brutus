@@ -61,35 +61,24 @@ void TableOfSymbols::add_symbol(std::string identifier, Type type)
 
 bool TableOfSymbols::is_declared(std::string identifier) const
 {
-    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
-    {
-        return true;
-    }
     return symbols.find(identifier) != symbols.end();
 }
 
 const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
 {
-    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
-    {
-        return parent->symbols.at(identifier);
-    }
     return symbols.at(identifier);
 }
 
-SymbolProperties& TableOfSymbols::get_symbol(std::string identifier)
-{
-    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
-    {
-        return parent->symbols.at(identifier);
-    }
-    return symbols.at(identifier);
-}
-
+<<<<<<< HEAD
 const std::string TableOfSymbols::get_last_symbol_name() const
 {
     std::string name = "!tmp" + std::to_string(next_tmp_var_id-1);
     return name;
+=======
+SymbolProperties& TableOfSymbols::get_symbol(std::string identifier)
+{
+    return symbols.at(identifier);
+>>>>>>> b457c23... Add func calls
 }
 
 size_t TableOfSymbols::get_aligned_size(size_t alignment_size) const
@@ -383,7 +372,7 @@ void BasicBlock::gen_asm(Writer& writer)
         instr->gen_asm(writer);
     }
     
-    /*if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
+    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
         writer.assembly(1) << "jne " << exit_false->label << std::endl;
     }
@@ -398,7 +387,7 @@ void BasicBlock::gen_asm(Writer& writer)
     else
     {
         writer.assembly(1) << "jmp " << exit_true->label << std::endl;
-    }*/
+    }
 }
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params)
