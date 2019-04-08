@@ -208,6 +208,111 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTLessThanOrEqual : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTLessThanOrEqual : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTLessThanOrEqual(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTLessThanOrEqual(const CProgASTLessThanOrEqual& src) = delete;
+    virtual ~CProgASTLessThanOrEqual();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTLessThanOrEqual& operator=(const CProgASTLessThanOrEqual& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTGreaterThan : public CProgASTExpression                      //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTGreaterThan : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTGreaterThan(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTGreaterThan(const CProgASTGreaterThan& src) = delete;
+    virtual ~CProgASTGreaterThan();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTGreaterThan& operator=(const CProgASTGreaterThan& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTGreaterThanOrEqual : public CProgASTExpression               //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTGreaterThanOrEqual : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTGreaterThanOrEqual(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTGreaterThanOrEqual(const CProgASTGreaterThanOrEqual& src) = delete;
+    virtual ~CProgASTGreaterThanOrEqual();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTGreaterThanOrEqual& operator=(const CProgASTGreaterThanOrEqual& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTGreaterThanOrEqual : public CProgASTExpression               //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTEqual : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTEqual(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTEqual(const CProgASTEqual& src) = delete;
+    virtual ~CProgASTEqual();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTEqual& operator=(const CProgASTEqual& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTNotEqual : public CProgASTExpression               //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTNotEqual : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTNotEqual(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTNotEqual(const CProgASTNotEqual& src) = delete;
+    virtual ~CProgASTNotEqual();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTNotEqual& operator=(const CProgASTNotEqual& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAddition : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 

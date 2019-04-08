@@ -139,6 +139,15 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::cmp_le:
             operation = "cmp_le";
         break;
+		case IRInstr::Operation::cmp_gt:
+            operation = "cmp_gt";
+        break;
+		case IRInstr::Operation::cmp_ge:
+            operation = "cmp_ge";
+        break;
+		case IRInstr::Operation::cmp_ne:
+            operation = "cmp_ne";
+        break;
         case IRInstr::Operation::ret:
             operation = "ret";
         break;
@@ -210,6 +219,15 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::cmp_le:
+
+        break;
+		case Operation::cmp_gt:
+
+        break;
+		case Operation::cmp_ge:
+
+        break;
+		case Operation::cmp_ne:
 
         break;
         case Operation::ret:
