@@ -51,8 +51,8 @@ expr: PAR_OP='(' expr ')'
 arg_list: expr (',' expr)* ;
 
 if_condition: IF '(' expr ')' block (ELSE IF '(' expr ')' block)* (ELSE block)? ;
-for_statement: FOR '(' statement expr? ';' expr? ')'
-while_statement: WHILE '(' expr ')'
+for_statement: FOR '(' statement expr? ';' expr? ')' block ;
+while_statement: WHILE '(' expr ')' block ;
 
 // -------------------------------------------------------------- skipped tokens
 
