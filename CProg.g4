@@ -19,6 +19,8 @@ block: '{' statement* '}' ;
 statement: return_statement ';'
          | declaration ';'
          | if_condition
+         | for_statement
+         | while_statement
          | expr ';'
          | ';' ;
 return_statement: RETURN expr ;
@@ -49,6 +51,8 @@ expr: PAR_OP='(' expr ')'
 arg_list: expr (',' expr)* ;
 
 if_condition: IF '(' expr ')' block (ELSE IF '(' expr ')' block)* (ELSE block)? ;
+for_statement: FOR '(' statement expr? ';' expr? ')'
+while_statement: WHILE '(' expr ')'
 
 // -------------------------------------------------------------- skipped tokens
 
@@ -68,6 +72,8 @@ CHAR_TYPE_NAME: 'char' ;
 RETURN: 'return' ;
 IF: 'if' ;
 ELSE: 'else' ;
+FOR: 'for' ;
+WHILE: 'while' ;
 OP_PP: '++';
 OP_MM: '--';
 OP_PLUS: '+' ;
