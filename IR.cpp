@@ -61,16 +61,28 @@ void TableOfSymbols::add_symbol(std::string identifier, Type type)
 
 bool TableOfSymbols::is_declared(std::string identifier) const
 {
+    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
+    {
+        return true;
+    }
     return symbols.find(identifier) != symbols.end();
 }
 
 const SymbolProperties& TableOfSymbols::get_symbol(std::string identifier) const
 {
+    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
+    {
+        return parent->symbols.at(identifier);
+    }
     return symbols.at(identifier);
 }
 
 SymbolProperties& TableOfSymbols::get_symbol(std::string identifier)
 {
+    if(parent && parent->symbols.find(identifier) != parent->symbols.end())
+    {
+        return parent->symbols.at(identifier);
+    }
     return symbols.at(identifier);
 }
 
