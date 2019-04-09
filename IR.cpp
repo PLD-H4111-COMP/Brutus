@@ -233,6 +233,9 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::cmp_ne:
             operation = "cmp_ne";
         break;
+        case IRInstr::Operation::cmp_null:
+            operation = "cmp_null";
+        break;
         case IRInstr::Operation::band:
             operation = "band";
         break;
@@ -328,7 +331,7 @@ void IRInstr::gen_asm(Writer& w)
         break;
         case Operation::call:
             w.assembly(1) << "movq $0, %rax" << std::endl;
-            for (int count_params = 2; count_params < params.size(); ++count_params) // passing parameters
+            for (size_t count_params = 2; count_params < params.size(); ++count_params) // passing parameters
             {
                 if (count_params < 8)
                 {
@@ -345,6 +348,9 @@ void IRInstr::gen_asm(Writer& w)
             {
                 w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl; // getting return value
             }
+        break;
+        case Operation::cmp_null:
+            w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
         break;
         case Operation::cmp_eq:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -409,13 +415,12 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::land:
-            
+
         break;
         case Operation::lor:
-            
+
         break;
         case Operation::lnot:
-            //w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
             w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
             w.assembly(1) << "sete %al" << std::endl;
             w.assembly(1) << "movzbl %al, %rax" << std::endl;
@@ -522,11 +527,22 @@ BasicBlock::~BasicBlock()
 void BasicBlock::gen_asm(Writer& writer)
 {
     writer.assembly(0) << "." << label << ":" << std::endl;
-    for (IRInstr* instr : instrs){
+    for (IRInstr* instr : instrs)
+    {
         instr->gen_asm(writer);
     }
-    /*
-    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
+
+    if(instrs.empty())
+    {
+        return;
+    }
+
+    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_null)
+    {
+        writer.assembly(1) << "je " << exit_false->label << std::endl;
+        writer.assembly(1) << "jne " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
         writer.assembly(1) << "jne " << exit_false->label << std::endl;
         writer.assembly(1) << "je " << exit_true->label << std::endl;
@@ -560,10 +576,10 @@ void BasicBlock::gen_asm(Writer& writer)
         writer.assembly(1) << "je " << exit_false->label << std::endl;
         writer.assembly(1) << "jne " << exit_true->label << std::endl;
     }
-    else if(exit_true!=nullptr)
+    else
     {
         writer.assembly(1) << "jmp " << exit_true->label << std::endl;
-    }*/
+    }
 }
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params)
@@ -606,7 +622,7 @@ void CFG::gen_asm_prologue(Writer& w){
     size_t stack_size = symbols.get_aligned_size(32);
     if (stack_size != 0)
         w.assembly(1) << "subq $" << std::to_string(stack_size) << ", %rsp" << std::endl;
-    
+
     // To do : add the parameters
     std::vector<std::string> parameters_names;
     symbols.get_parameters_names(parameters_names);
@@ -656,9 +672,12 @@ Type CFG::get_var_type(const std::string &name) const
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
     ast(fundcef), nextBBnumber(0), function_name(name), symbols(global_symbols)
 {
-    current_bb = new BasicBlock(this, new_BB_name());
-    bbs.push_back(current_bb);
-    bbs.push_back(new BasicBlock(this, new_BB_name()));
+    BasicBlock* entry = new BasicBlock(this, new_BB_name());
+    BasicBlock* exit = new BasicBlock(this, new_BB_name());
+    entry->exit_true = exit;
+    bbs.push_back(entry);
+    bbs.push_back(exit);
+    current_bb = entry;
 }
 
 
@@ -717,7 +736,7 @@ void CFG::print_debug_infos_variables() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class IRStore                                                              //
+// class IR                                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
 IR::IR(Writer &writer) : writer(writer)

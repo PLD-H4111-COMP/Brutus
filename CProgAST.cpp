@@ -206,6 +206,51 @@ std::string CProgASTDeclarator::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTIfStatement : public CProgASTStatement                       //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTIfStatement::CProgASTIfStatement(CProgASTExpression* condition, CProgASTStatement* if_statement, CProgASTStatement* else_statement) :
+    condition(condition), if_statement(if_statement), else_statement(else_statement)
+{}
+
+CProgASTIfStatement::~CProgASTIfStatement()
+{
+    delete condition;
+    delete if_statement;
+    delete else_statement;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTIfStatement::build_ir(CFG* cfg) const
+{
+    BasicBlock* test_bb = cfg->current_bb;
+    std::string test_result = condition->build_ir(cfg);
+    test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
+    BasicBlock* then_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    cfg->current_bb = then_bb;
+    if_statement->build_ir(cfg);
+    BasicBlock* after_if_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    after_if_bb->exit_true = test_bb->exit_true;
+    after_if_bb->exit_false = test_bb->exit_false;
+    then_bb->exit_true = after_if_bb;
+    then_bb->exit_false = nullptr;
+    test_bb->exit_true = then_bb;
+    test_bb->exit_false = nullptr;
+    if(else_statement != nullptr)
+    {
+        BasicBlock* else_bb = new BasicBlock(cfg, cfg->new_BB_name());
+        cfg->current_bb = else_bb;
+        else_statement->build_ir(cfg);
+        else_bb->exit_true = after_if_bb;
+        else_bb->exit_false = nullptr;
+        test_bb->exit_false = else_bb;
+    }
+    cfg->current_bb = after_if_bb;
+    return ""; // ??
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAssignment                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
