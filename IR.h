@@ -69,6 +69,7 @@ public:
     SymbolProperties& get_symbol(std::string identifier);
     size_t get_aligned_size(size_t alignment_size) const;
     const std::string get_last_symbol_name() const;
+    void get_parameters_names(std::vector<std::string> &names);
 
     void print_debug_infos() const;
 protected:
