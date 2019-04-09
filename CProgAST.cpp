@@ -84,6 +84,35 @@ CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTCompoundStatement : public CProgASTStatement                       //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTCompoundStatement::~CProgASTCompoundStatement()
+{
+    for(const CProgASTStatement* statement : statements)
+    {
+        delete statement;
+    }
+}
+
+// ----------------------------------------------------- Public Member Functions
+
+void CProgASTCompoundStatement::add_statement(CProgASTStatement* statement)
+{
+    statements.push_back(statement);
+}
+
+std::string CProgASTCompoundStatement::build_ir(CFG* cfg) const
+{
+    for(const CProgASTStatement* statement : statements)
+    {
+        statement->build_ir(cfg);
+    }
+    return ""; // ??
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTReturn : public CProgASTStatement                            //
 ////////////////////////////////////////////////////////////////////////////////
 

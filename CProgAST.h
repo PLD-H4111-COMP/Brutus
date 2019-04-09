@@ -86,6 +86,27 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTCompoundStatement : public CProgASTStatement                 //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTCompoundStatement : public CProgASTStatement {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTCompoundStatement() = default;
+    CProgASTCompoundStatement(const CProgASTCompoundStatement& src) = delete;
+    virtual ~CProgASTCompoundStatement();
+
+    // ------------------------------------------------- Public Member Functions
+    void add_statement(CProgASTStatement* statement);
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTCompoundStatement& operator=(const CProgASTCompoundStatement& src) = delete;
+private:
+    std::vector<const CProgASTStatement*> statements;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTReturn : public CProgASTStatement                            //
 ////////////////////////////////////////////////////////////////////////////////
 
