@@ -44,7 +44,7 @@ extern std::map<Type, const TypeProperties> types;
 struct SymbolProperties {
     // ------------------------------------------------------------- Constructor
     SymbolProperties() = default;
-    SymbolProperties(Type type, int index, bool initialized = false, bool used = false, bool callable = false);
+    SymbolProperties(Type type, int index, bool initialized = false, bool used = false, bool callable = false, int arg_index = -1);
 
     // ------------------------------------------------------- Public Properties
     Type type;
@@ -52,8 +52,8 @@ struct SymbolProperties {
     bool initialized;
     bool used;
     bool callable;
+    int arg_index;
     std::vector<Type> arg_types;
-    // BasicBlock* scope;
 };
 
 class TableOfSymbols {
@@ -64,9 +64,11 @@ public:
     // ------------------------------------------------- Public Member Functions
     std::string add_tmp_var(Type type);
     void add_symbol(std::string identifier, Type type);
+    void add_arg(std::string identifier, Type type);
     bool is_declared(std::string identifier) const;
     const SymbolProperties& get_symbol(std::string identifier) const;
     SymbolProperties& get_symbol(std::string identifier);
+    const SymbolProperties& get_arg(int index) const;
     size_t get_aligned_size(size_t alignment_size) const;
     const std::string get_last_symbol_name() const;
     void get_parameters_names(std::vector<std::string> &names);
@@ -78,6 +80,8 @@ protected:
     TableOfSymbols* parent;
     std::map<std::string, SymbolProperties> symbols;
     size_t size;
+    int next_arg_index;         // index of the next argument in the args list
+    int next_arg_offset;     // offset of the next argument in the stack, from %rbp
     int next_tmp_var_id;
 };
 
@@ -204,6 +208,7 @@ public:
 
     // symbol table methods
     void add_to_symbol_table(const std::string &name, Type type);
+    void add_arg_to_symbol_table(const std::string &name, Type type);
     std::string create_new_tempvar(Type type);
     int get_var_index(const std::string &name) const;
     Type get_var_type(const std::string &name) const;
@@ -222,7 +227,7 @@ public:
     std::string new_BB_name();
     BasicBlock* current_bb;
 
-protected:    
+protected:
     int nextBBnumber; /**< just for naming */
     std::string function_name;
     TableOfSymbols symbols;
@@ -241,7 +246,7 @@ public :
     void add_cfg(CFG* cfg);
     void gen_asm();
     void print_debug_infos() const;
-    
+
     TableOfSymbols global_symbols;
 private :
     Writer &writer;
