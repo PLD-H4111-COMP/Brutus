@@ -3,9 +3,10 @@
 #include "Writer.h"
 
 // ---------------------------------------------------------- C++ System Headers
+#include <algorithm>
 #include <iostream>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 std::vector<std::string> param_registers = {"r8d", "r9d", "rcx", "rdx", "rsi", "rdi"};
@@ -37,13 +38,13 @@ std::map<Type, const TypeProperties> types =
 ////////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------- Constructor
-SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool used, bool callable) :
-    type(type), index(index), initialized(initialized), used(used), callable(callable)
+SymbolProperties::SymbolProperties(Type type, int index, bool initialized, bool used, bool callable, int arg_index) :
+    type(type), index(index), initialized(initialized), used(used), callable(callable), arg_index(arg_index)
 {}
 
 // ----------------------------------------------------------------- Constructor
 TableOfSymbols::TableOfSymbols(TableOfSymbols* parent) :
-    parent(parent), size(0), next_tmp_var_id(0)
+    parent(parent), size(0), next_arg_index(0), next_arg_offset(0), next_tmp_var_id(0)
 {}
 
 // ----------------------------------------------------- Public Member Functions
@@ -60,6 +61,22 @@ void TableOfSymbols::add_symbol(std::string identifier, Type type)
 {
     size += types.at(type).size;
     symbols[identifier] = SymbolProperties(type, get_next_free_symbol_index());
+}
+
+void TableOfSymbols::add_arg(std::string identifier, Type type)
+{
+    if(next_arg_index < 6)
+    {
+        size += types.at(type).size;
+        symbols[identifier] = SymbolProperties(type, get_next_free_symbol_index());
+        symbols[identifier].arg_index = next_arg_index++;
+    }
+    else
+    {
+        symbols[identifier] = SymbolProperties(type, 16 + next_arg_offset);
+        symbols[identifier].arg_index = next_arg_index++;
+        next_arg_offset += types.at(type).size;
+    }
 }
 
 bool TableOfSymbols::is_declared(std::string identifier) const
@@ -87,6 +104,25 @@ SymbolProperties& TableOfSymbols::get_symbol(std::string identifier)
         return parent->symbols.at(identifier);
     }
     return symbols.at(identifier);
+}
+
+const SymbolProperties& TableOfSymbols::get_arg(int index) const
+{
+    if(parent && index < parent->next_arg_index)
+    {
+        return parent->get_arg(index);
+    }
+    else if(index < next_arg_index)
+    {
+        auto it = std::find_if(symbols.begin(), symbols.end(),
+            [index](const std::pair<std::string, SymbolProperties>& t) -> bool
+            {
+                return t.second.arg_index == index;
+            }
+        );
+        return it->second;
+    }
+    throw std::out_of_range("TableOfSymbols::get_arg() : index is out of range");
 }
 
 const std::string TableOfSymbols::get_last_symbol_name() const
@@ -472,7 +508,7 @@ void BasicBlock::gen_asm(Writer& writer)
     else if (exit_false != nullptr)
     {
         std::string name = cfg->get_last_var_name();
-        
+
         writer.assembly(1) << "movq " << cfg->get_var_index(name) << "(%rbp), %rax" << std::endl;
         writer.assembly(1) << "cmp %rax, $0" << std::endl;
         writer.assembly(1) << "je " << exit_false->label << std::endl;
@@ -596,6 +632,11 @@ void CFG::add_to_symbol_table(const std::string &name, Type type)
     symbols.add_symbol(name, type);
 }
 
+void CFG::add_arg_to_symbol_table(const std::string &name, Type type)
+{
+    symbols.add_arg(name, type);
+}
+
 std::string CFG::create_new_tempvar(Type type)
 {
     return symbols.add_tmp_var(type);
@@ -670,4 +711,3 @@ void IR::print_debug_infos() const
         cfgs[i]->print_debug_infos();
     }
 }
-

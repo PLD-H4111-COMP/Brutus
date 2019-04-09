@@ -70,13 +70,11 @@ CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
     SymbolProperties& fproperties = global_symbols->get_symbol(identifier);
     fproperties.callable = true;
     fproperties.arg_types = arg_types;
-    
-    // Add the function parameters in global_symbols. Their name must begin with !param_
 
     CFG* cfg = new CFG(this, identifier, global_symbols);
     for(size_t i=0; i<arg_names.size(); ++i)
     {
-        cfg->add_to_symbol_table(arg_names[i], arg_types[i]);
+        cfg->add_arg_to_symbol_table(arg_names[i], arg_types[i]);
     }
     for(CProgASTStatement* statement : statements)
     {
@@ -643,7 +641,6 @@ void CProgASTFunccall::add_arg(CProgASTExpression* arg)
 std::string CProgASTFunccall::build_ir(CFG* cfg) const
 {
     Type result_type = cfg->get_var_type(func_name->getText());
-    std::cout << "Hey ! : " << types.at(result_type).name << std::endl;
     std::string tmp_name = "";
     if (result_type != Type::VOID)
     {
