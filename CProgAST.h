@@ -253,6 +253,26 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTBNot : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTBNot : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTBNot(CProgASTExpression* expression);
+    CProgASTBNot(const CProgASTBNot& src) = delete;
+    virtual ~CProgASTBNot();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTBNot& operator=(const CProgASTBNot& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTLessThan : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 

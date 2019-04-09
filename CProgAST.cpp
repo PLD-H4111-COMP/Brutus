@@ -286,6 +286,30 @@ std::string CProgASTBXor::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTBNot : public CProgASTExpression                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTBNot::CProgASTBNot(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTBNot::~CProgASTBNot()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTBNot::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    Type result_type = cfg->get_var_type(exp_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::bnot, result_type, {tmp_name, exp_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTLessThan : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 
