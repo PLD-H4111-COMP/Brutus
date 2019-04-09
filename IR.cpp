@@ -221,6 +221,9 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::cmp_ne:
             operation = "cmp_ne";
         break;
+        case IRInstr::Operation::cmp_null:
+            operation = "cmp_null";
+        break;
         case IRInstr::Operation::band:
             operation = "band";
         break;
@@ -505,6 +508,11 @@ void BasicBlock::gen_asm(Writer& writer)
         instr->gen_asm(writer);
     }
 
+    if(instrs.empty())
+    {
+        return;
+    }
+
     if (instrs.back()->get_operation() == IRInstr::Operation::cmp_null)
     {
         writer.assembly(1) << "je " << exit_false->label << std::endl;
@@ -640,9 +648,12 @@ Type CFG::get_var_type(const std::string &name) const
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
     ast(fundcef), nextBBnumber(0), function_name(name), symbols(global_symbols)
 {
-    current_bb = new BasicBlock(this, new_BB_name());
-    bbs.push_back(current_bb);
-    bbs.push_back(new BasicBlock(this, new_BB_name()));
+    BasicBlock* entry = new BasicBlock(this, new_BB_name());
+    BasicBlock* exit = new BasicBlock(this, new_BB_name());
+    entry->exit_true = exit;
+    bbs.push_back(entry);
+    bbs.push_back(exit);
+    current_bb = entry;
 }
 
 
