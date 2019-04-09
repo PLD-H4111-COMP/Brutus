@@ -109,7 +109,7 @@ public:
         band,
         bor,
         bxor,
-		bnot,
+        bnot,
         ret
     } Operation;
 
