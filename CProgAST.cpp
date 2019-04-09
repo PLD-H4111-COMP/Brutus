@@ -195,8 +195,9 @@ CProgASTIfStatement::~CProgASTIfStatement()
 // ----------------------------------------------------- Public Member Functions
 std::string CProgASTIfStatement::build_ir(CFG* cfg) const
 {
-    std::string test_result = condition->build_ir(cfg);
     BasicBlock* test_bb = cfg->current_bb;
+    std::string test_result = condition->build_ir(cfg);
+    test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
     BasicBlock* then_bb = new BasicBlock(cfg, cfg->new_BB_name());
     cfg->current_bb = then_bb;
     if_statement->build_ir(cfg);

@@ -111,6 +111,7 @@ public:
         cmp_gt,
         cmp_ge,
         cmp_ne,
+        cmp_null,
         band,
         bor,
         bxor,

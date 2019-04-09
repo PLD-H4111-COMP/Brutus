@@ -322,6 +322,9 @@ void IRInstr::gen_asm(Writer& w)
                 w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl; // getting return value
             }
         break;
+        case Operation::cmp_null:
+            w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
+        break;
         case Operation::cmp_eq:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
             w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
@@ -391,7 +394,6 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::lnot:
-            //w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
             w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
             w.assembly(1) << "sete %al" << std::endl;
             w.assembly(1) << "movzbl %al, %rax" << std::endl;
@@ -498,11 +500,17 @@ BasicBlock::~BasicBlock()
 void BasicBlock::gen_asm(Writer& writer)
 {
     writer.assembly(0) << "." << label << ":" << std::endl;
-    for (IRInstr* instr : instrs){
+    for (IRInstr* instr : instrs)
+    {
         instr->gen_asm(writer);
     }
 
-    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
+    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_null)
+    {
+        writer.assembly(1) << "je " << exit_false->label << std::endl;
+        writer.assembly(1) << "jne " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
         writer.assembly(1) << "jne " << exit_false->label << std::endl;
         writer.assembly(1) << "je " << exit_true->label << std::endl;
@@ -693,7 +701,7 @@ void CFG::print_debug_infos_variables() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class IRStore                                                              //
+// class IR                                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
 IR::IR(Writer &writer) : writer(writer)
