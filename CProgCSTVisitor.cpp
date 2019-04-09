@@ -211,7 +211,7 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         {
             if(ctx->OP_PLUS())
             {
-                // NOP
+                rexpr = expr;
             }
             else if(ctx->OP_MINUS())
             {
