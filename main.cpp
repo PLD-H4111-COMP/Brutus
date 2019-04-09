@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     CProgCSTVisitor visitor;
     CProgASTProgram *ast = visitor.visit(tree).as<CProgASTProgram*>();
 
-    IR ir(writer);
+    IR ir(writer, options.input_file);
     ast->build_ir(ir);
     ir.print_debug_infos();
     ir.gen_asm();

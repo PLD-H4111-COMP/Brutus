@@ -253,7 +253,7 @@ protected:
 
 class IR {
 public :
-    IR(Writer &writer);
+    IR(Writer &writer, const std::string &filename);
     ~IR();
     void add_cfg(CFG* cfg);
     void gen_asm();
@@ -262,5 +262,6 @@ public :
     TableOfSymbols global_symbols;
 private :
     Writer &writer;
+    std::string filename;
     std::vector<CFG*> cfgs;
 };

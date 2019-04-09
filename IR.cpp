@@ -804,7 +804,7 @@ void CFG::print_debug_infos_variables() const
 // class IR                                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
-IR::IR(Writer &writer) : writer(writer)
+IR::IR(Writer &writer, const std::string &filename) : writer(writer), filename(filename)
 {
 
 }
@@ -823,7 +823,7 @@ void IR::add_cfg(CFG* cfg)
 }
 
 void IR::gen_asm(){
-    writer.assembly(1) << ".file\t\"ret42.c\"" << std::endl;
+    writer.assembly(1) << ".file\t\""+filename+"\"" << std::endl;
     writer.assembly(1) << ".text" << std::endl;
     for (CFG* cfg : cfgs){
         cfg->gen_asm_prologue(writer);
