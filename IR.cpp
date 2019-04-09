@@ -254,25 +254,45 @@ void IRInstr::gen_asm(Writer& w)
         break;
         case Operation::cmp_eq:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("cmp", "a", params[2]) << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
             w.assembly(1) << "sete %al" << std::endl;
             w.assembly(1) << "movzbq %al, %rax" << std::endl;
             w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_lt:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+            w.assembly(1) << "setl %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_le:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+            w.assembly(1) << "setle %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_gt:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+            w.assembly(1) << "setg %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_ge:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+            w.assembly(1) << "setge %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::cmp_ne:
-
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+            w.assembly(1) << "setne %al" << std::endl;
+            w.assembly(1) << "movzbq %al, %rax" << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::band:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
