@@ -168,7 +168,14 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         }
         else if (ctx->POSTFIX_OP)
         {
-            // TODO
+            if(ctx->OP_PP())
+            {
+                rexpr = new CProgASTPostPP(expr);
+            }
+            else if(ctx->OP_MM())
+            {
+                rexpr = new CProgASTPostMM(expr);
+            }
         }
         else if (ctx->PREFIX_OP)
         {
@@ -182,11 +189,11 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             }
             else if(ctx->OP_PP())
             {
-                // TODO
+                rexpr = new CProgASTPrePP(expr);
             }
             else if(ctx->OP_MM())
             {
-                // TODO
+                rexpr = new CProgASTPreMM(expr);
             }
             else if(ctx->OP_NOT())
             {

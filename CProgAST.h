@@ -190,6 +190,86 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPrePP : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTPrePP : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTPrePP(CProgASTExpression* expression);
+    CProgASTPrePP(const CProgASTPrePP& src) = delete;
+    virtual ~CProgASTPrePP();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTPrePP& operator=(const CProgASTPrePP& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPreMM : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTPreMM : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTPreMM(CProgASTExpression* expression);
+    CProgASTPreMM(const CProgASTPreMM& src) = delete;
+    virtual ~CProgASTPreMM();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTPreMM& operator=(const CProgASTPreMM& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPostPP : public CProgASTExpression                           //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTPostPP : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTPostPP(CProgASTExpression* expression);
+    CProgASTPostPP(const CProgASTPostPP& src) = delete;
+    virtual ~CProgASTPostPP();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTPostPP& operator=(const CProgASTPostPP& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPostMM : public CProgASTExpression                           //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTPostMM : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTPostMM(CProgASTExpression* expression);
+    CProgASTPostMM(const CProgASTPostMM& src) = delete;
+    virtual ~CProgASTPostMM();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTPostMM& operator=(const CProgASTPostMM& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTBAnd : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 

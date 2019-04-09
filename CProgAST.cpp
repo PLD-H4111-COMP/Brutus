@@ -208,6 +208,98 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPrePP : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTPrePP::CProgASTPrePP(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTPrePP::~CProgASTPrePP()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTPrePP::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    cfg->current_bb->add_IRInstr(IRInstr::pre_pp, cfg->get_var_type(exp_name), {exp_name});
+    return exp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPreMM : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTPreMM::CProgASTPreMM(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTPreMM::~CProgASTPreMM()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTPreMM::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    cfg->current_bb->add_IRInstr(IRInstr::pre_mm, cfg->get_var_type(exp_name), {exp_name});
+    return exp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPostPP : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTPostPP::CProgASTPostPP(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTPostPP::~CProgASTPostPP()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTPostPP::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    Type result_type = cfg->get_var_type(exp_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::post_pp, result_type, {tmp_name, exp_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTPostMM : public CProgASTExpression                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTPostMM::CProgASTPostMM(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTPostMM::~CProgASTPostMM()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTPostMM::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    Type result_type = cfg->get_var_type(exp_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::post_mm, result_type, {tmp_name, exp_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTBAnd : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 
