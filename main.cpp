@@ -39,6 +39,11 @@ int main(int argc, char **argv)
     }
 
     ifstream file(options.input_file);
+    if (!file)
+    {
+        Writer::error() << "cannot open " << options.input_file << std::endl;
+        return 1;
+    }
     ANTLRInputStream input(file);
     CProgLexer lexer(&input);
     CommonTokenStream tokens(&lexer);

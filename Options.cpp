@@ -1,6 +1,5 @@
 #include "Options.h"
-
-#include <iostream>
+#include "Writer.h"
 
 Options::Options() : input_file(""), output_file("brutus.s"), optimisation(false), generate_assembly(true), help(false)
 {
@@ -37,7 +36,7 @@ bool Options::parseOptions(int nb_options, char **option_inputs)
                 }
                 else
                 {
-                    std::cerr << "You must specify the output file after -o." << std::endl;
+                    Writer::error() << "you must specify the output file after -o." << std::endl;
                     return false;
                 }
             }
@@ -51,7 +50,7 @@ bool Options::parseOptions(int nb_options, char **option_inputs)
             }
             else
             {
-                std::cerr << "Unknown option : " << input << std::endl;
+                Writer::error() << "unknown option : " << input << std::endl;
                 return false;
             }
         }
