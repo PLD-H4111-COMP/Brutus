@@ -74,6 +74,8 @@ CHAR_TYPE_NAME: 'char' ;
 RETURN: 'return' ;
 IF: 'if' ;
 ELSE: 'else' ;
+WHILE: 'while' ;
+FOR: 'for' ;
 OP_PP: '++';
 OP_MM: '--';
 OP_PLUS: '+' ;
