@@ -233,6 +233,15 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::bnot:
             operation = "bnot";
         break;
+        case IRInstr::Operation::land:
+            operation = "and";
+        break;
+        case IRInstr::Operation::lor:
+            operation = "or";
+        break;
+        case IRInstr::Operation::lnot:
+            operation = "not";
+        break;
         case IRInstr::Operation::ret:
             operation = "ret";
         break;
@@ -373,6 +382,19 @@ void IRInstr::gen_asm(Writer& w)
         case Operation::bnot:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
             w.assembly(1) << x86_instr_reg("not", "a", bb->cfg->get_var_type(params[1])) << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        break;
+        case Operation::land:
+            
+        break;
+        case Operation::lor:
+            
+        break;
+        case Operation::lnot:
+            //w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
+            w.assembly(1) << "sete %al" << std::endl;
+            w.assembly(1) << "movzbl %al, %rax" << std::endl;
             w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::ret:

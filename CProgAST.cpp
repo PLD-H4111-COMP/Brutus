@@ -310,6 +310,82 @@ std::string CProgASTBNot::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTAnd : public CProgASTExpression                              //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTAnd::CProgASTAnd(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTAnd::~CProgASTAnd()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTAnd::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::land, result_type, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTOr : public CProgASTExpression                               //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTOr::CProgASTOr(CProgASTExpression* lhs, CProgASTExpression* rhs) :
+    lhs_operand(lhs), rhs_operand(rhs)
+{}
+
+CProgASTOr::~CProgASTOr()
+{
+    delete lhs_operand;
+    delete rhs_operand;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTOr::build_ir(CFG* cfg) const
+{
+    std::string lhs_name = lhs_operand->build_ir(cfg);
+    std::string rhs_name = rhs_operand->build_ir(cfg);
+    Type result_type = cfg->get_max_type(lhs_name, rhs_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::lor, result_type, {tmp_name, lhs_name, rhs_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTNot : public CProgASTExpression                              //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTNot::CProgASTNot(CProgASTExpression* expression) :
+    inner_expression(expression)
+{}
+
+CProgASTNot::~CProgASTNot()
+{
+    delete inner_expression;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTNot::build_ir(CFG* cfg) const
+{
+    std::string exp_name = inner_expression->build_ir(cfg);
+    Type result_type = cfg->get_var_type(exp_name);
+    std::string tmp_name = cfg->create_new_tempvar(result_type);
+    cfg->current_bb->add_IRInstr(IRInstr::lnot, result_type, {tmp_name, exp_name});
+    return tmp_name;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTLessThan : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 

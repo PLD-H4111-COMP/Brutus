@@ -115,6 +115,9 @@ public:
         bor,
         bxor,
         bnot,
+        land,
+        lor,
+        lnot,
         ret
     } Operation;
 
