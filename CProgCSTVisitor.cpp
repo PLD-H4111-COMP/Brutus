@@ -190,7 +190,7 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             }
             else if(ctx->OP_NOT())
             {
-                // TODO
+                rexpr = new CProgASTNot(expr);
             }
             else if(ctx->OP_BNOT())
             {
@@ -235,6 +235,24 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         }else if(ctx->OP_BXOR())
         {
             rexpr = new CProgASTBXor(lhs, rhs);
+        }else if(ctx->OP_AND())
+        {
+            rexpr = new CProgASTAnd(lhs, rhs);
+        }else if(ctx->OP_OR())
+        {
+            rexpr = new CProgASTOr(lhs, rhs);
+        }else if(ctx->OP_LT())
+        {
+            rexpr = new CProgASTLessThan(lhs, rhs);
+        }else if(ctx->OP_LTE())
+        {
+            rexpr = new CProgASTLessThanOrEqual(lhs, rhs);
+        }else if(ctx->OP_GT())
+        {
+            rexpr = new CProgASTGreaterThan(lhs, rhs);
+        }else if(ctx->OP_GTE())
+        {
+            rexpr = new CProgASTGreaterThanOrEqual(lhs, rhs);
         }
     }
     return rexpr;

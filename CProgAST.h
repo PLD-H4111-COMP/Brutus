@@ -273,6 +273,68 @@ private:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTAnd : public CProgASTExpression                              //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTAnd : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTAnd(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTAnd(const CProgASTAnd& src) = delete;
+    virtual ~CProgASTAnd();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTAnd& operator=(const CProgASTAnd& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTOr : public CProgASTExpression                               //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTOr : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTOr(CProgASTExpression* lhs, CProgASTExpression* rhs);
+    CProgASTOr(const CProgASTOr& src) = delete;
+    virtual ~CProgASTOr();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTOr& operator=(const CProgASTOr& src) = delete;
+private:
+    const CProgASTExpression* lhs_operand;
+    const CProgASTExpression* rhs_operand;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTNot : public CProgASTExpression                              //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTNot : public CProgASTExpression {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTNot(CProgASTExpression* expression);
+    CProgASTNot(const CProgASTNot& src) = delete;
+    virtual ~CProgASTNot();
+
+    // ------------------------------------------------- Public Member Functions
+    virtual std::string build_ir(CFG* cfg) const;
+
+    // ---------------------------------------------------- Overloaded Operators
+    CProgASTNot& operator=(const CProgASTNot& src) = delete;
+private:
+    const CProgASTExpression* inner_expression;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTLessThan : public CProgASTExpression                         //
 ////////////////////////////////////////////////////////////////////////////////
 
