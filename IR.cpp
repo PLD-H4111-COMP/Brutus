@@ -424,9 +424,30 @@ void BasicBlock::gen_asm(Writer& writer)
         instr->gen_asm(writer);
     }
     
-    /*if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
+    if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
         writer.assembly(1) << "jne " << exit_false->label << std::endl;
+        writer.assembly(1) << "je " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_lt)
+    {
+        writer.assembly(1) << "jge " << exit_false->label << std::endl;
+        writer.assembly(1) << "jl " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_le)
+    {
+        writer.assembly(1) << "jg " << exit_false->label << std::endl;
+        writer.assembly(1) << "jle " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_gt)
+    {
+        writer.assembly(1) << "jle " << exit_false->label << std::endl;
+        writer.assembly(1) << "jg " << exit_true->label << std::endl;
+    }
+    else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_ge)
+    {
+        writer.assembly(1) << "jl " << exit_false->label << std::endl;
+        writer.assembly(1) << "jge " << exit_true->label << std::endl;
     }
     else if (exit_false != nullptr)
     {
@@ -435,11 +456,12 @@ void BasicBlock::gen_asm(Writer& writer)
         writer.assembly(1) << "movq " << cfg->get_var_index(name) << "(%rbp), %rax" << std::endl;
         writer.assembly(1) << "cmp %rax, $0" << std::endl;
         writer.assembly(1) << "je " << exit_false->label << std::endl;
+        writer.assembly(1) << "jne " << exit_true->label << std::endl;
     }
     else
     {
         writer.assembly(1) << "jmp " << exit_true->label << std::endl;
-    }*/
+    }
 }
 
 void BasicBlock::add_IRInstr(IRInstr::Operation op, Type t, std::vector<std::string> params)
