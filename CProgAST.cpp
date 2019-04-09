@@ -195,7 +195,29 @@ CProgASTIfStatement::~CProgASTIfStatement()
 // ----------------------------------------------------- Public Member Functions
 std::string CProgASTIfStatement::build_ir(CFG* cfg) const
 {
-    // ...
+    std::string test_result = condition->build_ir(cfg);
+    BasicBlock* test_bb = cfg->current_bb;
+    BasicBlock* then_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    cfg->current_bb = then_bb;
+    if_statement->build_ir(cfg);
+    BasicBlock* after_if_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    after_if_bb->exit_true = test_bb->exit_true;
+    after_if_bb->exit_false = test_bb->exit_false;
+    then_bb->exit_true = after_if_bb;
+    then_bb->exit_false = nullptr;
+    test_bb->exit_true = then_bb;
+    test_bb->exit_false = nullptr;
+    if(else_statement != nullptr)
+    {
+        BasicBlock* else_bb = new BasicBlock(cfg, cfg->new_BB_name());
+        cfg->current_bb = else_bb;
+        else_statement->build_ir(cfg);
+        else_bb->exit_true = after_if_bb;
+        else_bb->exit_false = nullptr;
+        test_bb->exit_false = else_bb;
+    }
+    cfg->current_bb = after_if_bb;
+    return ""; // ??
 }
 
 ////////////////////////////////////////////////////////////////////////////////
