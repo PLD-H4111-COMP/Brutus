@@ -71,6 +71,8 @@ CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
     fproperties.callable = true;
     fproperties.arg_types = arg_types;
     
+    // Add the function parameters in global_symbols. Their name must begin with !param_
+
     CFG* cfg = new CFG(this, identifier, global_symbols);
     for(size_t i=0; i<arg_names.size(); ++i)
     {
