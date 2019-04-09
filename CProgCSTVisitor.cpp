@@ -70,6 +70,10 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
     {
         return static_cast<CProgASTStatement*>(visit(ctx->if_condition()).as<CProgASTIfStatement*>());
     }
+    else if(ctx->compound_statement() != nullptr)
+    {
+        return static_cast<CProgASTStatement*>(visit(ctx->compound_statement()).as<CProgASTCompoundStatement*>());
+    }
     else
     {
         Writer::error() << "empty statement currently not supported" << std::endl;
@@ -142,6 +146,16 @@ antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *c
     return new CProgASTAssignment(identifier, expression);
 }
 
+antlrcpp::Any CProgCSTVisitor::visitCompound_statement(CProgParser::Compound_statementContext *ctx)
+{
+    CProgASTCompoundStatement* compound_statement = new CProgASTCompoundStatement();
+    for(auto statement_ctx : ctx->statement())
+    {
+        compound_statement->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
+    }
+    return compound_statement;
+}
+
 antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
 {
     CProgASTExpression* rexpr = nullptr;
@@ -184,7 +198,14 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         }
         else if (ctx->POSTFIX_OP)
         {
-            // TODO
+            if(ctx->OP_PP())
+            {
+                rexpr = new CProgASTPostPP(expr);
+            }
+            else if(ctx->OP_MM())
+            {
+                rexpr = new CProgASTPostMM(expr);
+            }
         }
         else if (ctx->PREFIX_OP)
         {
@@ -198,11 +219,11 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             }
             else if(ctx->OP_PP())
             {
-                // TODO
+                rexpr = new CProgASTPrePP(expr);
             }
             else if(ctx->OP_MM())
             {
-                // TODO
+                rexpr = new CProgASTPreMM(expr);
             }
             else if(ctx->OP_NOT())
             {

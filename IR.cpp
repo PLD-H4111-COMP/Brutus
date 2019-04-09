@@ -194,6 +194,18 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
         case IRInstr::Operation::neg:
             operation = "neg";
         break;
+        case IRInstr::Operation::pre_pp:
+            operation = "pre_pp";
+        break;
+        case IRInstr::Operation::pre_mm:
+            operation = "pre_mm";
+        break;
+        case IRInstr::Operation::post_pp:
+            operation = "post_pp";
+        break;
+        case IRInstr::Operation::post_mm:
+            operation = "post_mm";
+        break;
         case IRInstr::Operation::rmem:
             operation = "rmem";
         break;
@@ -296,6 +308,18 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
             w.assembly(1) << x86_instr_reg("neg", "a", bb->cfg->get_var_type(params[1])) << std::endl;
             w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        break;
+        case Operation::pre_pp:
+             w.assembly(1) << x86_instr("inc", bb->cfg->get_var_type(params[0])) << " " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
+        break;
+        case Operation::pre_mm:
+            w.assembly(1) << x86_instr("dec", bb->cfg->get_var_type(params[0])) << " " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
+        break;
+        case Operation::post_pp:
+            
+        break;
+        case Operation::post_mm:
+            
         break;
         case Operation::rmem:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
