@@ -177,6 +177,28 @@ std::string CProgASTDeclarator::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTIfStatement : public CProgASTStatement                       //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTIfStatement::CProgASTIfStatement(CProgASTExpression* condition, CProgASTStatement* if_statement, CProgASTStatement* else_statement) :
+    condition(condition), if_statement(if_statement), else_statement(else_statement)
+{}
+
+CProgASTIfStatement::~CProgASTIfStatement()
+{
+    delete condition;
+    delete if_statement;
+    delete else_statement;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTIfStatement::build_ir(CFG* cfg) const
+{
+    // ...
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAssignment                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 

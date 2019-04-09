@@ -66,6 +66,10 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
     {
         return static_cast<CProgASTStatement*>(visit(ctx->expr()).as<CProgASTExpression*>());
     }
+    else if(ctx->if_condition() != nullptr)
+    {
+        return static_cast<CProgASTStatement*>(visit(ctx->if_condition()).as<CProgASTIfStatement*>());
+    }
     else
     {
         Writer::error() << "empty statement currently not supported" << std::endl;
@@ -117,6 +121,18 @@ antlrcpp::Any CProgCSTVisitor::visitDeclaration(CProgParser::DeclarationContext 
         declaration->add_declarator(new CProgASTDeclarator(identifier, initializer));
     }
     return declaration;
+}
+
+antlrcpp::Any CProgCSTVisitor::visitIf_condition(CProgParser::If_conditionContext *ctx)
+{
+    CProgASTExpression* condition = visit(ctx->expr()).as<CProgASTExpression*>();
+    CProgASTStatement* if_statement = visit(ctx->statement(0)).as<CProgASTStatement*>();
+    CProgASTStatement* else_statement = nullptr;
+    if(ctx->statement().size() > 1)
+    {
+        else_statement = visit(ctx->statement(1)).as<CProgASTStatement*>();
+    }
+    return new CProgASTIfStatement(condition, if_statement, else_statement);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *ctx)
@@ -284,4 +300,3 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
     }
     return rexpr;
 }
-

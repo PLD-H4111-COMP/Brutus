@@ -304,7 +304,7 @@ void IRInstr::gen_asm(Writer& w)
         break;
         case Operation::call:
             w.assembly(1) << "movq $0, %rax" << std::endl;
-            for (int count_params = 2; count_params < params.size(); ++count_params) // passing parameters
+            for (size_t count_params = 2; count_params < params.size(); ++count_params) // passing parameters
             {
                 if (count_params < 8)
                 {
@@ -385,10 +385,10 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::land:
-            
+
         break;
         case Operation::lor:
-            
+
         break;
         case Operation::lnot:
             //w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -501,7 +501,7 @@ void BasicBlock::gen_asm(Writer& writer)
     for (IRInstr* instr : instrs){
         instr->gen_asm(writer);
     }
-    
+
     if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
         writer.assembly(1) << "jne " << exit_false->label << std::endl;
@@ -582,7 +582,7 @@ void CFG::gen_asm_prologue(Writer& w){
     size_t stack_size = symbols.get_aligned_size(32);
     if (stack_size != 0)
         w.assembly(1) << "subq $" << std::to_string(stack_size) << ", %rsp" << std::endl;
-    
+
     // To do : add the parameters
     std::vector<std::string> parameters_names;
     symbols.get_parameters_names(parameters_names);

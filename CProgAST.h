@@ -151,6 +151,25 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTIfStatement : public CProgASTStatement                       //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTIfStatement : public CProgASTStatement {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTIfStatement(CProgASTExpression* condition, CProgASTStatement* if_statement, CProgASTStatement* else_statement);
+    CProgASTIfStatement(const CProgASTIfStatement& src) = delete;
+    virtual ~CProgASTIfStatement();
+
+    // ------------------------------------------------- Public Member Functions
+    std::string build_ir(CFG* cfg) const;
+private:
+    const CProgASTExpression* condition;
+    const CProgASTStatement* if_statement;
+    const CProgASTStatement* else_statement;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTExpression : public CProgASTStatement                        //
 ////////////////////////////////////////////////////////////////////////////////
 
