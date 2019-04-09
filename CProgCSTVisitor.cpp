@@ -66,6 +66,10 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
     {
         return static_cast<CProgASTStatement*>(visit(ctx->expr()).as<CProgASTExpression*>());
     }
+    else if(ctx->compound_statement() != nullptr)
+    {
+        return static_cast<CProgASTStatement*>(visit(ctx->compound_statement()).as<CProgASTCompoundStatement*>());
+    }
     else
     {
         Writer::error() << "empty statement currently not supported" << std::endl;
@@ -124,6 +128,16 @@ antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *c
     CProgASTIdentifier* identifier = new CProgASTIdentifier(ctx->IDENTIFIER()->getText());
     CProgASTExpression* expression = visit(ctx->expr()).as<CProgASTExpression*>();
     return new CProgASTAssignment(identifier, expression);
+}
+
+antlrcpp::Any CProgCSTVisitor::visitCompound_statement(CProgParser::Compound_statementContext *ctx)
+{
+    CProgASTCompoundStatement* compound_statement = new CProgASTCompoundStatement();
+    for(auto statement_ctx : ctx->statement())
+    {
+        compound_statement->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
+    }
+    return compound_statement;
 }
 
 antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
