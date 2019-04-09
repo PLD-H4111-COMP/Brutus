@@ -71,7 +71,7 @@ public:
     const SymbolProperties& get_arg(int index) const;
     size_t get_aligned_size(size_t alignment_size) const;
     const std::string get_last_symbol_name() const;
-    void get_parameters_names(std::vector<std::string> &names);
+    int get_nb_parameters() const;
 
     void print_debug_infos() const;
 protected:
@@ -133,13 +133,16 @@ public:
     /** Actual code generation */
     void gen_asm(Writer& writer); /**< x86 assembly code generation for this IR instruction */
     static std::string IR_reg_to_asm(const std::string &reg, Type type); /**< helper method: inputs a, IR reg , returns e.g. "eax" for for the Type::INT_32 reg "a" */
+    static std::string x86_instr(const std::string &instr, Type type);
+    static std::string IR_param_reg_to_asm(const std::string &reg, Type type);
+    static std::string x86_instr_param(const std::string &instr, Type type);
 
     void print_debug_infos() const;
 
     Operation get_operation() const;
 
 private:
-    std::string x86_instr(const std::string &instr, Type type) const;
+    
     std::string x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const;
     std::string x86_instr_reg_var(const std::string &instr, const std::string &var, const std::string &reg) const;
     std::string x86_instr_reg(const std::string &instr, const std::string &reg, Type type) const;
@@ -223,6 +226,7 @@ public:
     bool is_declared(const std::string &name) const;
     Type get_max_type(const std::string &lhs, const std::string &rhs) const;
     std::string get_last_var_name() const;
+    int get_nb_parameters() const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;
