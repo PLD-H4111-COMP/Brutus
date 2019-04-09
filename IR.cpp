@@ -275,19 +275,19 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::band:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("and", params[2], "d") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("and", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::bor:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("or", params[2], "d") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("or", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::bxor:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("xor", params[2], "d") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_var_reg("xor", params[2], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::bnot:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -312,9 +312,10 @@ std::string IRInstr::IR_reg_to_asm(const std::string &reg, Type type)
             return "%e" + reg + "x";
         case Type::INT_64:
             return "%r" + reg + "x";
+        default:
+            Writer::error() << "unexpected type " << types.at(type).name << " in IR_reg_to_asm" << std::endl;
+            return "error";
     }
-
-    return "error";
 }
 
 std::string IRInstr::x86_instr(const std::string &instr, Type type) const
@@ -329,8 +330,10 @@ std::string IRInstr::x86_instr(const std::string &instr, Type type) const
             return instr + "l";
         case Type::INT_64:
             return instr + "q";
+        default:
+            Writer::error() << "unexpected type " << types.at(type).name << " in x86_instr" << std::endl;
+            return "error";
     }
-    return "error type";
 }
 
 std::string IRInstr::x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const
@@ -489,7 +492,7 @@ Type CFG::get_var_type(const std::string &name) const
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
-    ast(fundcef), function_name(name), symbols(global_symbols), nextBBnumber(0)
+    ast(fundcef), nextBBnumber(0), function_name(name), symbols(global_symbols)
 {
     current_bb = new BasicBlock(this, new_BB_name());
     bbs.push_back(current_bb);
