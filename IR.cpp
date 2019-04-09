@@ -316,10 +316,10 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr("dec", bb->cfg->get_var_type(params[0])) << " " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
         break;
         case Operation::post_pp:
-            
+
         break;
         case Operation::post_mm:
-            
+
         break;
         case Operation::rmem:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -350,7 +350,7 @@ void IRInstr::gen_asm(Writer& w)
             }
         break;
         case Operation::cmp_null:
-            w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
+            w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[0])) << " $0, " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
         break;
         case Operation::cmp_eq:
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
@@ -526,7 +526,7 @@ BasicBlock::~BasicBlock()
 
 void BasicBlock::gen_asm(Writer& writer)
 {
-    writer.assembly(0) << "." << label << ":" << std::endl;
+    writer.assembly(0) << label << ":" << std::endl;
     for (IRInstr* instr : instrs)
     {
         instr->gen_asm(writer);

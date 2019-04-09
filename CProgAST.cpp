@@ -230,6 +230,7 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
     BasicBlock* then_bb = new BasicBlock(cfg, cfg->new_BB_name());
     cfg->current_bb = then_bb;
     if_statement->build_ir(cfg);
+    cfg->add_bb(then_bb);
     BasicBlock* after_if_bb = new BasicBlock(cfg, cfg->new_BB_name());
     after_if_bb->exit_true = test_bb->exit_true;
     after_if_bb->exit_false = test_bb->exit_false;
@@ -242,11 +243,13 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
         BasicBlock* else_bb = new BasicBlock(cfg, cfg->new_BB_name());
         cfg->current_bb = else_bb;
         else_statement->build_ir(cfg);
+        cfg->add_bb(else_bb);
         else_bb->exit_true = after_if_bb;
         else_bb->exit_false = nullptr;
         test_bb->exit_false = else_bb;
     }
     cfg->current_bb = after_if_bb;
+    cfg->add_bb(after_if_bb);
     return ""; // ??
 }
 
