@@ -172,13 +172,16 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
             operation = "cmp_ne";
         break;
         case IRInstr::Operation::band:
-            operation = "and";
+            operation = "band";
         break;
         case IRInstr::Operation::bor:
-            operation = "or";
+            operation = "bor";
         break;
         case IRInstr::Operation::bxor:
-            operation = "xor";
+            operation = "bxor";
+        break;
+        case IRInstr::Operation::bnot:
+            operation = "bnot";
         break;
         case IRInstr::Operation::ret:
             operation = "ret";
@@ -280,6 +283,11 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr_var_reg("mov", params[1], "d") << std::endl;
             w.assembly(1) << x86_instr_var_reg("xor", params[2], "d") << std::endl;
             w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+        break;
+        case Operation::bnot:
+            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
+            w.assembly(1) << x86_instr_reg("not", "a", bb->cfg->get_var_type(params[1])) << std::endl;
+            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
         break;
         case Operation::ret:
             w.assembly(1) << x86_instr_var_reg("mov", params[0], "a") << std::endl;

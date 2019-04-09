@@ -194,7 +194,7 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
             }
             else if(ctx->OP_BNOT())
             {
-                // TODO
+                rexpr = new CProgASTBNot(expr);
             }
         }
         else if (ctx->OP_ASGN())
