@@ -45,7 +45,7 @@ antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
                 ; // error
         }
     }
-    for(auto statement_ctx : ctx->block()->statement())
+    for(auto statement_ctx : ctx->compound_statement()->statement())
     {
         funcdef->add_statement(visit(statement_ctx).as<CProgASTStatement*>());
     }

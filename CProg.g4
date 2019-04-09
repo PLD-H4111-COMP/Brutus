@@ -6,7 +6,7 @@ program: PREPROC_DIR* funcdef* ;
 
 // -------------------------------------------------------- non-terminal symbols
 
-funcdef: type_name IDENTIFIER '(' arg_decl_list? ')' block ;
+funcdef: type_name IDENTIFIER '(' arg_decl_list? ')' compound_statement ;
 arg_decl_list: VOID_TYPE_NAME | type_name IDENTIFIER (',' type_name IDENTIFIER)* ;
 type_name: VOID_TYPE_NAME
          | CHAR_TYPE_NAME
@@ -15,18 +15,24 @@ type_name: VOID_TYPE_NAME
          | INT_32_TYPE_NAME
          | INT_64_TYPE_NAME
          | IDENTIFIER ;
-block: '{' statement* '}' ;
-statement: return_statement ';'
+
+statement: compound_statement
+         | return_statement ';'
          | declaration ';'
          | if_condition
          | for_statement
          | while_statement
          | expr ';'
          | ';' ;
+
+compound_statement: '{' statement* '}' ;
 return_statement: RETURN expr ;
 declaration: type_name declarator (',' declarator)* ;
 declarator: IDENTIFIER
           | assignment ;
+if_condition: IF '(' expr ')' statement (ELSE statement)? ;
+for_statement: FOR '(' (declaration | expr)? ';' expr? ';' expr? ')' statement ;
+while_statement: WHILE '(' expr ')' statement ;
 
 assignment: IDENTIFIER OP_ASGN expr ;
 
@@ -50,10 +56,6 @@ expr: PAR_OP='(' expr ')'
 
 arg_list: expr (',' expr)* ;
 
-if_condition: IF '(' expr ')' block (ELSE IF '(' expr ')' block)* (ELSE block)? ;
-for_statement: FOR '(' statement expr? ';' expr? ')' block ;
-while_statement: WHILE '(' expr ')' block ;
-
 // -------------------------------------------------------------- skipped tokens
 
 PREPROC_DIR: '#' ~[\r\n]* '\r'? '\n' ;
@@ -72,8 +74,6 @@ CHAR_TYPE_NAME: 'char' ;
 RETURN: 'return' ;
 IF: 'if' ;
 ELSE: 'else' ;
-FOR: 'for' ;
-WHILE: 'while' ;
 OP_PP: '++';
 OP_MM: '--';
 OP_PLUS: '+' ;
