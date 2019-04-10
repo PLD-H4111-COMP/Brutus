@@ -199,6 +199,10 @@ std::string CProgASTDeclarator::build_ir(CFG* cfg) const
     {
         cfg->add_to_symbol_table(name, type_specifier);
     }
+    else
+    {
+        Writer::error() << "multiple definition of '" << name << "'" << std::endl;
+    }
     if(initializer != nullptr)
     {
         initializer->build_ir(cfg);
@@ -1196,6 +1200,7 @@ CProgASTIntLiteral::CProgASTIntLiteral(int64_t val)
 std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
 {
     std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->get_symbol_properties(tmp_name).initialized = true;
     std::string literal_str = std::to_string(value);
     cfg->current_bb->add_IRInstr(IRInstr::ldconst, Type::INT_64, {tmp_name, literal_str});
     return tmp_name;

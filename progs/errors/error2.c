@@ -3,5 +3,5 @@ int f(int a, int b) {
 }
 
 int main() {
-  return f(5);
+  return f(5) + f(1,2,3);
 }

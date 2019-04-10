@@ -234,6 +234,7 @@ public:
     bool is_initialized(const std::string &symbol_name) const;
     void initialize(const std::string &symbol_name);
     const SymbolProperties& get_symbol_properties(const std::string &symbol_name) const;
+    SymbolProperties& get_symbol_properties(const std::string &symbol_name);
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;

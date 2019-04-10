@@ -930,6 +930,11 @@ const SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_nam
     return symbols.get_symbol(symbol_name);
 }
 
+SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_name)
+{
+    return symbols.get_symbol(symbol_name);
+}
+
 CFG::CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols* global_symbols) :
     ast(funcdef), nextBBnumber(0), function_name(name), symbols(global_symbols)
 {
