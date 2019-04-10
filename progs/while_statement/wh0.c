@@ -10,10 +10,11 @@ int pgcd(int a, int b) {
 
 int main()
 {
-  int c = 'a' - 1;
-  while(c != 'z') {
+  char c = 'A' - 1;
+  while(c < 'Z') {
     putchar(++c);
   }
+  putchar('\n');
   return pgcd(55, 25);
 }
 
