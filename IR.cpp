@@ -808,7 +808,7 @@ void BasicBlock::gen_asm(Writer& writer)
         std::string name = cfg->get_last_var_name();
 
         writer.assembly(1) << "movq " << cfg->get_var_index(name) << "(%rbp), %rax" << std::endl;
-        writer.assembly(1) << "cmp %rax, $0" << std::endl;
+        writer.assembly(1) << "cmpq $0, %rax" << std::endl;
         writer.assembly(1) << "je " << exit_false->label << std::endl;
         writer.assembly(1) << "jne " << exit_true->label << std::endl;
     }
