@@ -227,6 +227,7 @@ public:
     Type get_max_type(const std::string &lhs, const std::string &rhs) const;
     std::string get_last_var_name() const;
     int get_nb_parameters() const;
+    TableOfSymbols get_table_of_symbols() const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;

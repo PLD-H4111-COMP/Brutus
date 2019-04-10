@@ -769,6 +769,12 @@ int CFG::get_nb_parameters() const
     return symbols.get_nb_parameters();
 }
 
+TableOfSymbols CFG::get_table_of_symbols() const
+{
+    return symbols;
+}
+
+
 void CFG::print_debug_infos() const
 {
     for (BasicBlock* bb : bbs)
