@@ -902,13 +902,22 @@ void CProgASTFunccall::add_arg(CProgASTExpression* arg)
 
 std::string CProgASTFunccall::build_ir(CFG* cfg) const
 {
-    Type result_type = cfg->get_var_type(func_name->getText());
-    
-    TableOfSymbols ts = cfg->get_table_of_symbols();
-    SymbolProperties sp = ts.get_symbol(func_name->getText());
-    if((sp.arg_types).size()!=args.size())
+    Type result_type;
+    if (cfg->is_declared(func_name->getText()))
     {
-        Writer::error() << "Wrong number of arguments for function " << func_name->getText() << std::endl;
+        result_type = cfg->get_var_type(func_name->getText());
+
+        TableOfSymbols ts = cfg->get_table_of_symbols();
+        SymbolProperties sp = ts.get_symbol(func_name->getText());
+        if((sp.arg_types).size()!=args.size())
+        {
+            Writer::error() << "Wrong number of arguments for function " << func_name->getText() << std::endl;
+        }
+    }
+    else
+    {
+        result_type = Type::INT_64;
+        Writer::warning() << "implicit declaration of function '" << func_name->getText() << "'" << std::endl;
     }
     
     std::string tmp_name = "";
