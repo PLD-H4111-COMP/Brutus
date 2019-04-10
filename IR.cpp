@@ -77,6 +77,8 @@ void TableOfSymbols::add_arg(std::string identifier, Type type)
         symbols[identifier].arg_index = next_arg_index++;
         next_arg_offset += types.at(type).size;
     }
+
+    symbols[identifier].initialized = true;
 }
 
 bool TableOfSymbols::is_declared(std::string identifier) const

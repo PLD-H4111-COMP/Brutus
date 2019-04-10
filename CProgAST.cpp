@@ -399,17 +399,8 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     {
         Writer::error() << "use of undeclercqed identifier '" << name << "'" << std::endl;
     }
-    if (cfg->is_declared(init) && !cfg->is_initialized(init))
-    {
-        if (init[0] != '!') //! if temporary variable
-        {
-            Writer::warning() << "use of uninitialized variable '" << init << "'" << std::endl;
-        }
-    }
-    else
-    {
-        cfg->initialize(name);
-    }
+
+    cfg->initialize(name);
     cfg->current_bb->add_IRInstr(IRInstr::wmem, cfg->get_var_type(name), {name, init});
 
     return name;
@@ -1285,6 +1276,10 @@ std::string CProgASTIdentifier::build_ir(CFG* cfg) const
     if(!cfg->is_declared(name))
     {
         Writer::error() << "use of undeclercqed identifier '" << name << "'" << std::endl;
+    }
+    else if (!cfg->is_initialized(name))
+    {
+        Writer::warning() << "use of uninitialized variable '" << name << "'" << std::endl;
     }
     return name;
 }
