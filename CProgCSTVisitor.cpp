@@ -7,7 +7,6 @@
 // ---------------------------------------------------------- C++ System Headers
 #include <iostream>
 #include <string>
-#include "Writer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // class CProgCSTVisitor                                                      //

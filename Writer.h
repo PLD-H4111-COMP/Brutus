@@ -12,7 +12,7 @@ public:
     static std::ostream& info();
     static std::ostream& warning();
     static std::ostream& error();
-    static bool errorOccurred;
+    static bool error_occurred;
 
 private:
     std::ofstream m_output_file_stream;

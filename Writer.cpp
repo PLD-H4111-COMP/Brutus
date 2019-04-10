@@ -7,8 +7,7 @@ constexpr static auto BOLD = "\033[1m";
 constexpr static auto YELLOW = "\033[33m";
 constexpr static auto RED = "\033[31m";
 
-bool Writer::errorOccurred = false;
-
+bool Writer::error_occurred = false;
 
 Writer::Writer(const Options &options) : m_output_file_stream(options.output_file)
 {
@@ -39,7 +38,7 @@ std::ostream& Writer::warning()
 
 std::ostream& Writer::error()
 {
-    errorOccurred = true;
+    error_occurred = true;
     return std::cerr << BOLD << RED << "error: " << RESET;
 }
 
