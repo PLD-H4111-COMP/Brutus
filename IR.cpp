@@ -944,7 +944,7 @@ CFG::CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols
 
 std::string CFG::new_BB_name()
 {
-    return function_name + "_block" + std::to_string(nextBBnumber++);
+    return "." + function_name + "_block" + std::to_string(nextBBnumber++);
 }
 
 BasicBlock* CFG::get_last_bb()
