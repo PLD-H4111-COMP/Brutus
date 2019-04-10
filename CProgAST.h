@@ -198,7 +198,7 @@ private:
 class CProgASTWhileStatement : public CProgASTStatement {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTWhileStatement(CProgASTExpression* condition, CProgASTStatement* statement);
+    CProgASTWhileStatement(CProgASTExpression* condition, CProgASTStatement* body);
     CProgASTWhileStatement(const CProgASTWhileStatement& src) = delete;
     virtual ~CProgASTWhileStatement();
 
@@ -206,7 +206,27 @@ public:
     std::string build_ir(CFG* cfg) const;
 private:
     const CProgASTExpression* condition;
-    const CProgASTStatement* statement;
+    const CProgASTStatement* body;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTForStatement : public CProgASTStatement                      //
+////////////////////////////////////////////////////////////////////////////////
+
+class CProgASTForStatement : public CProgASTStatement {
+public:
+    // ------------------------------------------------ Constructor / Destructor
+    CProgASTForStatement(CProgASTExpression* initialization, CProgASTExpression* condition, CProgASTExpression* increment, CProgASTStatement* body);
+    CProgASTForStatement(const CProgASTForStatement& src) = delete;
+    virtual ~CProgASTForStatement();
+
+    // ------------------------------------------------- Public Member Functions
+    std::string build_ir(CFG* cfg) const;
+private:
+    const CProgASTExpression* initialization;
+    const CProgASTExpression* condition;
+    const CProgASTExpression* increment;
+    const CProgASTStatement* body;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

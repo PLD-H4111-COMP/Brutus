@@ -16,6 +16,7 @@ public:
     virtual antlrcpp::Any visitDeclaration(CProgParser::DeclarationContext *ctx) override;
     virtual antlrcpp::Any visitIf_condition(CProgParser::If_conditionContext *ctx) override;
     virtual antlrcpp::Any visitWhile_statement(CProgParser::While_statementContext *ctx) override;
+    virtual antlrcpp::Any visitFor_statement(CProgParser::For_statementContext *ctx) override;
     virtual antlrcpp::Any visitAssignment(CProgParser::AssignmentContext *ctx) override;
     virtual antlrcpp::Any visitCompound_statement(CProgParser::Compound_statementContext *ctx) override;
     virtual antlrcpp::Any visitExpr(CProgParser::ExprContext *ctx) override;

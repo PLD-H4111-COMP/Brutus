@@ -31,7 +31,7 @@ declaration: type_name declarator (',' declarator)* ;
 declarator: IDENTIFIER
           | assignment ;
 if_condition: IF '(' expr ')' statement (ELSE statement)? ;
-for_statement: FOR '(' (declaration | expr)? ';' expr? ';' expr? ')' statement ;
+for_statement: FOR '(' expr? ';' expr? ';' expr? ')' statement ;
 while_statement: WHILE '(' expr ')' statement ;
 
 assignment: IDENTIFIER OP_ASGN expr ;

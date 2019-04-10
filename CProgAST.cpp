@@ -263,14 +263,14 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
 ////////////////////////////////////////////////////////////////////////////////
 
 // ---------------------------------------------------- Constructor / Destructor
-CProgASTWhileStatement::CProgASTWhileStatement(CProgASTExpression* condition, CProgASTStatement* statement) :
-    condition(condition), statement(statement)
+CProgASTWhileStatement::CProgASTWhileStatement(CProgASTExpression* condition, CProgASTStatement* body) :
+    condition(condition), body(body)
 {}
 
 CProgASTWhileStatement::~CProgASTWhileStatement()
 {
     delete condition;
-    delete statement;
+    delete body;
 }
 
 // ----------------------------------------------------- Public Member Functions
@@ -297,7 +297,7 @@ std::string CProgASTWhileStatement::build_ir(CFG* cfg) const
     cfg->add_bb(test_bb);
 
     cfg->current_bb = body_bb;
-    statement->build_ir(cfg);
+    body->build_ir(cfg);
     cfg->add_bb(body_bb);
 
     cfg->current_bb = after_while_bb;
@@ -305,6 +305,68 @@ std::string CProgASTWhileStatement::build_ir(CFG* cfg) const
     return ""; // ??
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// class CProgASTForStatement : public CProgASTStatement                      //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTForStatement::CProgASTForStatement(CProgASTExpression* initialization, CProgASTExpression* condition, CProgASTExpression* increment, CProgASTStatement* body) :
+    initialization(initialization), condition(condition), increment(increment), body(body)
+{}
+
+CProgASTForStatement::~CProgASTForStatement()
+{
+    delete initialization;
+    delete condition;
+    delete increment;
+    delete body;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTForStatement::build_ir(CFG* cfg) const
+{
+    BasicBlock* before_for_bb = cfg->current_bb;
+
+    BasicBlock* body_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* init_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* test_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* incr_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* after_for_bb = new BasicBlock(cfg, cfg->new_BB_name());
+
+    after_for_bb->exit_true = before_for_bb->exit_true;
+    after_for_bb->exit_false = before_for_bb->exit_false;
+    before_for_bb->exit_true = init_bb;
+    before_for_bb->exit_false = nullptr;
+    init_bb->exit_true = test_bb;
+    init_bb->exit_false = nullptr;
+    test_bb->exit_true = body_bb;
+    test_bb->exit_false = after_for_bb;
+    body_bb->exit_true = incr_bb;
+    body_bb->exit_false = nullptr;
+    incr_bb->exit_true = test_bb;
+    incr_bb->exit_false = nullptr;
+
+    cfg->current_bb = init_bb;
+    initialization->build_ir(cfg);
+    cfg->add_bb(init_bb);
+
+    cfg->current_bb = test_bb;
+    std::string test_result = condition->build_ir(cfg);
+    test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
+    cfg->add_bb(test_bb);
+
+    cfg->current_bb = body_bb;
+    body->build_ir(cfg);
+    cfg->add_bb(body_bb);
+
+    cfg->current_bb = incr_bb;
+    increment->build_ir(cfg);
+    cfg->add_bb(incr_bb);
+
+    cfg->current_bb = after_for_bb;
+    cfg->add_bb(after_for_bb);
+    return ""; // ??
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAssignment                                                   //
@@ -345,7 +407,7 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
         cfg->initialize(name);
     }
     cfg->current_bb->add_IRInstr(IRInstr::wmem, cfg->get_var_type(name), {name, init});
-    
+
     return name;
 }
 
@@ -966,7 +1028,7 @@ std::string CProgASTFunccall::build_ir(CFG* cfg) const
         result_type = Type::INT_64;
         Writer::warning() << "implicit declaration of function '" << func_name->getText() << "'" << std::endl;
     }
-    
+
     std::string tmp_name = "";
     if (result_type != Type::VOID)
     {
