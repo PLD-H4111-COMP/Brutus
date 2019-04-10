@@ -742,6 +742,10 @@ void BasicBlock::gen_asm(Writer& writer)
 
     if(instrs.empty())
     {
+        if(exit_true)
+        {
+            writer.assembly(1) << "jmp " << exit_true->label << std::endl;
+        }
         return;
     }
 
