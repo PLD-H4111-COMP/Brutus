@@ -271,38 +271,81 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << x86_instr("mov", bb->cfg->get_var_type(params[0])) << " $" << params[1] << ", " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
         break;
         case Operation::add:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("add", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("add", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::sub:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("sub", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("sub", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::mul:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("imul", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("imul", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::div:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("mov", params[2], "b") << std::endl;
-            w.assembly(1) << "cqto" << std::endl; // TODO : fix
-            w.assembly(1) << x86_instr_reg("idiv", "b", bb->cfg->get_var_type(params[0])) << std::endl; // TODO : check type
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_extend_reg_a(type) << std::endl;
+            w.assembly(1) << x86_instr_reg("idiv", type, "b") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::mod:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("mov", params[2], "b") << std::endl;
-            w.assembly(1) << "cqto" << std::endl; // TODO : fix
-            w.assembly(1) << x86_instr_reg("idiv", "b", bb->cfg->get_var_type(params[0])) << std::endl; // TODO : check type
-            w.assembly(1) << x86_instr_reg_var("mov", "d", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_extend_reg_a(type) << std::endl;
+            w.assembly(1) << x86_instr_reg("idiv", type, "b") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+            {
+                w.assembly(1) << x86_instr(x86_instr("movs", type) + "t", output_type) << " "
+                              << IR_reg_to_asm("d", type) << ", " << IR_reg_to_asm("a", output_type) << std::endl;
+            }
+            else
+                w.assembly(1) << x86_mov_reg_var("d", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::neg:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg("neg", "a", bb->cfg->get_var_type(params[1])) << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_var_type(params[1]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_instr_reg("neg", type, "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::pre_pp:
              w.assembly(1) << x86_instr("inc", bb->cfg->get_var_type(params[0])) << " " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
@@ -317,12 +360,24 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::rmem:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_var_type(params[1]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::wmem:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_var_type(params[1]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::call:
             w.assembly(1) << "movq $0, %rax" << std::endl;
@@ -331,7 +386,7 @@ void IRInstr::gen_asm(Writer& w)
             {
                 count_register = params.size()-3;
             }
-            for (int count_params = 2; count_params < params.size(); ++count_params) // passing parameters
+            for (size_t count_params = 2; count_params < params.size(); ++count_params) // passing parameters
             {
                 if (count_params < 8)
                 {
@@ -347,73 +402,136 @@ void IRInstr::gen_asm(Writer& w)
             w.assembly(1) << "call " << params[1] << std::endl;
             if (params[0] != "")
             {
-                w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl; // getting return value
+                w.assembly(1) << x86_mov_reg_var("a", Type::INT_64, params[0]) << std::endl; // getting return value
             }
         break;
         case Operation::cmp_null:
             w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[0])) << " $0, " << bb->cfg->IR_var_to_asm(params[0]) << std::endl;
         break;
         case Operation::cmp_eq:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "sete %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::cmp_lt:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "setl %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::cmp_le:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "setle %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::cmp_gt:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "setg %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::cmp_ge:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "setge %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::cmp_ne:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("cmp", params[2], "a") << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("cmp", type, "b", "a") << std::endl;
             w.assembly(1) << "setne %al" << std::endl;
-            w.assembly(1) << "movzbq %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::band:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("and", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("and", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::bor:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("or", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("or", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::bxor:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_var_reg("xor", params[2], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_max_type(params[1], params[2]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[2], "b", type) << std::endl;
+            w.assembly(1) << x86_instr_reg_reg("xor", type, "b", "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::bnot:
-            w.assembly(1) << x86_instr_var_reg("mov", params[1], "a") << std::endl;
-            w.assembly(1) << x86_instr_reg("not", "a", bb->cfg->get_var_type(params[1])) << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+        {
+            Type type = bb->cfg->get_var_type(params[1]);
+            w.assembly(1) << x86_mov_var_reg(params[1], "a", type) << std::endl;
+            w.assembly(1) << x86_instr_reg("not", type, "a") << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (type < output_type)
+                w.assembly(1) << x86_convert_reg_a(type, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::land:
 
@@ -422,13 +540,17 @@ void IRInstr::gen_asm(Writer& w)
 
         break;
         case Operation::lnot:
+        {
             w.assembly(1) << x86_instr("cmp", bb->cfg->get_var_type(params[1])) << " $0, " << bb->cfg->IR_var_to_asm(params[1]) << std::endl;
             w.assembly(1) << "sete %al" << std::endl;
-            w.assembly(1) << "movzbl %al, %rax" << std::endl;
-            w.assembly(1) << x86_instr_reg_var("mov", "a", params[0]) << std::endl;
+            Type output_type = bb->cfg->get_var_type(params[0]);
+            if (Type::CHAR < output_type)
+                w.assembly(1) << x86_convert_reg_a(Type::CHAR, output_type) << std::endl;
+            w.assembly(1) << x86_mov_reg_var("a", output_type, params[0]) << std::endl;
+        }
         break;
         case Operation::ret:
-            w.assembly(1) << x86_instr_var_reg("mov", params[0], "a") << std::endl;
+            w.assembly(1) << x86_mov_var_reg(params[0], "a", Type::INT_64) << std::endl;
         break;
     }
 }
@@ -505,24 +627,73 @@ std::string IRInstr::x86_instr_param(const std::string &instr, Type type)
     }
 }
 
-std::string IRInstr::x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const
-{
-    Type type = bb->cfg->get_var_type(var);
-    return x86_instr(instr, type) + " " + bb->cfg->IR_var_to_asm(var) + ", " + IR_reg_to_asm(reg, type);
-}
-
-std::string IRInstr::x86_instr_reg_var(const std::string &instr, const std::string &reg, const std::string &var) const
-{
-    Type type = bb->cfg->get_var_type(var);
-    return x86_instr(instr, type) + " " + IR_reg_to_asm(reg, type) + ", " + bb->cfg->IR_var_to_asm(var);
-}
-
-
-std::string IRInstr::x86_instr_reg(const std::string &instr, const std::string &reg, Type type) const
+std::string IRInstr::x86_instr_reg(const std::string &instr, Type type, const std::string &reg) const
 {
     return x86_instr(instr, type) + " " + IR_reg_to_asm(reg, type);
 }
 
+std::string IRInstr::x86_instr_reg_reg(const std::string &instr, Type type, const std::string &reg1, const std::string &reg2) const
+{
+    return x86_instr(instr, type) + " " + IR_reg_to_asm(reg1, type) + ", " + IR_reg_to_asm(reg2, type);
+}
+
+std::string IRInstr::x86_mov_var_reg(const std::string &var, const std::string &reg, Type reg_type, bool signed_fill) const
+{
+    Type var_type = bb->cfg->get_var_type(var);
+    std::string instr;
+    if (types.at(var_type).size >= types.at(reg_type).size)
+        instr = x86_instr("mov", reg_type);
+    else
+        instr = x86_instr(x86_instr(signed_fill ? "movs" : "movz", var_type), reg_type);
+
+    return instr + " " + bb->cfg->IR_var_to_asm(var) + ", " + IR_reg_to_asm(reg, reg_type);
+}
+
+std::string IRInstr::x86_mov_reg_var(const std::string &reg, Type reg_type, const std::string &var) const
+{
+    Type var_type = bb->cfg->get_var_type(var);
+    std::string instr;
+    if (types.at(reg_type).size >= types.at(var_type).size)
+    {
+        instr = x86_instr("mov", var_type);
+        reg_type = var_type;
+    }
+    else
+        Writer::error() << "reg_type < var_type in x86_mov_reg_var" << std::endl;
+
+    return instr + " " + IR_reg_to_asm(reg, reg_type) + ", " + bb->cfg->IR_var_to_asm(var);
+}
+
+std::string IRInstr::x86_extend_reg_a(Type from)
+{
+    std::string to;
+    switch (from)
+    {
+        case Type::CHAR:
+            to = "w";
+        break;
+        case Type::INT_16:
+            to = "d";
+        break;
+        case Type::INT_32:
+            to = "d";
+        break;
+        case Type::INT_64:
+            to = "o";
+        break;
+        default:
+            to = "error";
+            Writer::error() << "type error in x86_extend_reg_a" << std::endl;
+        break;
+    }
+    return x86_instr("c", from) + "t" + to;
+}
+
+std::string IRInstr::x86_convert_reg_a(Type from, Type to)
+{
+    //return x86_instr(x86_instr("c", from) + "t", to);
+    return x86_instr(x86_instr("movs", from), to) + " " + IR_reg_to_asm("a", from) + ", " + IR_reg_to_asm("a", to);
+}
 
 void IRInstr::print_debug_infos() const
 {
@@ -576,32 +747,50 @@ void BasicBlock::gen_asm(Writer& writer)
 
     if (instrs.back()->get_operation() == IRInstr::Operation::cmp_null)
     {
-        writer.assembly(1) << "je " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "je " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "jne " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
-        writer.assembly(1) << "jne " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "jne " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "je " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_lt)
     {
-        writer.assembly(1) << "jge " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "jge " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "jl " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_le)
     {
-        writer.assembly(1) << "jg " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "jg " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "jle " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_gt)
     {
-        writer.assembly(1) << "jle " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "jle " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "jg " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_ge)
     {
-        writer.assembly(1) << "jl " << exit_false->label << std::endl;
+        if(exit_false)
+        {
+            writer.assembly(1) << "jl " << exit_false->label << std::endl;
+        }
         writer.assembly(1) << "jge " << exit_true->label << std::endl;
     }
     else if (exit_false != nullptr)
@@ -615,6 +804,11 @@ void BasicBlock::gen_asm(Writer& writer)
     }
     else
     {
+        if (!exit_true)
+        {
+            Writer::error() << instrs.size() << std::endl;
+            Writer::error() << label << std::endl;
+        }
         writer.assembly(1) << "jmp " << exit_true->label << std::endl;
     }
 }
@@ -792,7 +986,7 @@ void CFG::print_debug_infos_variables() const
 // class IR                                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
-IR::IR(Writer &writer) : writer(writer)
+IR::IR(Writer &writer, const std::string &filename) : writer(writer), filename(filename)
 {
 
 }
@@ -811,7 +1005,7 @@ void IR::add_cfg(CFG* cfg)
 }
 
 void IR::gen_asm(){
-    writer.assembly(1) << ".file\t\"ret42.c\"" << std::endl;
+    writer.assembly(1) << ".file\t\""+filename+"\"" << std::endl;
     writer.assembly(1) << ".text" << std::endl;
     for (CFG* cfg : cfgs){
         cfg->gen_asm_prologue(writer);
