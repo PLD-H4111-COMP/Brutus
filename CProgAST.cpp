@@ -6,6 +6,7 @@
 // ------------------------------------------------------------- Project Headers
 #include "CProgAST.h"
 #include "IR.h"
+#include "Writer.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // class CProgAST                                                             //
@@ -280,11 +281,23 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
 {
     std::string name = lhs_identifier->getText();
     std::string init = rhs_expression->build_ir(cfg);
-    //if(!cfg->tos.declared(name))
+    if(!cfg->is_declared(name))
     {
-        // error
+        Writer::error() << name << " is never declercqed !" << std::endl;
+    }
+    if (cfg->is_declared(init) && !cfg->is_initialized(init))
+    {
+        if (init[0] != '!') //! if temporary variable
+        {
+            Writer::warning() << init << " use of uninitialized expression" << std::endl;
+        }
+    }
+    else
+    {
+        cfg->initialize(name);
     }
     cfg->current_bb->add_IRInstr(IRInstr::wmem, cfg->get_var_type(name), {name, init});
+    
     return name;
 }
 
@@ -1004,15 +1017,11 @@ std::string CProgASTIdentifier::getText() const
     return name;
 }
 
-std::string CProgASTIdentifier::build_ir(CFG*) const
+std::string CProgASTIdentifier::build_ir(CFG* cfg) const
 {
-    /*if(!cfg->tos.declared(name))
+    if(!cfg->is_declared(name))
     {
-        // error
+        Writer::error() << name << " is never declercqed !" << std::endl;
     }
-    else
-    {
-        cfg->tos[name].used = true;
-    }*/
     return name;
 }

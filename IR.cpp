@@ -150,6 +150,11 @@ int TableOfSymbols::get_nb_parameters() const
     return next_arg_index;
 }
 
+void TableOfSymbols::initialize(const std::string &identifier)
+{
+    symbols[identifier].initialized = true;
+}
+
 void TableOfSymbols::print_debug_infos() const
 {
     for(auto p : symbols)
@@ -908,6 +913,16 @@ Type CFG::get_var_type(const std::string &name) const
     }
     Writer::error() << "use of undeclared identifier '" << name << "'" << std::endl;
     return Type::INT_64;
+}
+
+bool CFG::is_initialized(const std::string &symbol_name)
+{
+    return symbols.get_symbol(symbol_name).initialized;
+}
+
+void CFG::initialize(const std::string &symbol_name)
+{
+    symbols.initialize(symbol_name);
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
