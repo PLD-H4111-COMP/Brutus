@@ -15,7 +15,7 @@ std::vector<std::string> param_registers = {"di", "si", "dx", "cx", "8", "9"};
 // enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-TypeProperties::TypeProperties(size_t size, std::string name) :
+TypeProperties::TypeProperties(size_t size, const std::string &name) :
     size(size), name(name)
 {}
 
@@ -263,7 +263,7 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op)
     return os << operation;
 }
 
-IRInstr::IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> params) :
+IRInstr::IRInstr(BasicBlock* bb, Operation op, Type t, const std::vector<std::string> &params) :
     bb(bb), op(op), t(t), params(params)
 {}
 
@@ -723,7 +723,7 @@ IRInstr::Operation IRInstr::get_operation() const
 ////////////////////////////////////////////////////////////////////////////////
 
 
-BasicBlock::BasicBlock(CFG* cfg, std::string entry_label) :
+BasicBlock::BasicBlock(CFG* cfg, const std::string &entry_label) :
     exit_true(nullptr), exit_false(nullptr), label(entry_label)
 {
     // jump to the next block default ?
@@ -930,8 +930,8 @@ const SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_nam
     return symbols.get_symbol(symbol_name);
 }
 
-CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
-    ast(fundcef), nextBBnumber(0), function_name(name), symbols(global_symbols)
+CFG::CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols* global_symbols) :
+    ast(funcdef), nextBBnumber(0), function_name(name), symbols(global_symbols)
 {
     BasicBlock* entry = new BasicBlock(this, new_BB_name());
     BasicBlock* exit = new BasicBlock(this, new_BB_name());

@@ -49,7 +49,7 @@ private:
 class CProgASTFuncdef {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTFuncdef(std::string id, Type type);
+    CProgASTFuncdef(const std::string &id, Type type);
     CProgASTFuncdef(const CProgASTFuncdef& src) = delete;
     virtual ~CProgASTFuncdef();
 
@@ -99,7 +99,7 @@ public:
 
     // ------------------------------------------------- Public Member Functions
     void add_statement(CProgASTStatement* statement);
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTCompoundStatement& operator=(const CProgASTCompoundStatement& src) = delete;
@@ -119,7 +119,7 @@ public:
     virtual ~CProgASTReturn();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTReturn& operator=(const CProgASTReturn& src) = delete;
@@ -140,7 +140,7 @@ public:
 
     // ------------------------------------------------- Public Member Functions
     void add_declarator(CProgASTDeclarator* declarator);
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTDeclaration& operator=(const CProgASTDeclaration& src) = delete;
@@ -184,7 +184,7 @@ public:
     virtual ~CProgASTIfStatement();
 
     // ------------------------------------------------- Public Member Functions
-    std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 private:
     const CProgASTExpression* condition;
     const CProgASTStatement* if_statement;
@@ -221,7 +221,7 @@ public:
     virtual ~CProgASTAssignment();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTAssignment& operator=(const CProgASTAssignment& src) = delete;
@@ -242,7 +242,7 @@ public:
     virtual ~CProgASTPrePP();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTPrePP& operator=(const CProgASTPrePP& src) = delete;
@@ -262,7 +262,7 @@ public:
     virtual ~CProgASTPreMM();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTPreMM& operator=(const CProgASTPreMM& src) = delete;
@@ -282,7 +282,7 @@ public:
     virtual ~CProgASTPostPP();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTPostPP& operator=(const CProgASTPostPP& src) = delete;
@@ -302,7 +302,7 @@ public:
     virtual ~CProgASTPostMM();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTPostMM& operator=(const CProgASTPostMM& src) = delete;
@@ -322,7 +322,7 @@ public:
     virtual ~CProgASTBAnd();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTBAnd& operator=(const CProgASTBAnd& src) = delete;
@@ -343,7 +343,7 @@ public:
     virtual ~CProgASTBOr();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTBOr& operator=(const CProgASTBOr& src) = delete;
@@ -364,7 +364,7 @@ public:
     virtual ~CProgASTBXor();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTBXor& operator=(const CProgASTBXor& src) = delete;
@@ -385,7 +385,7 @@ public:
     virtual ~CProgASTBNot();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTBNot& operator=(const CProgASTBNot& src) = delete;
@@ -405,7 +405,7 @@ public:
     virtual ~CProgASTAnd();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTAnd& operator=(const CProgASTAnd& src) = delete;
@@ -426,7 +426,7 @@ public:
     virtual ~CProgASTOr();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTOr& operator=(const CProgASTOr& src) = delete;
@@ -447,7 +447,7 @@ public:
     virtual ~CProgASTNot();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTNot& operator=(const CProgASTNot& src) = delete;
@@ -467,7 +467,7 @@ public:
     virtual ~CProgASTLessThan();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTLessThan& operator=(const CProgASTLessThan& src) = delete;
@@ -488,7 +488,7 @@ public:
     virtual ~CProgASTLessThanOrEqual();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTLessThanOrEqual& operator=(const CProgASTLessThanOrEqual& src) = delete;
@@ -509,7 +509,7 @@ public:
     virtual ~CProgASTGreaterThan();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTGreaterThan& operator=(const CProgASTGreaterThan& src) = delete;
@@ -530,7 +530,7 @@ public:
     virtual ~CProgASTGreaterThanOrEqual();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTGreaterThanOrEqual& operator=(const CProgASTGreaterThanOrEqual& src) = delete;
@@ -551,7 +551,7 @@ public:
     virtual ~CProgASTEqual();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTEqual& operator=(const CProgASTEqual& src) = delete;
@@ -572,7 +572,7 @@ public:
     virtual ~CProgASTNotEqual();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTNotEqual& operator=(const CProgASTNotEqual& src) = delete;
@@ -593,7 +593,7 @@ public:
     virtual ~CProgASTAddition();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTAddition& operator=(const CProgASTAddition& src) = delete;
@@ -614,7 +614,7 @@ public:
     virtual ~CProgASTSubtraction();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTSubtraction& operator=(const CProgASTSubtraction& src) = delete;
@@ -635,7 +635,7 @@ public:
     virtual ~CProgASTMultiplication();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTMultiplication& operator=(const CProgASTMultiplication& src) = delete;
@@ -656,7 +656,7 @@ public:
     virtual ~CProgASTDivision();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTDivision& operator=(const CProgASTDivision& src) = delete;
@@ -677,7 +677,7 @@ public:
     virtual ~CProgASTModulo();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTModulo& operator=(const CProgASTModulo& src) = delete;
@@ -698,7 +698,7 @@ public:
     virtual ~CProgASTUnaryMinus();
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTUnaryMinus& operator=(const CProgASTUnaryMinus& src) = delete;
@@ -719,7 +719,7 @@ public:
 
     // ------------------------------------------------- Public Member Functions
     void add_arg(CProgASTExpression* arg);
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTFunccall& operator=(const CProgASTFunccall& src) = delete;
@@ -740,7 +740,7 @@ public:
     virtual ~CProgASTIntLiteral() = default;
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTIntLiteral& operator=(const CProgASTIntLiteral& src) = delete;
@@ -760,7 +760,7 @@ public:
     virtual ~CProgASTCharLiteral() = default;
 
     // ------------------------------------------------- Public Member Functions
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTCharLiteral& operator=(const CProgASTCharLiteral& src) = delete;
@@ -775,13 +775,13 @@ private:
 class CProgASTIdentifier : public CProgASTExpression {
 public:
     // ------------------------------------------------ Constructor / Destructor
-    CProgASTIdentifier(std::string identifier);
+    CProgASTIdentifier(const std::string &identifier);
     CProgASTIdentifier(const CProgASTIdentifier& src) = delete;
     virtual ~CProgASTIdentifier() = default;
 
     // ------------------------------------------------- Public Member Functions
     std::string getText() const;
-    virtual std::string build_ir(CFG* cfg) const;
+    virtual std::string build_ir(CFG* cfg) const override;
 
     // ---------------------------------------------------- Overloaded Operators
     CProgASTIdentifier& operator=(const CProgASTIdentifier& src) = delete;

@@ -25,7 +25,7 @@ enum class Type { VOID, CHAR, INT_16, INT_32, INT_64 };
 struct TypeProperties {
     // ------------------------------------------------------------- Constructor
     TypeProperties() = delete;
-    TypeProperties(size_t size, std::string name);
+    TypeProperties(size_t size, const std::string &name);
 
     // ------------------------------------------------------- Public Properties
     const size_t size;
@@ -129,7 +129,7 @@ public:
 
 
     /**  constructor */
-    IRInstr(BasicBlock* bb, Operation op, Type t, std::vector<std::string> params);
+    IRInstr(BasicBlock* bb, Operation op, Type t, const std::vector<std::string> &params);
 
     /** Actual code generation */
     void gen_asm(Writer& writer); /**< x86 assembly code generation for this IR instruction */
@@ -180,7 +180,7 @@ std::ostream& operator<<(std::ostream& os, const IRInstr::Operation& op);
 
 class BasicBlock {
 public:
-    BasicBlock(CFG* cfg, std::string entry_label);
+    BasicBlock(CFG* cfg, const std::string &entry_label);
     virtual ~BasicBlock();
     void gen_asm(Writer& writer); /**< x86 assembly code generation for this basic block (very simple) */
 
@@ -217,7 +217,7 @@ public:
 
     // x86 code generation: could be encapsulated in a processor class in a retargetable compiler
     void gen_asm(Writer& writer);
-    std::string IR_var_to_asm(const std::string &reg); /**< helper method: inputs a IR input variable, returns e.g. "-24(%rbp)" for the proper value of -24 */
+    std::string IR_var_to_asm(const std::string &var); /**< helper method: inputs a IR input variable, returns e.g. "-24(%rbp)" for the proper value of -24 */
     void gen_asm_prologue(Writer& writer);
     void gen_asm_epilogue(Writer& writer);
 

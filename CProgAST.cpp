@@ -41,7 +41,7 @@ void CProgASTProgram::build_ir(IR& ir) const
 ////////////////////////////////////////////////////////////////////////////////
 
 // ---------------------------------------------------- Constructor / Destructor
-CProgASTFuncdef::CProgASTFuncdef(std::string id, Type type) :
+CProgASTFuncdef::CProgASTFuncdef(const std::string &id, Type type) :
     identifier(id), return_type(type)
 {}
 
@@ -1015,7 +1015,7 @@ std::string CProgASTCharLiteral::build_ir(CFG* cfg) const
 ////////////////////////////////////////////////////////////////////////////////
 
 // ---------------------------------------------------- Constructor / Destructor
-CProgASTIdentifier::CProgASTIdentifier(std::string identifier) :
+CProgASTIdentifier::CProgASTIdentifier(const std::string &identifier) :
     name(identifier)
 {}
 
