@@ -352,7 +352,7 @@ std::string CProgASTForStatement::build_ir(CFG* cfg) const
 
     cfg->current_bb = test_bb;
     std::string test_result = condition->build_ir(cfg);
-    test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
+    cfg->current_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
     cfg->add_bb(test_bb);
 
     cfg->current_bb = body_bb;
