@@ -241,6 +241,7 @@ public:
 
     // basic block management
     std::string new_BB_name();
+    BasicBlock* get_last_bb();
     BasicBlock* current_bb;
 
 protected:

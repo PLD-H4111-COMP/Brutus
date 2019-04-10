@@ -551,6 +551,7 @@ void IRInstr::gen_asm(Writer& w)
         break;
         case Operation::ret:
             w.assembly(1) << x86_mov_var_reg(params[0], "a", Type::INT_64) << std::endl;
+            w.assembly(1) << "jmp " << bb->cfg->get_last_bb()->label << std::endl;
         break;
     }
 }
@@ -922,6 +923,10 @@ std::string CFG::new_BB_name()
     return function_name + "_block" + std::to_string(nextBBnumber++);
 }
 
+BasicBlock* CFG::get_last_bb()
+{
+    return bbs.back();
+}
 
 void CFG::add_bb(BasicBlock* bb)
 {
