@@ -907,8 +907,7 @@ std::string CProgASTFunccall::build_ir(CFG* cfg) const
     {
         result_type = cfg->get_var_type(func_name->getText());
 
-        TableOfSymbols ts = cfg->get_table_of_symbols();
-        SymbolProperties sp = ts.get_symbol(func_name->getText());
+        SymbolProperties sp = cfg->get_symbol_properties(func_name->getText());
         if((sp.arg_types).size()!=args.size())
         {
             Writer::error() << "Wrong number of arguments for function " << func_name->getText() << std::endl;

@@ -915,7 +915,7 @@ Type CFG::get_var_type(const std::string &name) const
     return Type::INT_64;
 }
 
-bool CFG::is_initialized(const std::string &symbol_name)
+bool CFG::is_initialized(const std::string &symbol_name) const
 {
     return symbols.get_symbol(symbol_name).initialized;
 }
@@ -923,6 +923,11 @@ bool CFG::is_initialized(const std::string &symbol_name)
 void CFG::initialize(const std::string &symbol_name)
 {
     symbols.initialize(symbol_name);
+}
+
+const SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_name) const
+{
+    return symbols.get_symbol(symbol_name);
 }
 
 CFG::CFG(const CProgASTFuncdef* fundcef, const std::string &name, TableOfSymbols* global_symbols) :
@@ -986,12 +991,6 @@ int CFG::get_nb_parameters() const
 {
     return symbols.get_nb_parameters();
 }
-
-TableOfSymbols CFG::get_table_of_symbols() const
-{
-    return symbols;
-}
-
 
 void CFG::print_debug_infos() const
 {
