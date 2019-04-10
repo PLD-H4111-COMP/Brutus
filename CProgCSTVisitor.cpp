@@ -75,6 +75,10 @@ antlrcpp::Any CProgCSTVisitor::visitStatement(CProgParser::StatementContext *ctx
     {
         return static_cast<CProgASTStatement*>(visit(ctx->if_condition()).as<CProgASTIfStatement*>());
     }
+    else if(ctx->while_statement() != nullptr)
+    {
+        return static_cast<CProgASTStatement*>(visit(ctx->while_statement()).as<CProgASTWhileStatement*>());
+    }
     else if(ctx->compound_statement() != nullptr)
     {
         return static_cast<CProgASTStatement*>(visit(ctx->compound_statement()).as<CProgASTCompoundStatement*>());
@@ -142,6 +146,13 @@ antlrcpp::Any CProgCSTVisitor::visitIf_condition(CProgParser::If_conditionContex
         else_statement = visit(ctx->statement(1)).as<CProgASTStatement*>();
     }
     return new CProgASTIfStatement(condition, if_statement, else_statement);
+}
+
+antlrcpp::Any CProgCSTVisitor::visitWhile_statement(CProgParser::While_statementContext *ctx)
+{
+    CProgASTExpression* condition = visit(ctx->expr()).as<CProgASTExpression*>();
+    CProgASTStatement* statement = visit(ctx->statement()).as<CProgASTStatement*>();
+    return new CProgASTWhileStatement(condition, statement);
 }
 
 antlrcpp::Any CProgCSTVisitor::visitAssignment(CProgParser::AssignmentContext *ctx)

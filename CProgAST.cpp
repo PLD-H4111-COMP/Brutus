@@ -259,6 +259,54 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// class CProgASTWhileStatement : public CProgASTStatement                    //
+////////////////////////////////////////////////////////////////////////////////
+
+// ---------------------------------------------------- Constructor / Destructor
+CProgASTWhileStatement::CProgASTWhileStatement(CProgASTExpression* condition, CProgASTStatement* statement) :
+    condition(condition), statement(statement)
+{}
+
+CProgASTWhileStatement::~CProgASTWhileStatement()
+{
+    delete condition;
+    delete statement;
+}
+
+// ----------------------------------------------------- Public Member Functions
+std::string CProgASTWhileStatement::build_ir(CFG* cfg) const
+{
+    BasicBlock* before_while_bb = cfg->current_bb;
+
+    BasicBlock* body_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* test_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* after_while_bb = new BasicBlock(cfg, cfg->new_BB_name());
+
+    after_while_bb->exit_true = before_while_bb->exit_true;
+    after_while_bb->exit_false = before_while_bb->exit_false;
+    before_while_bb->exit_true = test_bb;
+    before_while_bb->exit_false = nullptr;
+    test_bb->exit_true = body_bb;
+    test_bb->exit_false = after_while_bb;
+    body_bb->exit_true = test_bb;
+    body_bb->exit_false = nullptr;
+
+    cfg->current_bb = test_bb;
+    std::string test_result = condition->build_ir(cfg);
+    test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
+    cfg->add_bb(test_bb);
+
+    cfg->current_bb = body_bb;
+    statement->build_ir(cfg);
+    cfg->add_bb(body_bb);
+
+    cfg->current_bb = after_while_bb;
+    cfg->add_bb(after_while_bb);
+    return ""; // ??
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 // class CProgASTAssignment                                                   //
 ////////////////////////////////////////////////////////////////////////////////
 
