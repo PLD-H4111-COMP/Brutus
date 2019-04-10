@@ -804,6 +804,11 @@ void BasicBlock::gen_asm(Writer& writer)
     }
     else
     {
+        if (!exit_true)
+        {
+            Writer::error() << instrs.size() << std::endl;
+            Writer::error() << label << std::endl;
+        }
         writer.assembly(1) << "jmp " << exit_true->label << std::endl;
     }
 }
