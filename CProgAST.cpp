@@ -81,6 +81,8 @@ CFG* CProgASTFuncdef::build_ir(TableOfSymbols* global_symbols) const
     {
         statement->build_ir(cfg);
     }
+
+    cfg->check_for_unused_symbols();
     return cfg;
 }
 
@@ -1277,9 +1279,14 @@ std::string CProgASTIdentifier::build_ir(CFG* cfg) const
     {
         Writer::error() << "use of undeclercqed identifier '" << name << "'" << std::endl;
     }
-    else if (!cfg->is_initialized(name))
+    else
     {
-        Writer::warning() << "use of uninitialized variable '" << name << "'" << std::endl;
+        if (!cfg->is_initialized(name))
+        {
+            Writer::warning() << "use of uninitialized variable '" << name << "'" << std::endl;
+        }
+
+        cfg->set_used(name);
     }
     return name;
 }

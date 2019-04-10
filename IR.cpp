@@ -157,6 +157,25 @@ void TableOfSymbols::initialize(const std::string &identifier)
     symbols[identifier].initialized = true;
 }
 
+void TableOfSymbols::set_used(const std::string &identifier)
+{
+    symbols[identifier].used = true;
+}
+
+void TableOfSymbols::check_for_unused()
+{
+    for (auto &symbol : symbols)
+    {
+        if (symbol.first.at(0) != '!' && !symbol.second.used)
+        {
+            if (symbol.second.arg_index == -1)
+                Writer::warning() << "unused variable '" << symbol.first << "'" << std::endl;
+            else
+                Writer::warning() << "unused parameter '" << symbol.first << "'" << std::endl;
+        }
+    }
+}
+
 void TableOfSymbols::print_debug_infos() const
 {
     for(auto p : symbols)
@@ -809,6 +828,17 @@ void BasicBlock::print_debug_infos() const
 // class CFG                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
+CFG::CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols* global_symbols) :
+    ast(funcdef), nextBBnumber(0), function_name(name), symbols(global_symbols)
+{
+    BasicBlock* entry = new BasicBlock(this, new_BB_name());
+    BasicBlock* exit = new BasicBlock(this, new_BB_name());
+    entry->exit_true = exit;
+    bbs.push_back(entry);
+    bbs.push_back(exit);
+    current_bb = entry;
+}
+
 void CFG::gen_asm(Writer& writer)
 {
     for (BasicBlock* bb : bbs){
@@ -893,6 +923,16 @@ void CFG::initialize(const std::string &symbol_name)
     symbols.initialize(symbol_name);
 }
 
+void CFG::set_used(const std::string &symbol_name)
+{
+    symbols.set_used(symbol_name);
+}
+
+void CFG::check_for_unused_symbols()
+{
+    symbols.check_for_unused();
+}
+
 const SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_name) const
 {
     return symbols.get_symbol(symbol_name);
@@ -902,18 +942,6 @@ SymbolProperties& CFG::get_symbol_properties(const std::string &symbol_name)
 {
     return symbols.get_symbol(symbol_name);
 }
-
-CFG::CFG(const CProgASTFuncdef* funcdef, const std::string &name, TableOfSymbols* global_symbols) :
-    ast(funcdef), nextBBnumber(0), function_name(name), symbols(global_symbols)
-{
-    BasicBlock* entry = new BasicBlock(this, new_BB_name());
-    BasicBlock* exit = new BasicBlock(this, new_BB_name());
-    entry->exit_true = exit;
-    bbs.push_back(entry);
-    bbs.push_back(exit);
-    current_bb = entry;
-}
-
 
 std::string CFG::new_BB_name()
 {

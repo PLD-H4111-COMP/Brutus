@@ -73,6 +73,8 @@ public:
     const std::string get_last_symbol_name() const;
     int get_nb_parameters() const;
     void initialize(const std::string &identifier);
+    void set_used(const std::string &identifier);
+    void check_for_unused();
 
     void print_debug_infos() const;
 protected:
@@ -230,6 +232,8 @@ public:
     int get_nb_parameters() const;
     bool is_initialized(const std::string &symbol_name) const;
     void initialize(const std::string &symbol_name);
+    void set_used(const std::string &symbol_name);
+    void check_for_unused_symbols();
     const SymbolProperties& get_symbol_properties(const std::string &symbol_name) const;
     SymbolProperties& get_symbol_properties(const std::string &symbol_name);
 
