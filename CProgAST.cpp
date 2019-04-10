@@ -199,6 +199,10 @@ std::string CProgASTDeclarator::build_ir(CFG* cfg) const
     {
         cfg->add_to_symbol_table(name, type_specifier);
     }
+    else
+    {
+        Writer::error() << "multiple definition of '" << name << "'" << std::endl;
+    }
     if(initializer != nullptr)
     {
         initializer->build_ir(cfg);
@@ -393,13 +397,13 @@ std::string CProgASTAssignment::build_ir(CFG* cfg) const
     std::string init = rhs_expression->build_ir(cfg);
     if(!cfg->is_declared(name))
     {
-        Writer::error() << name << " is never declercqed !" << std::endl;
+        Writer::error() << "use of undeclercqed identifier '" << name << "'" << std::endl;
     }
     if (cfg->is_declared(init) && !cfg->is_initialized(init))
     {
         if (init[0] != '!') //! if temporary variable
         {
-            Writer::warning() << init << " use of uninitialized expression" << std::endl;
+            Writer::warning() << "use of uninitialized variable '" << init << "'" << std::endl;
         }
     }
     else
@@ -1154,9 +1158,13 @@ std::string CProgASTFunccall::build_ir(CFG* cfg) const
         result_type = cfg->get_var_type(func_name->getText());
 
         SymbolProperties sp = cfg->get_symbol_properties(func_name->getText());
-        if((sp.arg_types).size()!=args.size())
+        if((sp.arg_types).size() > args.size())
         {
-            Writer::error() << "Wrong number of arguments for function " << func_name->getText() << std::endl;
+            Writer::error() << "too few arguments to function '" << func_name->getText() << "'" << std::endl;
+        }
+        if((sp.arg_types).size() < args.size())
+        {
+            Writer::error() << "too many arguments to function '" << func_name->getText() << "'" << std::endl;
         }
     }
     else
@@ -1192,6 +1200,7 @@ CProgASTIntLiteral::CProgASTIntLiteral(int64_t val)
 std::string CProgASTIntLiteral::build_ir(CFG* cfg) const
 {
     std::string tmp_name = cfg->create_new_tempvar(Type::INT_64);
+    cfg->get_symbol_properties(tmp_name).initialized = true;
     std::string literal_str = std::to_string(value);
     cfg->current_bb->add_IRInstr(IRInstr::ldconst, Type::INT_64, {tmp_name, literal_str});
     return tmp_name;
@@ -1275,7 +1284,7 @@ std::string CProgASTIdentifier::build_ir(CFG* cfg) const
 {
     if(!cfg->is_declared(name))
     {
-        Writer::error() << name << " is never declercqed !" << std::endl;
+        Writer::error() << "use of undeclercqed identifier '" << name << "'" << std::endl;
     }
     return name;
 }

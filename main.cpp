@@ -55,10 +55,10 @@ int main(int argc, char **argv)
     CProgASTProgram *ast = visitor.visit(tree).as<CProgASTProgram*>();
     if(!ast)
         return 1;
-  
+
     IR ir(writer, options.input_file);
     ast->build_ir(ir);
-    ir.print_debug_infos();
+    // ir.print_debug_infos();
     if(!writer.error_occurred)
         ir.gen_asm();
     return 0;
