@@ -72,6 +72,7 @@ public:
     size_t get_aligned_size(size_t alignment_size) const;
     const std::string get_last_symbol_name() const;
     int get_nb_parameters() const;
+    void initialize(const std::string &identifier);
 
     void print_debug_infos() const;
 protected:
@@ -227,6 +228,8 @@ public:
     Type get_max_type(const std::string &lhs, const std::string &rhs) const;
     std::string get_last_var_name() const;
     int get_nb_parameters() const;
+    bool is_initialized(const std::string &symbol_name);
+    void initialize(const std::string &symbol_name);
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;
