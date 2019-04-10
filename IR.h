@@ -20,7 +20,7 @@ class Writer;
 // enum Type                                                                  //
 ////////////////////////////////////////////////////////////////////////////////
 
-enum class Type { INT_64, INT_32, INT_16, CHAR, VOID };
+enum class Type { VOID, CHAR, INT_16, INT_32, INT_64 };
 
 struct TypeProperties {
     // ------------------------------------------------------------- Constructor
@@ -143,10 +143,13 @@ public:
     Operation get_operation() const;
 
 private:
-    
-    std::string x86_instr_var_reg(const std::string &instr, const std::string &var, const std::string &reg) const;
-    std::string x86_instr_reg_var(const std::string &instr, const std::string &var, const std::string &reg) const;
-    std::string x86_instr_reg(const std::string &instr, const std::string &reg, Type type) const;
+    std::string x86_instr_reg(const std::string &instr, Type type, const std::string &reg) const;
+    std::string x86_instr_reg_reg(const std::string &instr, Type type, const std::string &reg1, const std::string &reg2) const;
+    std::string x86_mov_var_reg(const std::string &var, const std::string &reg, Type reg_type, bool signed_fill = true) const;
+    std::string x86_mov_reg_var(const std::string &reg, Type reg_type, const std::string &var) const;
+    static std::string x86_extend_reg_a(Type from);
+    static std::string x86_convert_reg_a(Type from, Type to);
+    void gen_x86_movs(Writer &w, const std::string &rvar1, const std::string &rvar2) const;
 
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
@@ -230,6 +233,7 @@ public:
     int get_nb_parameters() const;
     bool is_initialized(const std::string &symbol_name);
     void initialize(const std::string &symbol_name);
+    TableOfSymbols get_table_of_symbols() const;
 
     void print_debug_infos() const;
     void print_debug_infos_variables() const;
@@ -240,6 +244,7 @@ public:
 
     // basic block management
     std::string new_BB_name();
+    BasicBlock* get_last_bb();
     BasicBlock* current_bb;
 
 protected:
@@ -256,7 +261,7 @@ protected:
 
 class IR {
 public :
-    IR(Writer &writer);
+    IR(Writer &writer, const std::string &filename);
     ~IR();
     void add_cfg(CFG* cfg);
     void gen_asm();
@@ -265,5 +270,6 @@ public :
     TableOfSymbols global_symbols;
 private :
     Writer &writer;
+    std::string filename;
     std::vector<CFG*> cfgs;
 };

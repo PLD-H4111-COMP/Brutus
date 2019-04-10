@@ -28,7 +28,8 @@ antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
     CProgASTFuncdef *funcdef = new CProgASTFuncdef(identifier, Type::INT_64);
     if(ctx->arg_decl_list())
     {
-        for(size_t i=0; i<ctx->arg_decl_list()->IDENTIFIER().size(); ++i)
+        size_t i;
+        for(i=0; i<ctx->arg_decl_list()->IDENTIFIER().size(); ++i)
         {
             std::string arg_name = ctx->arg_decl_list()->IDENTIFIER(i)->getText();
             if(ctx->arg_decl_list()->type_name(i)->CHAR_TYPE_NAME())
@@ -42,8 +43,12 @@ antlrcpp::Any CProgCSTVisitor::visitFuncdef(CProgParser::FuncdefContext *ctx)
             else if(ctx->arg_decl_list()->type_name(i)->INT_16_TYPE_NAME())
                 funcdef->add_arg(arg_name, Type::INT_16);
             else
-                ; // error
+            {
+                Writer::error() << "missing argument or unexpected type" << std::endl;
+            }
         }
+        if(ctx->arg_decl_list()->type_name(i) != nullptr)
+            Writer::error() << "wrong number of input arguments" << std::endl;
     }
     for(auto statement_ctx : ctx->compound_statement()->statement())
     {

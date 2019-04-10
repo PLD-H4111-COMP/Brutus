@@ -228,27 +228,31 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
     BasicBlock* test_bb = cfg->current_bb;
     std::string test_result = condition->build_ir(cfg);
     test_bb->add_IRInstr(IRInstr::cmp_null, cfg->get_var_type(test_result), {test_result});
+
     BasicBlock* then_bb = new BasicBlock(cfg, cfg->new_BB_name());
-    cfg->current_bb = then_bb;
-    if_statement->build_ir(cfg);
-    cfg->add_bb(then_bb);
     BasicBlock* after_if_bb = new BasicBlock(cfg, cfg->new_BB_name());
+    BasicBlock* else_bb = else_statement ? new BasicBlock(cfg, cfg->new_BB_name()) : nullptr;
+
     after_if_bb->exit_true = test_bb->exit_true;
     after_if_bb->exit_false = test_bb->exit_false;
     then_bb->exit_true = after_if_bb;
     then_bb->exit_false = nullptr;
     test_bb->exit_true = then_bb;
-    test_bb->exit_false = nullptr;
-    if(else_statement != nullptr)
+    test_bb->exit_false = else_bb ? else_bb : after_if_bb;
+
+    cfg->current_bb = then_bb;
+    if_statement->build_ir(cfg);
+    cfg->add_bb(then_bb);
+
+    if(else_bb)
     {
-        BasicBlock* else_bb = new BasicBlock(cfg, cfg->new_BB_name());
         cfg->current_bb = else_bb;
-        else_statement->build_ir(cfg);
-        cfg->add_bb(else_bb);
         else_bb->exit_true = after_if_bb;
         else_bb->exit_false = nullptr;
-        test_bb->exit_false = else_bb;
+        else_statement->build_ir(cfg);
+        cfg->add_bb(else_bb);
     }
+
     cfg->current_bb = after_if_bb;
     cfg->add_bb(after_if_bb);
     return ""; // ??
@@ -899,6 +903,14 @@ void CProgASTFunccall::add_arg(CProgASTExpression* arg)
 std::string CProgASTFunccall::build_ir(CFG* cfg) const
 {
     Type result_type = cfg->get_var_type(func_name->getText());
+    
+    TableOfSymbols ts = cfg->get_table_of_symbols();
+    SymbolProperties sp = ts.get_symbol(func_name->getText());
+    if((sp.arg_types).size()!=args.size())
+    {
+        Writer::error() << "Wrong number of arguments for function " << func_name->getText() << std::endl;
+    }
+    
     std::string tmp_name = "";
     if (result_type != Type::VOID)
     {

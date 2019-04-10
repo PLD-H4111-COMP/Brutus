@@ -53,10 +53,13 @@ int main(int argc, char **argv)
     Writer writer(options);
     CProgCSTVisitor visitor;
     CProgASTProgram *ast = visitor.visit(tree).as<CProgASTProgram*>();
-
-    IR ir(writer);
+    if(!ast)
+        return 1;
+  
+    IR ir(writer, options.input_file);
     ast->build_ir(ir);
     ir.print_debug_infos();
-    ir.gen_asm();
+    if(!writer.error_occurred)
+        ir.gen_asm();
     return 0;
 }
