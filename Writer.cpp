@@ -11,7 +11,7 @@ bool Writer::error_occurred = false;
 
 Writer::Writer(const Options &options) : m_output_file_stream(options.output_file)
 {
-    if (!m_output_file_stream.is_open())
+    if (!options.output_file.empty() && !m_output_file_stream.is_open())
     {
         error() << "could not write into " << options.output_file << std::endl;
     }

@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     IR ir(writer, options.input_file);
     ast->build_ir(ir);
     // ir.print_debug_infos();
-    if(!writer.error_occurred)
+    if(!writer.error_occurred && options.generate_assembly)
         ir.gen_asm();
     return 0;
 }

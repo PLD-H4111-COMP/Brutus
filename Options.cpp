@@ -59,6 +59,9 @@ bool Options::parseOptions(int nb_options, char **option_inputs)
             input_file = input;
         }
     }
+
+    if (!generate_assembly)
+        output_file = "";
     
     return input_file.size();
 }
