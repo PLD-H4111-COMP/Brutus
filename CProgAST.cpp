@@ -246,10 +246,10 @@ std::string CProgASTIfStatement::build_ir(CFG* cfg) const
     if(else_bb)
     {
         cfg->current_bb = else_bb;
-        else_statement->build_ir(cfg);
-        cfg->add_bb(else_bb);
         else_bb->exit_true = after_if_bb;
         else_bb->exit_false = nullptr;
+        else_statement->build_ir(cfg);
+        cfg->add_bb(else_bb);
     }
 
     cfg->current_bb = after_if_bb;
