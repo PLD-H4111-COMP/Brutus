@@ -304,22 +304,28 @@ antlrcpp::Any CProgCSTVisitor::visitExpr(CProgParser::ExprContext *ctx)
         else if(ctx->OP_BXOR())
         {
             rexpr = new CProgASTBXor(lhs, rhs);
-        }else if(ctx->OP_AND())
+        }
+        else if(ctx->OP_AND())
         {
             rexpr = new CProgASTAnd(lhs, rhs);
-        }else if(ctx->OP_OR())
+        }
+        else if(ctx->OP_OR())
         {
             rexpr = new CProgASTOr(lhs, rhs);
-        }else if(ctx->OP_LT())
+        }
+        else if(ctx->OP_LT())
         {
             rexpr = new CProgASTLessThan(lhs, rhs);
-        }else if(ctx->OP_LTE())
+        }
+        else if(ctx->OP_LTE())
         {
             rexpr = new CProgASTLessThanOrEqual(lhs, rhs);
-        }else if(ctx->OP_GT())
+        }
+        else if(ctx->OP_GT())
         {
             rexpr = new CProgASTGreaterThan(lhs, rhs);
-        }else if(ctx->OP_GTE())
+        }
+        else if(ctx->OP_GTE())
         {
             rexpr = new CProgASTGreaterThanOrEqual(lhs, rhs);
         }

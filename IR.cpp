@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> param_registers = {"di", "si", "dx", "cx", "8", "9"};
+static std::vector<std::string> param_registers_64 = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
 
 ////////////////////////////////////////////////////////////////////////////////
 // enum Type                                                                  //
@@ -395,11 +395,12 @@ void IRInstr::gen_asm(Writer& w)
             {
                 if (count_params < 8)
                 {
-                    w.assembly(1) << x86_instr_param("mov", bb->cfg->get_var_type(params[count_params])) << " " << bb->cfg->IR_var_to_asm(params[count_params]) << ", " << IR_param_reg_to_asm(param_registers[count_register], bb->cfg->get_var_type(params[count_params])) << std::endl;
+                    w.assembly(1) << x86_mov_var_reg(params[count_params], "a", Type::INT_64) << std::endl;
+                    w.assembly(1) << "movq %rax, " << param_registers_64[count_register] << std::endl;
                 }
                 else
                 {
-                    w.assembly(1) << x86_instr("mov", bb->cfg->get_var_type(params[count_params])) << " " << bb->cfg->IR_var_to_asm(params[count_params]) << ", %rax" << std::endl;
+                    w.assembly(1) << x86_mov_var_reg(params[count_params], "a", Type::INT_64) << std::endl;
                     w.assembly(1) << "pushq %rax" << std::endl;
                 }
                 --count_register;
@@ -579,48 +580,12 @@ std::string IRInstr::IR_reg_to_asm(const std::string &reg, Type type)
     }
 }
 
-std::string IRInstr::IR_param_reg_to_asm(const std::string &reg, Type type)
-{
-    switch (type)
-    {
-        case Type::CHAR:
-            return "%e" + reg;
-        case Type::INT_16:
-            return "%" + reg;
-        case Type::INT_32:
-            return "%e" + reg;
-        case Type::INT_64:
-            return "%r" + reg;
-        default:
-            Writer::error() << "unexpected type " << types.at(type).name << " in IR_reg_to_asm" << std::endl;
-            return "error";
-    }
-}
-
 std::string IRInstr::x86_instr(const std::string &instr, Type type)
 {
     switch (type)
     {
         case Type::CHAR:
             return instr + "b";
-        case Type::INT_16:
-            return instr + "w";
-        case Type::INT_32:
-            return instr + "l";
-        case Type::INT_64:
-            return instr + "q";
-        default:
-            Writer::error() << "unexpected type " << types.at(type).name << " in x86_instr" << std::endl;
-            return "error";
-    }
-}
-
-std::string IRInstr::x86_instr_param(const std::string &instr, Type type)
-{
-    switch (type)
-    {
-        case Type::CHAR:
-            return instr + "l";
         case Type::INT_16:
             return instr + "w";
         case Type::INT_32:
@@ -876,9 +841,10 @@ void CFG::gen_asm_prologue(Writer& w){
         {
             limit = symbols.get_nb_parameters();
         }
-        for (int count_param = 0; count_param < limit; ++count_param){
-            w.assembly(1) << IRInstr::x86_instr_param("mov", symbols.get_arg(count_param).type) << " " << IRInstr::IR_param_reg_to_asm(param_registers[count_register], symbols.get_arg(count_param).type) << ", " << symbols.get_arg(count_param).index << "(%rbp)" << std::endl;
-        --count_register;
+        for (int count_param = 0; count_param < limit; ++count_param) {
+            w.assembly(1) << "movq " << param_registers_64[count_register] << ", %rax" << std::endl;
+            w.assembly(1) << IRInstr::x86_instr("mov", symbols.get_arg(count_param).type) << " " << IRInstr::IR_reg_to_asm("a", symbols.get_arg(count_param).type) << ", " << symbols.get_arg(count_param).index << "(%rbp)" << std::endl;
+            --count_register;
         }
     }
 }

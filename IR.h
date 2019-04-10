@@ -135,8 +135,6 @@ public:
     void gen_asm(Writer& writer); /**< x86 assembly code generation for this IR instruction */
     static std::string IR_reg_to_asm(const std::string &reg, Type type); /**< helper method: inputs a, IR reg , returns e.g. "eax" for for the Type::INT_32 reg "a" */
     static std::string x86_instr(const std::string &instr, Type type);
-    static std::string IR_param_reg_to_asm(const std::string &reg, Type type);
-    static std::string x86_instr_param(const std::string &instr, Type type);
 
     void print_debug_infos() const;
 
@@ -149,7 +147,6 @@ private:
     std::string x86_mov_reg_var(const std::string &reg, Type reg_type, const std::string &var) const;
     static std::string x86_extend_reg_a(Type from);
     static std::string x86_convert_reg_a(Type from, Type to);
-    void gen_x86_movs(Writer &w, const std::string &rvar1, const std::string &rvar2) const;
 
     BasicBlock* bb; /**< The BB this instruction belongs to, which provides a pointer to the CFG this instruction belong to */
     Operation op;
