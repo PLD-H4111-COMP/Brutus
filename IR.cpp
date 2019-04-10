@@ -743,56 +743,60 @@ void BasicBlock::gen_asm(Writer& writer)
 
     if(instrs.empty())
     {
+        if(exit_true)
+        {
+            writer.assembly(1) << "jmp " << exit_true->label << std::endl;
+        }
         return;
     }
 
     if (instrs.back()->get_operation() == IRInstr::Operation::cmp_null)
     {
+        writer.assembly(1) << "jne " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "je " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "jne " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_eq)
     {
+        writer.assembly(1) << "je " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "jne " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "je " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_lt)
     {
+        writer.assembly(1) << "jl " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "jge " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "jl " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_le)
     {
+        writer.assembly(1) << "jle " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "jg " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "jle " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_gt)
     {
+        writer.assembly(1) << "jg " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "jle " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "jg " << exit_true->label << std::endl;
     }
     else if (instrs.back()->get_operation() == IRInstr::Operation::cmp_ge)
     {
+        writer.assembly(1) << "jge " << exit_true->label << std::endl;
         if(exit_false)
         {
-            writer.assembly(1) << "jl " << exit_false->label << std::endl;
+            writer.assembly(1) << "jmp " << exit_false->label << std::endl;
         }
-        writer.assembly(1) << "jge " << exit_true->label << std::endl;
     }
     else if (exit_false != nullptr)
     {
