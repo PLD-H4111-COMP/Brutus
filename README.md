@@ -38,5 +38,9 @@ make -j4
 ```
 make test
 ./customTests.sh
-./moodleTests.sh
+./moodleTests.sh # Not all the tests succeed because of missing features
 ```
+
+## Credits
+
+H4111
