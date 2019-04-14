@@ -15,6 +15,7 @@ for folder in *
     ./launchTests.sh $BRUTUS
     let "progsOk = progsOk + $?"
     cd ..
+    echo ""
 done
 echo ""
 echo "Total number of programs : $nbProgs"
