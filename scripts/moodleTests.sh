@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BRUTUS="$(readlink -f Brutus)"
 cd progs/moodleTests

@@ -2,8 +2,8 @@
 
 target="a.out"
 
-if [ -z "$CC" ]; then
-    CC=./Brutus
+if [ -z "$BRUTUS" ]; then
+    BRUTUS=./Brutus
 fi
 
 # fetch options
@@ -25,7 +25,7 @@ if [ $# -eq 0 ]; then
 	echo "Your command line doesn't contain a target file !"
 	exit 1
 else
-	$CC -o .tmp.s $1
+	$BRUTUS -o .tmp.s $1
 	if [ $? -ne 0 ]; then
 	    echo "Problem encountered when compiling with Brutus..."
         exit 1

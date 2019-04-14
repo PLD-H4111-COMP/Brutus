@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 BRUTUS="./compile.sh"
 let "progsOk = 0"
