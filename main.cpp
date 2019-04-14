@@ -61,5 +61,6 @@ int main(int argc, char **argv)
     // ir.print_debug_infos();
     if(!writer.error_occurred && options.generate_assembly)
         ir.gen_asm();
-    return 0;
+
+    return writer.error_occurred;
 }

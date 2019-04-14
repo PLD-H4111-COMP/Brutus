@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BRUTUS="$(readlink -f Brutus)"
-cd progs/tests
+cd progs/moodleTests
 let "progsOk = 0"
 let "nbProgs = 0"
 for folder in *

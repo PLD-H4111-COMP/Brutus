@@ -1,12 +1,10 @@
 #!/bin/bash
 
-
-set -e
-set -u
-set -o pipefail
-
 target="a.out"
 
+if [ -z "$CC" ]; then
+    CC=./Brutus
+fi
 
 # fetch options
 while getopts 'o:' OPTION; do
@@ -22,22 +20,23 @@ while getopts 'o:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
-
 # compile
 if [ $# -eq 0 ]; then
 	echo "Your command line doesn't contain a target file !"
 	exit 1
 else
-	./Brutus -o .tmp.s $1
+	$CC -o .tmp.s $1
 	if [ $? -ne 0 ]; then
-	    echo "problem encountred when compiling with Brutus..."
+	    echo "Problem encountered when compiling with Brutus..."
+        exit 1
 	else
     	echo "Brutus compilation finished."
 	fi
 
 	gcc .tmp.s -o $target
 	if [ $? -ne 0 ]; then
-	    echo "problem encountred with gcc"
+	    echo "Problem encountered with gcc"
+        exit 2
 	else
     	echo "\"$target\" was generated successfully."
 	fi

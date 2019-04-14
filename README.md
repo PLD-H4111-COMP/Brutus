@@ -36,5 +36,7 @@ make -j4
 ## How to test
 
 ```
-./tests.sh
+make test
+./customTests.sh
+./moodleTests.sh
 ```

@@ -43,5 +43,8 @@ add_custom_command(TARGET Brutus POST_BUILD
                    ${CMAKE_SOURCE_DIR}/progs $<TARGET_FILE_DIR:Brutus>/progs)
 
 configure_file(scripts/compile.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-configure_file(scripts/tests.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(scripts/moodleTests.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(scripts/customTests.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
+enable_testing()
+add_test(NAME customTests WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMAND ./customTests.sh)
